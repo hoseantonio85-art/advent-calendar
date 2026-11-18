@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ede8f0">
+<title>Декабрь чудес — сравнение двух визуальных тем</title>
+<style>
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#2b2336;background:#f5f1f4}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse 600px 480px at 80% -10%,#e4cfde 0%,transparent 90%),radial-gradient(ellipse 600px 510px at 4% 70%,#e4e9db 0%,transparent 95%),#f5f1f4}
+.header{max-width:1050px;padding:42px 24px 25px;margin:auto;display:flex;justify-content:space-between;align-items:start;gap:30px}
+.kicker{font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:750;color:#8e728d;margin-bottom:10px}
+h1{font-size:clamp(29px,4vw,43px);letter-spacing:-.06em;line-height:1.05;margin:0 0 14px}
+p{font-size:14px;line-height:1.6;color:#76697c;margin:0;max-width:510px}
+a{color:inherit}
+.back{white-space:nowrap;text-decoration:none;background:#fff9;border:1px solid #e6dce6;border-radius:13px;padding:12px 15px;font-size:12px;font-weight:700;box-shadow:0 6px 20px #392f3b0a}
+.legend{display:flex;gap:10px;max-width:1046px;margin:0 auto 22px;padding:0 24px;align-items:center;color:#988a9b;font-size:12px}
+.legend:before{content:"✦";color:#d5a1b2}
+.versions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;max-width:1040px;margin:0 auto;padding:0 24px 38px;align-items:start}
+.version{min-width:0;display:flex;flex-direction:column;align-items:center;gap:15px}
+.version-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 16px}
+.name{font-size:15px;font-weight:780;letter-spacing:-.025em}
+.desc{font-size:12px;color:#8c7e8e;margin-top:4px}
+.open{font-size:12px;font-weight:750;text-decoration:none;color:#8e688a;border-bottom:1px solid #bb9fba;padding:3px 0}
+.phone{position:relative;width:min(100%,410px);height:740px;border-radius:42px;padding:10px;background:#27222b;box-shadow:0 20px 60px #4c37563b,0 0 0 1px #49404a,inset 0 0 0 1px #fff3;overflow:hidden}
+.phone:before{content:"";position:absolute;width:90px;height:18px;border-radius:0 0 14px 14px;background:#27222b;top:9px;left:50%;transform:translateX(-50%);z-index:3;pointer-events:none}
+.phone iframe{width:100%;height:100%;border:0;border-radius:31px;background:#fff;display:block}
+.tabbar{display:none}
+.footer{text-align:center;padding:0 24px 35px;color:#9b8b9c;font-size:12px}
+@media(max-width:780px){
+ .header{padding:26px 18px 20px;gap:10px}.header .back{display:none}
+ .legend{padding:0 18px;margin-bottom:18px}
+ .tabbar{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#ebe2ec;border:1px solid #e2d6e4;border-radius:17px;padding:5px;margin:0 18px 20px}
+ .tabbar button{border:0;border-radius:12px;background:transparent;padding:12px 6px;color:#88798d;font-size:13px;font-weight:750;cursor:pointer}
+ .tabbar button[aria-selected="true"]{background:#fff;box-shadow:0 3px 12px #604d690f;color:#54425f}
+ .versions{display:block;padding:0 18px 20px}
+ .version{display:none}.version.active{display:flex}
+ .version-head{padding:0 3px}
+ .phone{height:min(740px,calc(100svh - 234px));min-height:460px;width:min(100%,390px)}
+}
+</style>
+</head>
+<body>
+<header class="header"><div><div class="kicker">ADVENT LAB · визуальный эксперимент</div><h1>Один календарь.<br>Два настроения.</h1><p>Одинаковые карточки, даты и сценарии. Меняются только поверхности, свет, цвет и эффект стекла. Открой любую дату прямо в превью.</p></div><a class="back" href="./">← К календарю</a></header>
+<div class="legend">Исходная тёмная тема сохранена без изменений</div>
+<div class="tabbar" role="tablist" aria-label="Выберите оформление"><button type="button" aria-selected="true" data-id="original" role="tab">Тёмная</button><button type="button" aria-selected="false" data-id="winter" role="tab">Winter Glass</button></div>
+<main class="versions">
+ <section class="version active" id="original"><div class="version-head"><div><div class="name">01 · Midnight Forest</div><div class="desc">Изумрудный, глубокий, насыщенный</div></div><a href="./" class="open">Открыть ↗</a></div><div class="phone"><iframe src="./" loading="lazy" title="Тёмная тема календаря"></iframe></div></section>
+ <section class="version" id="winter"><div class="version-head"><div><div class="name">02 · Winter Glass</div><div class="desc">Сиреневое стекло, свечение и иней</div></div><a href="./winter-glass/" class="open">Открыть ↗</a></div><div class="phone"><iframe src="./winter-glass/" loading="lazy" title="Светлая стеклянная тема календаря"></iframe></div></section>
+</main>
+<div class="footer">Два самостоятельных HTML-прототипа · декабрь 2026</div>
+<script>
+const tabs=[...document.querySelectorAll('.tabbar button')];
+const versions=[...document.querySelectorAll('.version')];
+function choose(id){tabs.forEach(t=>t.setAttribute('aria-selected',String(t.dataset.id===id)));versions.forEach(v=>v.classList.toggle('active',v.id===id));}
+tabs.forEach(t=>t.addEventListener('click',()=>choose(t.dataset.id)));
+</script>
+</body>
+</html>
