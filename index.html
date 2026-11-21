@@ -150,7 +150,7 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 .section-title{font-size:22px}
 .section-sub{margin-bottom:17px;font-size:10px}
 .calendar-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:124px;gap:8px;grid-auto-flow:row}
-.day-card,.day-card.wide{height:auto;min-height:0;border-radius:17px;padding:12px;min-width:0;box-shadow:inset 0 1px #ffffff3c,0 6px 16px #010b0840;border:1px solid #ffffff27}
+.day-card,.day-card.wide{--day-card-radius:17px;height:auto;min-height:0;border-radius:var(--day-card-radius);padding:12px;min-width:0;box-shadow:inset 0 1px #ffffff3c,0 6px 16px #010b0840;border:1px solid #ffffff27}
 .day-card.wide{grid-column:span 2;padding:13px 15px}
 .day-card.event{background:radial-gradient(circle at 85% 45%,#f1caa41b,transparent 58%),linear-gradient(140deg,#582232,#9e2d45 80%,#4c1e34)}
 .day-card.event.theme-ruby{background:radial-gradient(circle at 80% 14%,#ff9e791b,transparent 49%),linear-gradient(135deg,#a33345,#67223a 88%)}
@@ -189,7 +189,8 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 .card-name{font-size:12.8px;line-height:1.12;letter-spacing:-.025em;font-weight:760;max-width:105px;text-wrap:pretty;text-shadow:0 1px 10px #250c0b99}
 .day-card.wide .card-name{font-size:16px;line-height:1.09;max-width:126px}
 .card-meta{display:none}
-.day-card.event::before{content:"";position:absolute;inset:auto 0 0 0;height:65%;background:linear-gradient(0deg,#111b1c85,transparent);z-index:1;border-radius:0 0 15px 15px}
+/* Parent card clips the overlay; a second 15px radius used to form a stray seam. */
+.day-card.event::before{content:"";position:absolute;inset:auto 0 0 0;height:65%;background:linear-gradient(0deg,#111b1c85,transparent);z-index:1;border-radius:0}
 .day-card.event.wide::before{height:100%;background:linear-gradient(90deg,#101d1b4d,transparent 75%)}
 .day-card .illustration{width:96px;height:96px;top:17px;right:-9px;object-fit:contain;transform:rotate(-5deg);filter:drop-shadow(0 11px 12px #00170f5b)}
 .day-card.event.wide .illustration{width:142px;height:142px;right:-4px;top:-9px;transform:rotate(-4deg)}
@@ -207,7 +208,7 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 .sheet-visual img{display:block}
 .wisdom-symbol img{width:62px;height:62px;object-fit:contain}
 /* compact breakpoints: 3 columns even on small phones */
-@media(max-width:380px){.content{padding-left:12px;padding-right:12px}.calendar-grid{gap:6px;grid-auto-rows:111px}.day-card,.day-card.wide{padding:10px;border-radius:15px}.day-card.wide{padding:12px}.card-date,.day-card.wide .card-date{font-size:25px}.day-card .illustration{width:86px;height:86px;right:-8px;top:15px}.day-card.event.wide .illustration{width:126px;height:126px;right:-6px;top:-5px}.card-name{font-size:11.4px}.day-card.wide .card-name{font-size:14px}.hero h1{font-size:37px}.hero-art{width:155px;height:155px;right:-42px}}
+@media(max-width:380px){.content{padding-left:12px;padding-right:12px}.calendar-grid{gap:6px;grid-auto-rows:111px}.day-card,.day-card.wide{--day-card-radius:15px;padding:10px;border-radius:var(--day-card-radius)}.day-card.wide{padding:12px}.card-date,.day-card.wide .card-date{font-size:25px}.day-card .illustration{width:86px;height:86px;right:-8px;top:15px}.day-card.event.wide .illustration{width:126px;height:126px;right:-6px;top:-5px}.card-name{font-size:11.4px}.day-card.wide .card-name{font-size:14px}.hero h1{font-size:37px}.hero-art{width:155px;height:155px;right:-42px}}
 @media(max-width:335px){.calendar-grid{grid-auto-rows:104px;gap:5px}.card-date,.day-card.wide .card-date{font-size:23px}.day-card .illustration{width:80px;height:80px}.day-card.event.wide .illustration{width:118px;height:118px}.card-name{font-size:10.8px}.day-card.wide .card-name{font-size:13px}.hero h1{font-size:35px}}
 
 
@@ -432,12 +433,15 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .day-card.wisdom.wide .empty-date{font-size:clamp(62px,20vw,92px)}
 .day-card.is-past:not(.is-today){filter:saturate(.70) brightness(.93);opacity:.85;transition:filter .25s,opacity .25s}
 .day-card.is-past:hover,.day-card.is-past:focus-visible{filter:saturate(.96) brightness(1);opacity:1}
-/* Animated hairline gold perimeter: no pulsing of the whole tile. */
+/* Single perimeter: no extra outside gold ring under the animated line. */
 .day-card.is-today{
- border-color:#d2a25d!important;
- box-shadow:0 0 0 .5px #f0c47780,0 0 13px #e9b35b3b!important;
+ border-color:transparent!important;
+ box-shadow:0 6px 16px #010b0840,0 0 10px #e9b35b26!important;
  z-index:3;
 }
+/* Preserve a keyboard focus indicator INSIDE the tile. */
+.day-card:focus-visible{outline:2px solid #fff2c8;outline-offset:-5px}
+.day-card.is-today:focus-visible{outline-color:#fff8df}
 @property --advent-gold-angle{
  syntax:"<angle>";
  inherits:false;
@@ -445,7 +449,8 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 }
 .today-ring{
  position:absolute;inset:0;z-index:5;pointer-events:none;
- border-radius:inherit;padding:1.45px;
+ /* Match the actual tile radius at mobile breakpoints, not an independent roundness. */
+ border-radius:calc(var(--day-card-radius,17px) - 1px);padding:1.35px;
  background:conic-gradient(from var(--advent-gold-angle),
    #d7ac6455 0deg,#d5a05f99 185deg,#ffe09f 244deg,
    #fff7d8 258deg,#ffd27b 277deg,#c28c4699 307deg,#d7ac6455 360deg);
@@ -512,8 +517,9 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .day-card.wisdom.is-locked{
   opacity:.88;filter:saturate(.90);cursor:pointer;
   border-color:#dff9f69b;
-  box-shadow:inset 0 1px 0 #ffffffb9,inset 0 0 0 1px #f1ffff45,
-    inset 0 0 21px #d3f3ff3c,0 8px 18px #001a192e;
+  /* The actual border is the only 1px edge; ice highlights are diffuse. */
+  box-shadow:inset 0 1px 0 #ffffffb9,inset 0 0 21px #d3f3ff3c,
+    0 8px 18px #001a192e;
   transition:opacity .24s ease,filter .24s ease,border-color .22s ease,box-shadow .22s ease,transform .22s ease;
 }
 .day-card.wisdom.is-locked::before{
@@ -524,7 +530,7 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
     radial-gradient(ellipse at -7% -10%,#f1ffff91 0%,#e3faff2e 39%,transparent 64%),
     radial-gradient(ellipse at 108% 106%,#e8fbff6c 0%,#e6fbff12 39%,transparent 54%),
     linear-gradient(135deg,#e9faff2f 0%,transparent 47%,#d6f2ff20 100%);
-  box-shadow:inset 0 0 0 1px #ffffff6d,inset 0 0 22px #e0faff3c;
+  box-shadow:inset 0 0 22px #e0faff3c;
 }
 .day-card.wisdom.is-locked::after{
   content:"";position:absolute;inset:0;z-index:2;
@@ -551,14 +557,14 @@ html:not([data-frost]) .day-card.wisdom.is-locked:nth-child(4n+2)::before{
     radial-gradient(ellipse at -7% -10%,#f1ffff78 0%,#e3faff23 39%,transparent 64%),
     radial-gradient(ellipse at 108% 106%,#e8fbff50 0%,transparent 54%),
     linear-gradient(135deg,#e9faff23 0%,transparent 47%,#d6f2ff18 100%);
-  box-shadow:inset 0 0 0 1px #ffffff56,inset 0 0 20px #e0faff34;
+  box-shadow:inset 0 0 20px #e0faff34;
 }
 .day-card.wisdom.is-locked:hover,
 .day-card.wisdom.is-locked:focus-visible{
   opacity:.96;filter:saturate(.96);
   border-color:#ecffffcf;
-  box-shadow:inset 0 1px 0 #fff,inset 0 0 0 1px #f0ffff66,
-    inset 0 0 22px #e4ffff4c,0 9px 22px #001c173a;
+  box-shadow:inset 0 1px 0 #fff,inset 0 0 22px #e4ffff4c,
+    0 9px 22px #001c173a;
 }
 html:not([data-frost]) .day-card.wisdom.is-locked:nth-child(4n+1):is(:hover,:focus-visible),
 html:not([data-frost]) .day-card.wisdom.is-locked:nth-child(4n+2):is(:hover,:focus-visible){
