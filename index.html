@@ -481,6 +481,11 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .day-lock{position:absolute;top:12px;right:12px;width:21px;height:21px;z-index:5;color:#dbe6caaf;display:grid;place-items:center;pointer-events:none}
 .day-lock svg{width:17px;height:17px}
 .sheet-event-actions{grid-template-columns:minmax(0,1fr)}
+
+/* The visible handle has a generous swipe hit area without moving sheet content. */
+.sheet-grabber{width:100%;height:32px;background:transparent;border-radius:0;margin:-6px auto -6px;position:relative;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.sheet-grabber::after{content:"";position:absolute;left:50%;top:6px;transform:translateX(-50%);width:42px;height:5px;background:#c9cfc4;border-radius:20px;pointer-events:none}
+.sheet-grabber:active{cursor:grabbing}
 </style>
 </head>
 <body>
@@ -787,8 +792,57 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
    setTimeout(()=>URL.revokeObjectURL(url),1000);
    showToast('Демо-событие подготовлено для календаря');
  }
+
+ // Drag downward by the sheet's top handle; content remains natively scrollable.
+ let sheetDrag=null,sheetSwipeClosing=false;
+ function clearSheetDragStyles(){
+   sheet.style.removeProperty('transform');
+   sheet.style.removeProperty('transition');
+   overlay.style.removeProperty('opacity');
+   overlay.style.removeProperty('transition');
+ }
+ sheet.addEventListener('pointerdown',e=>{
+   // Keep the history sheet unchanged; only opened calendar dates are draggable.
+   if(activeDay===null||activeDay===-1||sheetDrag||sheetSwipeClosing||!e.target.closest('.sheet-grabber'))return;
+   if(e.pointerType==='mouse'&&e.button!==0)return;
+   e.preventDefault();
+   sheetDrag={id:e.pointerId,startY:e.clientY,started:performance.now(),distance:0};
+   sheet.setPointerCapture(e.pointerId);
+ });
+ sheet.addEventListener('pointermove',e=>{
+   if(!sheetDrag||sheetDrag.id!==e.pointerId)return;
+   const dy=Math.max(0,e.clientY-sheetDrag.startY);
+   sheetDrag.distance=dy;
+   if(dy<=0)return;
+   sheet.style.transition='none';
+   sheet.style.transform='translate(-50%, '+dy+'px)';
+   overlay.style.transition='none';
+   overlay.style.opacity=String(Math.max(0,1-dy/Math.max(240,sheet.offsetHeight*.75)));
+ });
+ function endSheetDrag(e,cancelled=false){
+   if(!sheetDrag||sheetDrag.id!==e.pointerId)return;
+   const drag=sheetDrag;sheetDrag=null;
+   if(sheet.hasPointerCapture(e.pointerId))sheet.releasePointerCapture(e.pointerId);
+   const dy=cancelled?0:Math.max(0,e.clientY-drag.startY);
+   const speed=dy/Math.max(1,performance.now()-drag.started);
+   if(!cancelled&&(dy>=100||(dy>=48&&speed>=.7))){
+     sheetSwipeClosing=true;
+     sheet.style.transition='transform .23s cubic-bezier(.4,0,.85,.65)';
+     sheet.style.transform='translate(-50%,105%)';
+     overlay.style.transition='opacity .23s ease';
+     overlay.style.opacity='0';
+     setTimeout(()=>{if(sheetSwipeClosing)closeSheet()},250);
+   }else{
+     clearSheetDragStyles();
+   }
+ }
+ sheet.addEventListener('pointerup',e=>endSheetDrag(e));
+ sheet.addEventListener('pointercancel',e=>endSheetDrag(e,true));
+ sheet.addEventListener('lostpointercapture',e=>endSheetDrag(e,true));
  function closeSheet(restore=true){
+   sheetDrag=null;sheetSwipeClosing=false;
    sheet.classList.remove('show');overlay.classList.remove('show');
+   clearSheetDragStyles();
    sheet.setAttribute('aria-hidden','true');overlay.setAttribute('aria-hidden','true');document.body.style.overflow='';activeDay=null;
    if(restore&&lastFocus?.focus)lastFocus.focus({preventScroll:true});
  }
