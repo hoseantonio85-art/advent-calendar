@@ -528,6 +528,24 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .sheet-grabber{width:100%;height:32px;background:transparent;border-radius:0;margin:-6px auto -6px;position:relative;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .sheet-grabber::after{content:"";position:absolute;left:50%;top:6px;transform:translateX(-50%);width:42px;height:5px;background:#c9cfc4;border-radius:20px;pointer-events:none}
 .sheet-grabber:active{cursor:grabbing}
+
+/* Comparison-only lighter frost. The published default remains the icy-glass direction. */
+html[data-frost="soft"] .day-card.wisdom.is-locked{
+  background:radial-gradient(ellipse at 5% 1%,#ffffffa8,transparent 60%),
+    linear-gradient(133deg,#d9e8e5 0%,#b8d1d0 58%,#91b3bf 100%)!important;
+  border-color:#effffff2;
+  box-shadow:inset 0 1px 0 #fff,inset 0 0 12px #e8ffffa8,0 8px 18px #061f2530;
+}
+html[data-frost="soft"] .day-card.wisdom.is-locked::before{
+  opacity:.73;
+  background:radial-gradient(ellipse at 0% 0%,#ffffffd9,transparent 47%),
+    radial-gradient(ellipse at 100% 100%,#eaffffd0,transparent 42%);
+}
+html[data-frost="soft"] .day-card.wisdom.is-locked::after{opacity:.47}
+html[data-frost="soft"] .day-card.wisdom.is-locked .empty-date{
+  color:#395d68!important;text-shadow:0 1px 0 #ffffffb3,0 3px 13px #4a7e8d2c;
+}
+html[data-frost="soft"] .day-card.wisdom.is-locked .winter-corner{color:#4f8795;opacity:.86}
 </style>
 </head>
 <body>
@@ -625,6 +643,8 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  const year=2026, month=12;
 
  const query=new URLSearchParams(location.search);
+ // Temporary review mode: compare two kinds of ice without maintaining separate themes.
+ if(query.get('frost')==='soft')document.documentElement.dataset.frost='soft';
  let previewDay=[1,15,31].includes(Number(query.get('preview')))?Number(query.get('preview')):null;
  const appTZ=window.ADVENT_CONFIG?.timeZone||null;
  function displayToday(){
