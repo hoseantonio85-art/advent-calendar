@@ -340,8 +340,6 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 .sheet-icon-action:hover{background:#e9eee6;border-color:#bfcfbe}
 .sheet-icon-action:active{transform:scale(.985)}
 .sheet-icon-action svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.sheet-icon-action[aria-pressed="true"]{background:#f9e6e5;border-color:#efc5bd;color:#a74356}
-.sheet-icon-action[aria-pressed="true"] svg{fill:#d96777;stroke:#b64c5d}
 .sheet .action-main{min-height:48px}
 .sheet .action-main svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .sheet-event-actions + .sheet-hint{margin-top:13px}
@@ -451,7 +449,6 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .countdown-unit{font-size:10px;color:#967d75}
 .countdown-note{font-size:12px;line-height:1.5;color:#84737a;text-align:center}
 .preview-cycle{margin:0 0 12px;border-radius:999px;padding:7px 10px;border:1px dashed #ffdbb77a;background:#fff1e21a;color:#ffe8cc;font-size:11px;cursor:pointer}
-.like-count{font-size:11px;padding:2px 6px;border-radius:10px;background:#d5c5be40;font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){.today-star{animation:none!important}}
 /* Lining (equal-height) and tabular (equal-width) digits for calendar numbers */
 .card-date,.day-card.wide .card-date,.empty-date,.countdown-number,#countdownMain{
@@ -726,7 +723,6 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
    place:'<path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
    calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M12 14v5m-2.5-2.5h5"/>',
-   heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
    share:'<circle cx="18" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="18" cy="19" r="2"/><path d="m8 11 8-5m-8 7 8 5"/>'
   };
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[kind]||''}</svg>`;
