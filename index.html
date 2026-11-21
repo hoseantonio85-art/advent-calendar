@@ -453,6 +453,12 @@ body{font-family:"Manrope",Inter,Arial,sans-serif}
 .preview-cycle{margin:0 0 12px;border-radius:999px;padding:7px 10px;border:1px dashed #ffdbb77a;background:#fff1e21a;color:#ffe8cc;font-size:11px;cursor:pointer}
 .like-count{font-size:11px;padding:2px 6px;border-radius:10px;background:#d5c5be40;font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){.today-star{animation:none!important}}
+/* Lining (equal-height) and tabular (equal-width) digits for calendar numbers */
+.card-date,.day-card.wide .card-date,.empty-date,.countdown-number,#countdownMain{
+  font-variant-numeric:lining-nums tabular-nums;
+  font-feature-settings:"lnum" 1,"tnum" 1;
+}
+
 </style>
 </head>
 <body>
