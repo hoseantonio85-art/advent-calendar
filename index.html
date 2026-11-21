@@ -166,9 +166,18 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 .day-card.wisdom:nth-child(4n+4){background:linear-gradient(150deg,#b94e4d,#8e2e3b);border-color:#f6b9a15c}
 .day-card::after{background-image:radial-gradient(#fff 0.8px,transparent 0.8px);background-size:16px 16px;mask-image:linear-gradient(140deg,transparent 35%,#000 100%);opacity:.16}
 .day-card.wisdom::after{opacity:.14}
-.day-card.wisdom::before{content:"";position:absolute;width:110px;height:110px;right:-45px;bottom:-52px;border:1px solid currentColor;border-radius:42% 58% 51% 49%;opacity:.13;transform:rotate(36deg);z-index:0}
-.day-card.wisdom:nth-child(3n)::before{width:75px;height:75px;bottom:-30px;right:-25px;box-shadow:0 0 0 18px #ffffff12}
-.day-card.wisdom:nth-child(4n+3)::before{color:#e6f7c8}
+/* Soft bauble silhouette replaces the former oval stroke. */
+.day-card.wisdom .ornament-mark{
+ position:absolute;right:-18px;top:10px;width:100px;height:126px;
+ color:#b77f69;opacity:.14;z-index:0;pointer-events:none;
+ transform:rotate(15deg);transform-origin:52% 29%;
+}
+.day-card.wisdom .ornament-mark svg{display:block;width:100%;height:100%;overflow:visible}
+.day-card.wisdom:nth-child(4n+2) .ornament-mark{color:#b9807a;opacity:.12}
+.day-card.wisdom:nth-child(4n+3) .ornament-mark{color:#c4ebd3;opacity:.13}
+.day-card.wisdom:nth-child(4n+4) .ornament-mark{color:#ffe2ca;opacity:.12}
+.day-card.wisdom.wide .ornament-mark{right:5px;top:-8px;width:143px;height:178px;opacity:.10}
+@media(max-width:380px){.day-card.wisdom:not(.wide) .ornament-mark{right:-23px;width:92px;height:116px}}
 .card-top{align-items:flex-start}
 .card-date,.day-card.wide .card-date{font-size:28px;line-height:1;letter-spacing:-.07em;font-weight:800;white-space:nowrap;color:#fff8e8;text-shadow:0 2px 10px #0001}
 .day-card.wisdom .card-date{color:#743f38}
@@ -259,28 +268,22 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
   0%,100%{transform:translate3d(0,0,0) rotate(-8deg) scale(1.06)}
   50%{transform:translate3d(-3px,5px,0) rotate(-7deg) scale(1.085)}
 }
-/* Empty dates have two very subtle drifting particles; event tiles remain untouched. */
+/* A little more falling snow on advice dates, without touching event art. */
 .day-card.wisdom .snow-particle{
-  position:absolute;
-  z-index:2;
-  top:var(--y);
-  left:var(--x);
-  display:block;
-  width:var(--size);
-  height:var(--size);
-  border-radius:50%;
-  background:rgba(255,255,247,.8);
-  opacity:0;
-  box-shadow:0 0 5px #fff8;
-  pointer-events:none;
+  position:absolute;z-index:2;top:var(--y);left:var(--x);display:block;
+  width:var(--size);height:var(--size);border-radius:50%;
+  background:rgba(255,255,247,.9);opacity:0;
+  box-shadow:0 0 5px #fff9;pointer-events:none;
   will-change:transform,opacity;
   animation:snow-gently-fall var(--duration) linear var(--delay) infinite;
 }
+.day-card.wisdom:nth-child(4n+1) .snow-particle,
+.day-card.wisdom:nth-child(4n+2) .snow-particle{box-shadow:0 0 0 .5px #829f9b7a,0 0 5px #fff9}
 @keyframes snow-gently-fall{
   0%{transform:translate3d(-4px,-13px,0);opacity:0}
-  20%{opacity:.38}
-  70%{opacity:.3}
-  100%{transform:translate3d(8px,53px,0);opacity:0}
+  20%{opacity:.51}
+  70%{opacity:.44}
+  100%{transform:translate3d(8px,61px,0);opacity:0}
 }
 @media(max-width:380px){
  .hero{min-height:240px;margin:0 -12px;padding:44px 17px 18px}
@@ -499,12 +502,13 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .day-card.wisdom.is-locked::after{
   content:"";position:absolute;inset:0;z-index:2;
   transform:none;border:0;border-radius:inherit;pointer-events:none;
-  opacity:.62;
+  opacity:.64;
+  /* Fine crystalline dust and hairline scratches concentrated at the edges. */
   background:
-    radial-gradient(circle at 7% 11%,#ffffffef 0 1px,transparent 1.6px),
-    radial-gradient(circle at 93% 89%,#f4ffffe8 0 1px,transparent 1.5px),
-    repeating-linear-gradient(155deg,transparent 0 11px,#f2ffff2e 12px 12.5px,transparent 13px 25px);
-  mask-image:linear-gradient(125deg,#000 0%,#000a 15%,transparent 41%,transparent 63%,#0008 95%);
+    radial-gradient(circle,#ffffffbd 0 .65px,transparent 1.15px) 0 0 / 15px 19px,
+    radial-gradient(circle,#d6f4ffb5 0 .75px,transparent 1.25px) 6px 9px / 21px 23px,
+    repeating-linear-gradient(155deg,transparent 0 11px,#eefeff30 12px 12.6px,transparent 13px 25px);
+  mask-image:linear-gradient(125deg,#000 0%,#000b 17%,transparent 42%,transparent 63%,#0009 95%);
 }
 .day-card.wisdom.is-locked .empty-date{opacity:1;text-shadow:0 2px 8px #183a3322}
 .day-card.wisdom.is-locked .winter-corner{opacity:.84}
@@ -665,6 +669,15 @@ html[data-frost="classic"] .day-card.wisdom.is-locked:focus-visible{
 .sheet-grabber{width:100%;height:32px;background:transparent;border-radius:0;margin:-6px auto -6px;position:relative;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .sheet-grabber::after{content:"";position:absolute;left:50%;top:6px;transform:translateX(-50%);width:42px;height:5px;background:#c9cfc4;border-radius:20px;pointer-events:none}
 .sheet-grabber:active{cursor:grabbing}
+/* Same top/right offset for close, while the swipe handle stays centered and separate. */
+.sheet .sheet-grabber{width:calc(100% - 94px);max-width:310px}
+.sheet .sheet-head{padding-right:44px}
+.sheet .close-btn{
+  position:absolute;top:14px;right:14px;z-index:8;
+  display:grid;place-items:center;width:38px;height:38px;padding:0;
+  font-family:Arial,sans-serif;font-size:24px;line-height:1;
+}
+.sheet .close-btn:focus-visible{outline:2px solid #5a8670;outline-offset:3px}
 
 /* Comparison-only lighter frost. The published default remains the icy-glass direction. */
 html[data-frost="soft"] .day-card.wisdom.is-locked{
@@ -867,10 +880,10 @@ html[data-frost="soft"] .day-card.wisdom.is-locked .winter-corner{color:#4f8795;
   ['Всё впереди','Конец календаря — это ещё и место для нового начала.','Возьми с собой в новый год самое дорогое.']
  ];
  const wideDays=new Set([1,4,8,14,16,18,25,31]);
- // Slow, deterministic snowflakes only in dates without scheduled events.
- const snowForDay=(day)=>[0,1,2].map(i=>{
-  const x=18+(day*17+i*29)%65, y=14+(day*9+i*12)%28;
-  const size=i===1?2.6:1.8, duration=10+((day+i*3)%6), delay=-((day*3+i*5)%14);
+ // Four subtle flakes with staggered motion for each advice tile.
+ const snowForDay=(day)=>[0,1,2,3].map(i=>{
+  const x=14+(day*17+i*23)%73, y=10+(day*9+i*13)%29;
+  const size=i===1?2.9:i===3?2.25:1.9, duration=10+((day+i*3)%6), delay=-((day*3+i*5)%14);
   return `<i class="snow-particle" style="--x:${x}%;--y:${y}%;--size:${size}px;--duration:${duration}s;--delay:${delay}s"></i>`;
  }).join('');
  const artForAdvice=['spark','moon','snow','star','cube'];
@@ -901,6 +914,7 @@ html[data-frost="soft"] .day-card.wisdom.is-locked .winter-corner{color:#4f8795;
     return `<button class="day-card ${event?'event':'wisdom'} ${theme} ${w?'wide':''} ${state} ${locked?'is-locked':''}" data-day="${day}" aria-label="${day} декабря, ${event?'мероприятие: '+escapeHtml(title):locked?'закрыто, совет откроется '+day+' декабря':'совет дня: '+escapeHtml(title)}">
       <span class="card-top"><span class="card-date">${day}</span></span>
       ${event?'':'<span class="empty-date" aria-hidden="true">'+day+'</span>'}
+      ${event?'':'<span class="ornament-mark" aria-hidden="true"><svg viewBox="0 0 100 124" focusable="false"><path d="M50 8c-5.2 0-9 3.9-9 9 0 5.2 3.8 9 9 9s9-3.8 9-9c0-5.1-3.8-9-9-9Z" fill="none" stroke="currentColor" stroke-width="4"/><rect x="38" y="26" width="24" height="11" rx="3" fill="currentColor"/><path d="M50 36c-23.8 0-41 18.1-41 42.4S26.9 120 50 120s41-17.3 41-41.6S73.8 36 50 36Z" fill="currentColor"/></svg></span>'}
       ${event?'':'<span class="winter-corner" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.75v18.5M2.75 12h18.5M5.45 5.45l13.1 13.1M18.55 5.45l-13.1 13.1"/><path d="m9.4 5.3 2.6 2.5 2.6-2.5M9.4 18.7l2.6-2.5 2.6 2.5M5.3 9.4 7.8 12l-2.5 2.6M18.7 9.4 16.2 12l2.5 2.6"/></svg></span>'}
       ${state==='is-today'?'<span class="today-star" aria-hidden="true">✦</span>':''}
       ${event?'':snowForDay(day)}
