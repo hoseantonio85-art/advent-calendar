@@ -90,9 +90,6 @@ button{font:inherit} button:focus-visible{outline:2px solid #f9d999;outline-offs
 .day-card.wisdom .card-burst{display:none}
 .wisdom-mark{position:absolute;right:19px;top:73px;width:29px;height:29px;color:#9ebdaa38}
 .day-card.wide .wisdom-mark{display:none}
-.card-seen{position:absolute;bottom:14px;right:13px;z-index:5;color:#e3efc9;display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#052e2566;border:1px solid #e4ebc371;opacity:0;transform:scale(.5);transition:.24s}
-.day-card.seen .card-seen{opacity:1;transform:scale(1)}
-.day-card.wide .card-seen{right:17px;bottom:17px}
 .month-footer{margin:26px 0 15px;background:linear-gradient(120deg,#e0ca9433,#96b17b13);border:1px solid #efdbac2b;border-radius:23px;padding:20px;position:relative;overflow:hidden}
 .month-footer h3{margin:0 0 7px;font-size:19px;letter-spacing:-.04em}.month-footer p{color:#bfd0bc;font-size:12px;line-height:1.56;max-width:270px;margin:0}
 .footer-spark{position:absolute;right:19px;top:5px;font-size:73px;color:#f9dba9;opacity:.22;font-weight:200}
@@ -192,9 +189,6 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 .day-card.wisdom .illustration,.day-card.wisdom.wide .illustration{display:none}
 .day-card .card-burst{width:70px;height:70px;right:1px;top:30px;background:#ffd2b74f;filter:blur(30px)}
 .day-card.wide .card-burst{width:116px;height:75px;right:30px;top:27px}
-.card-seen,.day-card.wide .card-seen{right:8px;bottom:8px;width:17px;height:17px;background:#153d35cc;color:#eff9e2}
-.day-card.event .card-seen{bottom:auto;top:10px;right:10px}
-.day-card .card-seen svg{width:11px;height:11px}
 .day-card.wisdom .card-bottom{display:none}
 .card-name:empty{display:none}
 .month-footer{margin-top:20px}
@@ -473,13 +467,61 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .history-countdown .countdown-digit{background:linear-gradient(145deg,#fffdf9,#f7ede7);border-color:#ece0d4}
 .history-countdown .countdown-note{margin:4px 0 0}
 
-/* Hidden advice before its day: event dates always remain browsable. */
-.day-card.wisdom.is-locked{opacity:.68;filter:saturate(.78);cursor:pointer}
-.day-card.wisdom.is-locked .empty-date{opacity:.88}
-.day-card.wisdom.is-locked .card-seen{display:none}
-.day-card.wisdom.is-locked:hover,.day-card.wisdom.is-locked:focus-visible{opacity:.82}
-.day-lock{position:absolute;top:12px;right:12px;width:21px;height:21px;z-index:5;color:#dbe6caaf;display:grid;place-items:center;pointer-events:none}
-.day-lock svg{width:17px;height:17px}
+/* Advent frost v1: frozen glass communicates locked advice, not a padlock or checkmark.
+   Keep every date crisp while ice texture stays behind the numeral. */
+.day-card.wisdom .winter-corner{
+  position:absolute;left:11px;top:10px;z-index:4;
+  display:grid;place-items:center;width:17px;height:17px;
+  color:#957566;opacity:.72;pointer-events:none;
+}
+.day-card.wisdom .winter-corner svg{width:15px;height:15px}
+.day-card.wisdom:nth-child(4n+3) .winter-corner,
+.day-card.wisdom:nth-child(4n+4) .winter-corner{color:#e0eedf;opacity:.78}
+.day-card.wisdom.is-locked{
+  opacity:1;filter:none;cursor:pointer;
+  background:radial-gradient(ellipse at 9% 0%,#d3f3f8a3,transparent 66%),
+    linear-gradient(137deg,#92bbc3 0%,#557f91 49%,#375b75 100%)!important;
+  border-color:#d8f6f7bf;
+  box-shadow:inset 0 1px 0 #fcffffdf,inset 0 0 14px #d0f5ff4d,0 8px 19px #011d2738;
+}
+.day-card.wisdom.is-locked::before{
+  content:"";position:absolute;inset:0;width:auto;height:auto;
+  right:0;bottom:0;border:0;border-radius:inherit;transform:none;
+  opacity:.92;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 0% 0%,#ffffffc9,transparent 45%),
+    radial-gradient(ellipse at 100% 100%,#d7f8ffc4,transparent 39%),
+    linear-gradient(130deg,#ffffff45,transparent 53%,#eaffff24);
+  box-shadow:inset 0 0 0 1px #f8ffff91,inset 0 0 18px #b8edfc78;
+}
+.day-card.wisdom.is-locked::after{
+  content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  opacity:.91;transform:none;border:0;border-radius:inherit;
+  background:
+    radial-gradient(circle at 6% 9%,#fff 0 1px,transparent 2px),
+    radial-gradient(circle at 13% 4%,#eaffffcc 0 1px,transparent 2px),
+    radial-gradient(circle at 94% 90%,#f5ffffea 0 1px,transparent 2px),
+    repeating-linear-gradient(154deg,transparent 0 9px,#e8ffff30 10px 10.5px,transparent 11px 22px);
+  background-size:100% 100%,100% 100%,100% 100%,100% 100%;
+  mask-image:linear-gradient(135deg,#000 0%,#0009 18%,transparent 53%,#0009 83%,#000);
+}
+.day-card.wisdom.is-locked .empty-date{
+  color:#f2fdff!important;opacity:1;text-shadow:0 2px 15px #19445b69,0 0 4px #ffffff56;
+}
+.day-card.wisdom.is-locked .winter-corner{color:#f1ffff;opacity:.92}
+.day-card.wisdom.is-locked .snow-particle{opacity:.28}
+.day-card.wisdom.is-locked:hover,
+.day-card.wisdom.is-locked:focus-visible{
+  opacity:1;border-color:#f5ffffd9;
+  box-shadow:inset 0 1px 0 #fff,inset 0 0 20px #e0ffff70,0 10px 25px #0d314454;
+}
+@media(max-width:380px){
+  .day-card.wisdom .winter-corner{left:9px;top:8px;width:16px;height:16px}
+  .day-card.wisdom .winter-corner svg{width:14px;height:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  .day-card.wisdom.is-locked{transition:none}
+}
 .sheet-event-actions{grid-template-columns:minmax(0,1fr)}
 
 /* The visible handle has a generous swipe hit area without moving sheet content. */
@@ -699,14 +741,13 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
     const day=i+1,event=events[day],w=wideDays.has(day),thought=thoughts[i],state=dayState(day),locked=isLockedAdvice(day);
     const theme=event?`theme-${event.theme}`:(i%3===0?'alt':'');
     const title=event?.title||thought[0];
-    return `<button class="day-card ${event?'event':'wisdom'} ${theme} ${w?'wide':''} ${visited.has(day)&&!locked?'seen':''} ${state} ${locked?'is-locked':''}" data-day="${day}" aria-label="${day} декабря, ${event?'мероприятие: '+escapeHtml(title):locked?'закрыто, совет откроется '+day+' декабря':'совет дня: '+escapeHtml(title)}">
+    return `<button class="day-card ${event?'event':'wisdom'} ${theme} ${w?'wide':''} ${state} ${locked?'is-locked':''}" data-day="${day}" aria-label="${day} декабря, ${event?'мероприятие: '+escapeHtml(title):locked?'закрыто, совет откроется '+day+' декабря':'совет дня: '+escapeHtml(title)}">
       <span class="card-top"><span class="card-date">${day}</span></span>
       ${event?'':'<span class="empty-date" aria-hidden="true">'+day+'</span>'}
+      ${event?'':'<span class="winter-corner" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.75v18.5M2.75 12h18.5M5.45 5.45l13.1 13.1M18.55 5.45l-13.1 13.1"/><path d="m9.4 5.3 2.6 2.5 2.6-2.5M9.4 18.7l2.6-2.5 2.6 2.5M5.3 9.4 7.8 12l-2.5 2.6M18.7 9.4 16.2 12l2.5 2.6"/></svg></span>'}
       ${state==='is-today'?'<span class="today-star" aria-hidden="true">✦</span>':''}
-      ${locked?'<span class="day-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>':''}
       ${event?'':snowForDay(day)}
       ${event?`<span class="card-burst"></span>${icon(event.art,'illustration')}<span class="card-bottom"><span class="card-name">${cardTitleMarkup(event,title)}</span></span>`:''}
-      <span class="card-seen" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
     </button>`;
    }).join('');
    grid.querySelectorAll('[data-day]').forEach(btn=>btn.addEventListener('click',()=>openDay(Number(btn.dataset.day))));
@@ -715,7 +756,6 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
    const count=visibleVisitedCount();
    document.getElementById('progressCount').textContent=`${count} / 31`;
    document.getElementById('progressFill').style.width=`${count/31*100}%`;
-   grid.querySelectorAll('[data-day]').forEach(el=>el.classList.toggle('seen',visited.has(Number(el.dataset.day))&&!isLockedAdvice(Number(el.dataset.day))));
  }
  function tipMarkup(day,only=false){
   const t=thoughts[day-1];
