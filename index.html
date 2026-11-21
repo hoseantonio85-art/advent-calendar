@@ -477,15 +477,55 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .day-card.wisdom .winter-corner svg{width:15px;height:15px}
 .day-card.wisdom:nth-child(4n+3) .winter-corner,
 .day-card.wisdom:nth-child(4n+4) .winter-corner{color:#e0eedf;opacity:.78}
-/* Default frost v2: an almost transparent ice film on top of each original card.
-   Preserve the four warm/cool colorways instead of replacing them with a shared blue gradient. */
+/* Default frost v3: lightly muted underlying colors and a more legible edge frost.
+   A translucent whole-card state avoids making unopened advice visually compete with events. */
 .day-card.wisdom.is-locked{
+  opacity:.91;filter:saturate(.90);cursor:pointer;
+  border-color:#dff9f6a3;
+  box-shadow:inset 0 1px 0 #ffffffc6,inset 0 0 0 1px #f1ffff4b,
+    inset 0 0 21px #d3f3ff3c,0 8px 18px #001a192e;
+  transition:opacity .24s ease,filter .24s ease,border-color .22s ease,box-shadow .22s ease,transform .22s ease;
+}
+.day-card.wisdom.is-locked::before{
+  content:"";position:absolute;inset:0;width:auto;height:auto;
+  right:0;bottom:0;border:0;border-radius:inherit;transform:none;
+  z-index:1;opacity:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse at -7% -10%,#f1ffffa0 0%,#e3faff31 39%,transparent 64%),
+    radial-gradient(ellipse at 108% 106%,#e8fbff7a 0%,#e6fbff12 39%,transparent 54%),
+    linear-gradient(135deg,#e9faff34 0%,transparent 47%,#d6f2ff20 100%);
+  box-shadow:inset 0 0 0 1px #ffffff75,inset 0 0 22px #e0faff3c;
+}
+.day-card.wisdom.is-locked::after{
+  content:"";position:absolute;inset:0;z-index:2;
+  transform:none;border:0;border-radius:inherit;pointer-events:none;
+  opacity:.62;
+  background:
+    radial-gradient(circle at 7% 11%,#ffffffef 0 1px,transparent 1.6px),
+    radial-gradient(circle at 93% 89%,#f4ffffe8 0 1px,transparent 1.5px),
+    repeating-linear-gradient(155deg,transparent 0 11px,#f2ffff2e 12px 12.5px,transparent 13px 25px);
+  mask-image:linear-gradient(125deg,#000 0%,#000a 15%,transparent 41%,transparent 63%,#0008 95%);
+}
+.day-card.wisdom.is-locked .empty-date{opacity:1;text-shadow:0 2px 8px #183a3322}
+.day-card.wisdom.is-locked .winter-corner{opacity:.84}
+.day-card.wisdom.is-locked .snow-particle{opacity:.24}
+.day-card.wisdom.is-locked:hover,
+.day-card.wisdom.is-locked:focus-visible{
+  opacity:.97;filter:saturate(.96);
+  border-color:#ecffffcf;
+  box-shadow:inset 0 1px 0 #fff,inset 0 0 0 1px #f0ffff66,
+    inset 0 0 22px #e4ffff4c,0 9px 22px #001c173a;
+}
+@media(prefers-reduced-motion:reduce){.day-card.wisdom.is-locked{transition:none}}
+
+/* Keep the previous, less-muted clear-ice version for review at ?frost=light. */
+html[data-frost="light"] .day-card.wisdom.is-locked{
   opacity:1;filter:none;cursor:pointer;
   border-color:#dff9f68a;
   box-shadow:inset 0 1px 0 #ffffffb0,inset 0 0 0 1px #f1ffff3a,
     inset 0 0 18px #d3f3ff22,0 8px 18px #001a192e;
 }
-.day-card.wisdom.is-locked::before{
+html[data-frost="light"] .day-card.wisdom.is-locked::before{
   content:"";position:absolute;inset:0;width:auto;height:auto;
   right:0;bottom:0;border:0;border-radius:inherit;transform:none;
   z-index:1;opacity:1;pointer-events:none;
@@ -495,7 +535,7 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
     linear-gradient(135deg,#e9faff28 0%,transparent 49%,#d6f2ff15 100%);
   box-shadow:inset 0 0 0 1px #ffffff50,inset 0 0 17px #e0faff28;
 }
-.day-card.wisdom.is-locked::after{
+html[data-frost="light"] .day-card.wisdom.is-locked::after{
   content:"";position:absolute;inset:0;z-index:2;
   transform:none;border:0;border-radius:inherit;pointer-events:none;
   opacity:.46;
@@ -505,16 +545,16 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
     repeating-linear-gradient(155deg,transparent 0 11px,#f2ffff24 12px 12.5px,transparent 13px 25px);
   mask-image:linear-gradient(125deg,#000 0%,#0008 13%,transparent 38%,transparent 66%,#0007 94%);
 }
-.day-card.wisdom.is-locked .empty-date{opacity:.91;text-shadow:0 2px 8px #183a3322}
-.day-card.wisdom.is-locked .winter-corner{opacity:.80}
-.day-card.wisdom.is-locked .snow-particle{opacity:.24}
-.day-card.wisdom.is-locked:hover,
-.day-card.wisdom.is-locked:focus-visible{
+html[data-frost="light"] .day-card.wisdom.is-locked .empty-date{opacity:.91;text-shadow:0 2px 8px #183a3322}
+html[data-frost="light"] .day-card.wisdom.is-locked .winter-corner{opacity:.80}
+html[data-frost="light"] .day-card.wisdom.is-locked .snow-particle{opacity:.24}
+html[data-frost="light"] .day-card.wisdom.is-locked:hover,
+html[data-frost="light"] .day-card.wisdom.is-locked:focus-visible{
   border-color:#ecffffbb;
   box-shadow:inset 0 1px 0 #fff,inset 0 0 0 1px #f0ffff57,
     inset 0 0 22px #e4ffff40,0 9px 22px #001c173a;
 }
-@media(prefers-reduced-motion:reduce){.day-card.wisdom.is-locked{transition:none}}
+@media(prefers-reduced-motion:reduce){html[data-frost="light"] .day-card.wisdom.is-locked{transition:none}}
 
 /* Original stronger blue frost (v1) remains accessible for design review via ?frost=classic. */
 html[data-frost="classic"] .day-card.wisdom.is-locked{
@@ -684,7 +724,7 @@ html[data-frost="soft"] .day-card.wisdom.is-locked .winter-corner{color:#4f8795;
 
  const query=new URLSearchParams(location.search);
  // Temporary review mode: compare two kinds of ice without maintaining separate themes.
- if(['soft','classic'].includes(query.get('frost')))document.documentElement.dataset.frost=query.get('frost');
+ if(['light','soft','classic'].includes(query.get('frost')))document.documentElement.dataset.frost=query.get('frost');
  let previewDay=[1,15,31].includes(Number(query.get('preview')))?Number(query.get('preview')):null;
  const appTZ=window.ADVENT_CONFIG?.timeZone||null;
  function displayToday(){
