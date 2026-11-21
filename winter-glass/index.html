@@ -710,25 +710,25 @@ body {
 
 /* v7 · requested card art and controlled line breaks */
 .card-name .card-line{display:block;white-space:nowrap;hyphens:none;word-break:keep-all;overflow-wrap:normal}
-.day-card[data-day="1"] .card-name{max-width:165px}
-.day-card[data-day="8"] .card-name{font-size:14px;max-width:174px}
-.day-card[data-day="14"] .card-name{max-width:160px}
-.day-card[data-day="9"] .card-name{font-size:12px}
-.day-card[data-day="31"] .illustration{
+.day-card.event.wide[data-day="1"] .card-name{max-width:165px}
+.day-card.event.wide[data-day="8"] .card-name{font-size:14px;max-width:174px}
+.day-card.event.wide[data-day="14"] .card-name{max-width:160px}
+.day-card.event:not(.wide)[data-day="9"] .card-name{font-size:12px}
+.day-card.event.wide[data-day="31"] .illustration{
  width:213px;height:213px;top:-55px;right:-28px;object-fit:contain;
  transform:none;filter:drop-shadow(0 9px 20px #0005);
 }
-.day-card[data-day="31"]:hover .illustration{transform:scale(1.04) translateY(-2px)}
+.day-card.event.wide[data-day="31"]:hover .illustration{transform:scale(1.04) translateY(-2px)}
 @media(max-width:380px){
- .day-card[data-day="8"] .card-name{font-size:12.7px}
- .day-card[data-day="14"] .card-name{font-size:13.5px}
- .day-card[data-day="31"] .illustration{width:190px;height:190px;right:-31px;top:-43px}
+ .day-card.event.wide[data-day="8"] .card-name{font-size:12.7px}
+ .day-card.event.wide[data-day="14"] .card-name{font-size:13.5px}
+ .day-card.event.wide[data-day="31"] .illustration{width:190px;height:190px;right:-31px;top:-43px}
 }
 @media(max-width:335px){
- .day-card[data-day="1"] .card-name{font-size:12.4px}
- .day-card[data-day="8"] .card-name{font-size:11.6px}
- .day-card[data-day="14"] .card-name{font-size:12.4px}
- .day-card[data-day="31"] .illustration{width:180px;height:180px;right:-35px;top:-40px}
+ .day-card.event.wide[data-day="1"] .card-name{font-size:12.4px}
+ .day-card.event.wide[data-day="8"] .card-name{font-size:11.6px}
+ .day-card.event.wide[data-day="14"] .card-name{font-size:12.4px}
+ .day-card.event.wide[data-day="31"] .illustration{width:180px;height:180px;right:-35px;top:-40px}
 }
 
 </style>
