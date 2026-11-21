@@ -475,6 +475,15 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .history-countdown .countdown-digits{margin:12px 0}
 .history-countdown .countdown-digit{background:linear-gradient(145deg,#fffdf9,#f7ede7);border-color:#ece0d4}
 .history-countdown .countdown-note{margin:4px 0 0}
+
+/* Hidden advice before its day: event dates always remain browsable. */
+.day-card.wisdom.is-locked{opacity:.68;filter:saturate(.78);cursor:pointer}
+.day-card.wisdom.is-locked .empty-date{opacity:.88}
+.day-card.wisdom.is-locked .card-seen{display:none}
+.day-card.wisdom.is-locked:hover,.day-card.wisdom.is-locked:focus-visible{opacity:.82}
+.day-lock{position:absolute;top:12px;right:12px;width:21px;height:21px;z-index:5;color:#dbe6caaf;display:grid;place-items:center;pointer-events:none}
+.day-lock svg{width:17px;height:17px}
+.sheet-event-actions{grid-template-columns:minmax(0,1fr)}
 </style>
 </head>
 <body>
@@ -681,15 +690,18 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  const escapeHtml=(str)=>String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
  const dateLabel=(d)=>`${d} декабря · ${weekNames[new Date(year,month-1,d).getDay()]}`;
  const cardTitleMarkup=(event,title)=>event?.cardLines?event.cardLines.map(line=>'<span class="card-line">'+escapeHtml(line)+'</span>').join(''):escapeHtml(event?.shortTitle||title);
+ function isLockedAdvice(day){return !events[day]&&dayState(day)==='is-future'}
+ function visibleVisitedCount(){return [...visited].filter(day=>Number.isInteger(day)&&day>=1&&day<=31&&!isLockedAdvice(day)).length}
  function renderGrid(){
    grid.innerHTML=Array.from({length:31},(_,i)=>{
-    const day=i+1,event=events[day],w=wideDays.has(day),thought=thoughts[i],state=dayState(day);
+    const day=i+1,event=events[day],w=wideDays.has(day),thought=thoughts[i],state=dayState(day),locked=isLockedAdvice(day);
     const theme=event?`theme-${event.theme}`:(i%3===0?'alt':'');
     const title=event?.title||thought[0];
-    return `<button class="day-card ${event?'event':'wisdom'} ${theme} ${w?'wide':''} ${visited.has(day)?'seen':''} ${state}" data-day="${day}" aria-label="${day} декабря, ${event?'мероприятие: '+escapeHtml(title):'совет дня: '+escapeHtml(title)}">
+    return `<button class="day-card ${event?'event':'wisdom'} ${theme} ${w?'wide':''} ${visited.has(day)&&!locked?'seen':''} ${state} ${locked?'is-locked':''}" data-day="${day}" aria-label="${day} декабря, ${event?'мероприятие: '+escapeHtml(title):locked?'закрыто, совет откроется '+day+' декабря':'совет дня: '+escapeHtml(title)}">
       <span class="card-top"><span class="card-date">${day}</span></span>
       ${event?'':'<span class="empty-date" aria-hidden="true">'+day+'</span>'}
       ${state==='is-today'?'<span class="today-star" aria-hidden="true">✦</span>':''}
+      ${locked?'<span class="day-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>':''}
       ${event?'':snowForDay(day)}
       ${event?`<span class="card-burst"></span>${icon(event.art,'illustration')}<span class="card-bottom"><span class="card-name">${cardTitleMarkup(event,title)}</span></span>`:''}
       <span class="card-seen" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -698,10 +710,10 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
    grid.querySelectorAll('[data-day]').forEach(btn=>btn.addEventListener('click',()=>openDay(Number(btn.dataset.day))));
  }
  function updateProgress(){
-   const count=visited.size;
+   const count=visibleVisitedCount();
    document.getElementById('progressCount').textContent=`${count} / 31`;
    document.getElementById('progressFill').style.width=`${count/31*100}%`;
-   grid.querySelectorAll('[data-day]').forEach(el=>el.classList.toggle('seen',visited.has(Number(el.dataset.day))));
+   grid.querySelectorAll('[data-day]').forEach(el=>el.classList.toggle('seen',visited.has(Number(el.dataset.day))&&!isLockedAdvice(Number(el.dataset.day))));
  }
  function tipMarkup(day,only=false){
   const t=thoughts[day-1];
@@ -719,33 +731,6 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
   };
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[kind]||''}</svg>`;
  };
- const eventLikes=readStore('advent2026-event-likes');
-
- const likeConf=window.ADVENT_CONFIG||{};
- const likesAdapter=window.AdventLikesAdapter||(likeConf.apiBase?{
-   async getSummary(day){const r=await fetch(String(likeConf.apiBase).replace(/\/$/,'')+'/advent/events/'+day+'/likes',{credentials:'include'});if(!r.ok)throw Error('GET '+r.status);return r.json()},
-   async setLike(day,liked){const r=await fetch(String(likeConf.apiBase).replace(/\/$/,'')+'/advent/events/'+day+'/like',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({liked})});if(!r.ok)throw Error('PUT '+r.status);return r.json()}
- }:null);
- function updateLikeUI(day,count){
-  if(activeDay!==day)return;const btn=sheet.querySelector('#eventLike');if(!btn)return;
-  btn.setAttribute('aria-pressed',String(eventLikes.has(day)));
-  const label=btn.querySelector('.like-label');if(label)label.textContent=eventLikes.has(day)?'Нравится ✓':'Нравится';
-  const total=btn.querySelector('#likeCount');if(total)total.textContent=typeof count==='number'&&count>=0?String(count):'—';
- }
- async function loadLike(day){
-  if(!likesAdapter)return;
-  try{const x=await likesAdapter.getSummary(day);if(typeof x.liked==='boolean'){if(x.liked)eventLikes.add(day);else eventLikes.delete(day)}updateLikeUI(day,x.count)}
-  catch{showToast('Общие лайки недоступны')}
- }
- async function toggleEventLike(day){
-  const btn=sheet.querySelector('#eventLike');if(!btn||btn.disabled)return;
-  const desired=!eventLikes.has(day);
-  if(!likesAdapter){if(desired)eventLikes.add(day);else eventLikes.delete(day);try{localStorage.setItem('advent2026-event-likes',JSON.stringify([...eventLikes]))}catch{}updateLikeUI(day);showToast('Демо: лайк сохранён только здесь');return}
-  btn.disabled=true;
-  try{const x=await likesAdapter.setLike(day,desired);const liked=typeof x.liked==='boolean'?x.liked:desired;if(liked)eventLikes.add(day);else eventLikes.delete(day);updateLikeUI(day,x.count);showToast(liked?'Спасибо за лайк ♡':'Лайк снят')}
-  catch{showToast('Не удалось сохранить лайк')}finally{btn.disabled=false}
- }
-
  const eventDetails=(key,label,value)=>`<div class="sheet-detail"><span class="sheet-detail-icon">${detailIcon(key)}</span><span class="sheet-detail-text"><span class="sheet-detail-label">${label}</span><span class="sheet-detail-value">${escapeHtml(value)}</span></span></div>`;
  const eventTextHtml=v=>escapeHtml(v).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>');
  function renderSheet(day){
@@ -763,12 +748,12 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
        <div class="sheet-divider"></div>
        <button class="action-main" id="mainAction">${detailIcon('calendar')} ${escapeHtml(event.cta||'Добавить в календарь')}</button>
        <div class="sheet-event-actions">
-         <button class="sheet-icon-action" id="eventLike" type="button" aria-pressed="${eventLikes.has(day)}">${detailIcon('heart')}<span class="like-label">${eventLikes.has(day)?'Нравится ✓':'Нравится'}</span>${likesAdapter?'<strong class="like-count" id="likeCount">—</strong>':''}</button>
          <button class="sheet-icon-action" id="secondaryAction" type="button">${detailIcon('share')}<span>Поделиться</span></button>
        </div>
        <p class="sheet-hint">${event.sourceCopy?"Время не указано · добавление в календарь создаёт событие на весь день":"Демо-контент · время и место не подтверждены"}</p>`:tipMarkup(day,true)+`<button class="action-main" id="mainAction">${saved.has(day)?'✓ Совет сохранён':'♡ Сохранить совет'}</button><button class="action-secondary" id="secondaryAction">Поделиться советом</button>`}`;
  }
  function openDay(day){
+   if(isLockedAdvice(day)){showToast('Совет откроется '+day+' декабря ✦');return}
    if(activeDay!==null)closeSheet(false);
    activeDay=day;lastFocus=document.activeElement;visited.add(day);
    try{localStorage.setItem('advent2026-visited',JSON.stringify([...visited]))}catch{}
@@ -787,8 +772,6 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
        sheet.querySelector('#mainAction').textContent=saved.has(day)?'✓ Совет сохранён':'♡ Сохранить совет';
      }
    });
-   sheet.querySelector('#eventLike')?.addEventListener('click',()=>toggleEventLike(day));
-   if(events[day])loadLike(day);
    sheet.querySelector('#secondaryAction')?.addEventListener('click',()=>shareDay(day));
    sheet.querySelector('#closeSheet').focus({preventScroll:true});
  }
@@ -823,7 +806,7 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  overlay.addEventListener('click',()=>closeSheet());
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeDay!==null)closeSheet();if(e.key==='Tab'&&activeDay!==null){const focusable=Array.from(sheet.querySelectorAll('button'));if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
  document.getElementById('aboutBtn').addEventListener('click',()=>{
-  lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Открыто <strong>${visited.size} из 31</strong> дней календаря</p>${historyCountdownMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>Каждый день можно открыть прямо сейчас</blockquote><p>Просмотр дней отмечается в прогрессе. События можно добавить в календарь, а понравившиеся советы — сохранить. Некоторые детали событий пока демонстрационные.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
+  lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Открыто <strong>${visibleVisitedCount()} из 31</strong> дней календаря</p>${historyCountdownMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>У каждого дня — своё время</blockquote><p>Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже. Некоторые детали событий пока демонстрационные.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
   sheet.setAttribute('aria-hidden','false');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';requestAnimationFrame(()=>{overlay.classList.add('show');sheet.classList.add('show')});sheet.scrollTop=0;
   sheet.querySelector('#closeSheet').onclick=()=>closeSheet();sheet.querySelector('#mainAction').onclick=()=>closeSheet();sheet.querySelector('#closeSheet').focus({preventScroll:true});refreshCountdown();
  });
