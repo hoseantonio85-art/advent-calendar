@@ -435,7 +435,9 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .day-card.is-past:hover,.day-card.is-past:focus-visible{filter:saturate(.96) brightness(1);opacity:1}
 /* Single perimeter: no extra outside gold ring under the animated line. */
 .day-card.is-today{
- border-color:transparent!important;
+ /* A physical 1px border pushed the absolute gold ring 1px inward.
+    Remove the border box only for today so the line meets the outer edge. */
+ border:0!important;
  box-shadow:0 6px 16px #010b0840!important;
  z-index:3;
 }
@@ -449,8 +451,8 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 }
 .today-ring{
  position:absolute;inset:0;z-index:5;pointer-events:none;
- /* Match the actual tile radius at mobile breakpoints, not an independent roundness. */
- border-radius:calc(var(--day-card-radius,17px) - 1px);padding:1.35px;
+ /* No parent border: identical bounds and corner radius to the tile itself. */
+ border-radius:inherit;padding:1.35px;
  background:conic-gradient(from var(--advent-gold-angle),
    #d7ac6455 0deg,#d5a05f99 185deg,#ffe09f 244deg,
    #fff7d8 258deg,#ffd27b 277deg,#c28c4699 307deg,#d7ac6455 360deg);
