@@ -697,8 +697,8 @@ body{font-family:"Manrope",Inter,Arial,sans-serif}
 
  const likeConf=window.ADVENT_CONFIG||{};
  const likesAdapter=window.AdventLikesAdapter||(likeConf.apiBase?{
-   async getSummary(day){const r=await fetch(String(likeConf.apiBase).replace(/\\/$/,'')+'/advent/events/'+day+'/likes',{credentials:'include'});if(!r.ok)throw Error('GET '+r.status);return r.json()},
-   async setLike(day,liked){const r=await fetch(String(likeConf.apiBase).replace(/\\/$/,'')+'/advent/events/'+day+'/like',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({liked})});if(!r.ok)throw Error('PUT '+r.status);return r.json()}
+   async getSummary(day){const r=await fetch(String(likeConf.apiBase).replace(/\/$/,'')+'/advent/events/'+day+'/likes',{credentials:'include'});if(!r.ok)throw Error('GET '+r.status);return r.json()},
+   async setLike(day,liked){const r=await fetch(String(likeConf.apiBase).replace(/\/$/,'')+'/advent/events/'+day+'/like',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({liked})});if(!r.ok)throw Error('PUT '+r.status);return r.json()}
  }:null);
  function updateLikeUI(day,count){
   if(activeDay!==day)return;const btn=sheet.querySelector('#eventLike');if(!btn)return;
