@@ -7,7 +7,7 @@
 <title>Декабрь чудес — интерактивный адвент-календарь</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&family=Yeseva+One&display=swap" rel="stylesheet">
 <style>
 :root{--deep:#08241d;--deep2:#0b3025;--light:#f8f2e8;--gold:#f3d495;--mute:#a3bba9;--accent:#ddf2bc;--radius:24px}
 *{box-sizing:border-box}
@@ -423,9 +423,9 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 
 
 /* Dynamic Advent v8 */
-body{font-family:"Manrope",Inter,Arial,sans-serif}
-.hero h1,.section-title,.sheet .sheet-title,.month-footer h3,.empty-date,.countdown-number{font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;letter-spacing:-.025em}
-.hero h1{font-weight:700;line-height:.99;letter-spacing:-.035em}
+body{font-family:"Roboto",Inter,Arial,sans-serif}
+.hero h1,.section-title,.sheet .sheet-title,.month-footer h3,.empty-date,.countdown-number{font-family:"Yeseva One",Georgia,serif;font-weight:400;letter-spacing:-.025em}
+.hero h1{font-weight:400;line-height:.99;letter-spacing:-.035em}
 .section-title{font-size:31px;line-height:1.02}
 .sheet .sheet-title{font-size:clamp(28px,7.4vw,36px);line-height:1.04}
 .day-card.wisdom .card-top{display:none}
@@ -443,7 +443,7 @@ body{font-family:"Manrope",Inter,Arial,sans-serif}
 .day-card.event.wide[data-day="25"] .illustration{height:154px;width:154px;top:-14px;right:-10px}
 @media(max-width:380px){.day-card.event.wide[data-day="25"] .illustration{width:143px;height:143px;top:-12px;right:-9px}.day-card.wisdom .empty-date{font-size:clamp(43px,15vw,66px)}}
 .countdown-trigger{display:flex;align-items:center;gap:9px;max-width:100%;margin:-6px 0 18px 3px;padding:10px 12px;border:1px solid #e9d19f6a;border-radius:999px;background:linear-gradient(110deg,#dba96229,#fee6b316);color:#f6ead0;cursor:pointer;font-size:11px;font-weight:650;position:relative;z-index:3}
-.countdown-trigger strong{font-family:"Cormorant Garamond",Georgia,serif;font-size:22px;line-height:.8;white-space:nowrap}
+.countdown-trigger strong{font-family:"Yeseva One",Georgia,serif;font-size:22px;line-height:.8;white-space:nowrap}
 .countdown-trigger .countdown-spark{color:#ffe1a1;font-size:16px}
 .countdown-digits{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:18px 0}
 .countdown-digit{padding:14px 4px;background:linear-gradient(155deg,#fff8ee,#f2e8e1);border:1px solid #efe3d8;border-radius:17px;text-align:center}
@@ -462,14 +462,14 @@ body{font-family:"Manrope",Inter,Arial,sans-serif}
 
 /* Shared serif numerals across event dates and quiet dates */
 .card-date,.day-card.wide .card-date{
-  font-family:"Cormorant Garamond",Georgia,serif;
-  font-weight:700;
+  font-family:"Yeseva One",Georgia,serif;
+  font-weight:400;
   font-variant-numeric:lining-nums tabular-nums;
   font-feature-settings:"lnum" 1,"tnum" 1;
 }
 /* A compact year-end summary lives inside the history widget */
 .progress-countdown{display:flex;justify-content:space-between;align-items:baseline;gap:5px;margin-top:9px;color:#e4eac6;font-size:10.5px;font-weight:600}
-.progress-countdown strong{font-family:"Cormorant Garamond",Georgia,serif;font-variant-numeric:lining-nums tabular-nums;font-size:18px;font-weight:700;color:#fae1ae;white-space:nowrap;line-height:1}
+.progress-countdown strong{font-family:"Yeseva One",Georgia,serif;font-variant-numeric:lining-nums tabular-nums;font-size:18px;font-weight:400;color:#fae1ae;white-space:nowrap;line-height:1}
 .history-progress{margin:9px 0 16px;font-size:13px;color:#686b66}
 .history-countdown{padding:16px 12px 10px;border-radius:18px;background:linear-gradient(140deg,#faf0e4,#f4ede7);border:1px solid #e5dcd4;margin:0 0 20px}
 .history-countdown-title{display:flex;justify-content:space-between;align-items:center;gap:6px;color:#785b56;font-size:12px;font-weight:700}
