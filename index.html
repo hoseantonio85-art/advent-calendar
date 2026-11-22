@@ -93,10 +93,10 @@ button{font:inherit} button:focus-visible{outline:2px solid #f9d999;outline-offs
 .month-footer{margin:26px 0 15px;background:linear-gradient(120deg,#e0ca9433,#96b17b13);border:1px solid #efdbac2b;border-radius:23px;padding:20px;position:relative;overflow:hidden}
 .month-footer h3{margin:0 0 7px;font-size:19px;letter-spacing:-.04em}.month-footer p{color:#bfd0bc;font-size:12px;line-height:1.56;max-width:270px;margin:0}
 .footer-spark{position:absolute;right:19px;top:5px;font-size:73px;color:#f9dba9;opacity:.22;font-weight:200}
-.overlay{position:fixed;inset:0;z-index:20;border-radius:0;background:rgba(2,16,12,.76);opacity:0;pointer-events:none;transition:opacity .27s ease;backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0)}
-.overlay.show{opacity:1;pointer-events:auto;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.sheet{position:fixed;z-index:21;left:50%;bottom:0;transform:translate(-50%,105%);width:min(100%,440px);max-height:min(91dvh,900px);overflow-y:auto;overscroll-behavior:contain;border-radius:27px 27px 0 0;background:#f8f3e8;color:#21372b;box-shadow:0 -20px 100px #0008;transition:transform .38s cubic-bezier(.22,.85,.25,1);visibility:hidden;padding:9px 21px calc(20px + env(safe-area-inset-bottom));scrollbar-width:none}
-.sheet::-webkit-scrollbar{display:none}
+.overlay{position:fixed;inset:0;z-index:20;border-radius:0;background:rgba(2,16,12,.76);opacity:0;pointer-events:none;transition:opacity .27s ease}
+.overlay.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;z-index:21;left:50%;bottom:0;transform:translate(-50%,105%);width:min(100%,440px);max-height:min(91dvh,900px);display:flex;flex-direction:column;overflow:hidden;border-radius:27px 27px 0 0;background:#f8f3e8;color:#21372b;box-shadow:0 -20px 100px #0008;transition:transform .38s cubic-bezier(.22,.85,.25,1);visibility:hidden;padding:0}
+.sheet-scroll::-webkit-scrollbar{display:none}
 .sheet.show{transform:translate(-50%,0);visibility:visible}
 .sheet-grabber{height:5px;width:42px;border-radius:20px;background:#c9cfc4;margin:0 auto 15px}
 .sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin:0 0 17px}
@@ -643,6 +643,25 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
   .day-card.event.wide[data-day="31"] .illustration{top:-4px}
 }
 
+
+/* One clipped, stationary sheet shell for date and history views; only the
+   content below the permanent drag handle / close control scrolls. */
+.sheet-chrome{
+ position:relative;z-index:3;flex:0 0 44px;height:44px;
+ background:#faf2e6;border-radius:27px 27px 0 0;
+}
+.sheet-scroll{
+ flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+ scrollbar-width:none;padding:2px 21px calc(20px + env(safe-area-inset-bottom));
+}
+.sheet .sheet-grabber{
+ width:calc(100% - 94px);max-width:310px;height:44px;
+ margin:0 auto;position:relative;
+}
+.sheet .sheet-grabber::after{top:14px}
+.sheet .sheet-chrome .close-btn{top:3px;right:14px}
+.sheet .sheet-head{padding-right:0}
+@media(max-width:360px){.sheet-scroll{padding-left:16px;padding-right:16px}}
 </style>
 </head>
 <body>
@@ -915,6 +934,23 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
        </div>
        `:tipMarkup(day,true)+`<button class="action-main" id="mainAction">${saved.has(day)?'✓ Совет сохранён':'♡ Сохранить совет'}</button><button class="action-secondary" id="secondaryAction">Поделиться советом</button>`}`;
  }
+
+ // Move the grabber and close button outside the scrolling content so both
+ // remain reachable after the user scrolls far down a long event.
+ function prepareSheetShell(){
+   const grabber=sheet.querySelector('.sheet-grabber');
+   const close=sheet.querySelector('#closeSheet');
+   if(!grabber||!close)throw Error('Bottom-sheet controls are missing');
+   const chrome=document.createElement('div'),scroll=document.createElement('div');
+   chrome.className='sheet-chrome';
+   scroll.className='sheet-scroll';
+   grabber.remove();
+   close.remove();
+   while(sheet.firstChild)scroll.appendChild(sheet.firstChild);
+   chrome.append(grabber,close);
+   sheet.append(chrome,scroll);
+   scroll.scrollTop=0;
+ }
  function openDay(day){
    if(isLockedAdvice(day)){showToast('Совет откроется '+day+' декабря ✦');return}
    if(activeDay!==null)closeSheet(false);
@@ -922,10 +958,11 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
    try{localStorage.setItem('advent2026-visited',JSON.stringify([...visited]))}catch{}
    updateProgress();
    sheet.innerHTML=renderSheet(day);
+   prepareSheetShell();
    sheet.setAttribute('aria-hidden','false');overlay.setAttribute('aria-hidden','false');
    document.body.style.overflow='hidden';
    requestAnimationFrame(()=>{overlay.classList.add('show');sheet.classList.add('show')});
-   sheet.scrollTop=0;
+   sheet.querySelector('.sheet-scroll').scrollTop=0;
    sheet.querySelector('#closeSheet').addEventListener('click',()=>closeSheet());
    sheet.querySelector('#mainAction').addEventListener('click',()=>{
      if(events[day]){downloadEventICS(day)}else{
@@ -964,8 +1001,8 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
    overlay.style.removeProperty('transition');
  }
  sheet.addEventListener('pointerdown',e=>{
-   // Keep the history sheet unchanged; only opened calendar dates are draggable.
-   if(activeDay===null||activeDay===-1||sheetDrag||sheetSwipeClosing||!e.target.closest('.sheet-grabber'))return;
+   // Date and history sheets share the same persistent grabber and swipe handling.
+   if(activeDay===null||sheetDrag||sheetSwipeClosing||!e.target.closest('.sheet-grabber'))return;
    if(e.pointerType==='mouse'&&e.button!==0)return;
    e.preventDefault();
    sheetDrag={id:e.pointerId,startY:e.clientY,started:performance.now(),distance:0};
@@ -1019,7 +1056,8 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeDay!==null)closeSheet();if(e.key==='Tab'&&activeDay!==null){const focusable=Array.from(sheet.querySelectorAll('button'));if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
  document.getElementById('aboutBtn').addEventListener('click',()=>{
   lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Открыто <strong>${visibleVisitedCount()} из 31</strong> дней календаря</p>${historyCountdownMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>У каждого дня — своё время</blockquote><p>Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
-  sheet.setAttribute('aria-hidden','false');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';requestAnimationFrame(()=>{overlay.classList.add('show');sheet.classList.add('show')});sheet.scrollTop=0;
+  prepareSheetShell();
+  sheet.setAttribute('aria-hidden','false');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';requestAnimationFrame(()=>{overlay.classList.add('show');sheet.classList.add('show')});sheet.querySelector('.sheet-scroll').scrollTop=0;
   sheet.querySelector('#closeSheet').onclick=()=>closeSheet();sheet.querySelector('#mainAction').onclick=()=>closeSheet();sheet.querySelector('#closeSheet').focus({preventScroll:true});refreshCountdown();
  });
  const previewControl=document.getElementById('previewCycle');
