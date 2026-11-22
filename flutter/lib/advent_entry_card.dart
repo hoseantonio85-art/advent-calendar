@@ -47,7 +47,7 @@ class AdventEntryCard extends StatelessWidget {
                 // Approved v9: photograph-based pine needles and warm light from
                 // the isolated HTML reference, subdued so typography stays primary.
                 image: DecorationImage(
-                  image: AssetImage('assets/advent/entry_fir_v9.webp'),
+                  image: AssetImage('assets/advent/entry_fir_v9.webp', package: 'advent_calendar'),
                   fit: BoxFit.fill,
                   opacity: .90,
                 ),

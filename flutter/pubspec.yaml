@@ -1,0 +1,17 @@
+name: advent_calendar
+description: Independent December Wonders feature module.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  timezone: ^0.10.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  assets:
+    - assets/advent/
+    - assets/advent/art/
