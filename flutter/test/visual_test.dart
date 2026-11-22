@@ -75,7 +75,7 @@ void main(){
         scroll.position.jumpTo(scroll.position.maxScrollExtent);await capture('finale-${width.toInt()}');
       }
       if(width==390){
-        await tester.ensureVisible(find.byKey(const ValueKey('day-15')),alignment:.4);await capture('middle-390');
+        await Scrollable.ensureVisible(tester.element(find.byKey(const ValueKey('day-15'))),alignment:.4);await capture('middle-390');
         await show(1);await capture('event-390');await close();
         await show(3);await capture('advice-390');await close();
         await tester.ensureVisible(find.byKey(const ValueKey('progress-count')));await tester.pumpAndSettle();

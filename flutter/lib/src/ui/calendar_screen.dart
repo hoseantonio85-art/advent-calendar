@@ -441,6 +441,37 @@ List<Color> _sheetColors(String theme)=>switch(theme){
   _=>const [Color(0xff426e83),Color(0xff233655)],
 };
 final _shareButtonStyle=OutlinedButton.styleFrom(backgroundColor:const Color(0xfff4f4ed),side:const BorderSide(color:Color(0xffdce3d9)),textStyle:const TextStyle(fontFamily:'packages/advent_calendar/Roboto',fontSize:12,fontWeight:FontWeight.w700),minimumSize:const Size.fromHeight(45),foregroundColor:const Color(0xff3f5b4a),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13)));
+/// Only the source's **strong** and *emphasis* syntax; no HTML execution.
+class _SourceText extends StatelessWidget {
+  const _SourceText(this.text); final String text;
+  @override
+  Widget build(BuildContext context) {
+    final spans = <TextSpan>[]; var offset = 0;
+    for (final match in RegExp(r'\*\*(.+?)\*\*|\*(.+?)\*').allMatches(text)) {
+      spans.add(TextSpan(text: text.substring(offset, match.start)));
+      spans.add(TextSpan(text: match.group(1) ?? match.group(2), style: TextStyle(
+        fontWeight: match.group(1) == null ? null : FontWeight.w700, fontStyle: match.group(2) == null ? null : FontStyle.italic)));
+      offset = match.end;
+    }
+    spans.add(TextSpan(text: text.substring(offset)));
+    return Text.rich(TextSpan(children: spans), style: const TextStyle(color: Color(0xff284936), fontSize: 13, height: 1.65));
+  }
+}
+
+String _dateCaption(AdventDay day){
+  const names=['ПОНЕДЕЛЬНИК','ВТОРНИК','СРЕДА','ЧЕТВЕРГ','ПЯТНИЦА','СУББОТА','ВОСКРЕСЕНЬЕ'];
+  return '${day.date.day} ДЕКАБРЯ · ${names[day.date.weekday-1]} · ${day.event==null?'СОВЕТ ДНЯ':'СОБЫТИЕ'}';
+}
+final _primaryButtonStyle=FilledButton.styleFrom(backgroundColor:const Color(0xff183e30),foregroundColor:Colors.white,
+  minimumSize:const Size.fromHeight(48),textStyle:const TextStyle(fontFamily: 'packages/advent_calendar/Roboto',fontSize:12,fontWeight:FontWeight.w700),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13)));
+Widget _detail(IconData icon,String label,String value,double width,{bool first=false}){
+  final iconSize=width<=360?34.0:38.0,valueSize=width<=335&&first?10.0:width<=360?11.0:12.0;
+  return Container(padding:const EdgeInsets.all(8),decoration:BoxDecoration(color:const Color(0xffeff0e8),border:Border.all(color:const Color(0xffe4e7dc)),borderRadius:BorderRadius.circular(13)),
+    child:Row(children:[Container(width:iconSize,height:iconSize,decoration:BoxDecoration(gradient:const LinearGradient(colors:[Color(0xffdce8dd),Color(0xffe5ebdf)]),borderRadius:BorderRadius.circular(width<=360?10:11),border:Border.all(color:const Color(0xffd3ddd3))),child:Icon(icon,size:19,color:const Color(0xff557e65))),
+      const SizedBox(width:8),Expanded(child:Column(mainAxisAlignment:MainAxisAlignment.center,crossAxisAlignment:CrossAxisAlignment.start,children:[Text(label,style:const TextStyle(fontSize:10,fontWeight:FontWeight.w600,color:Color(0xff819285))),const SizedBox(height:3),Text(value,style:TextStyle(fontSize:valueSize,height:1.4,fontWeight:FontWeight.w700,color:const Color(0xff2d4536)))]))]));
+}
+
+
 class _MedalPainter extends CustomPainter{
   const _MedalPainter();
   @override
