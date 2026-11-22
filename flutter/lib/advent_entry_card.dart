@@ -1,7 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-/// The host must push the full Advent page with onOpen; day details use sheets.
+/// Approved v9 entry card. The host pushes the full Advent page through onOpen;
+/// only event/advice details use sheets. Requires registered v9 background WebP.
 class AdventEntryCard extends StatelessWidget {
   const AdventEntryCard({super.key, required this.daysUntilNewYear, required this.onOpen});
   final int daysUntilNewYear;
@@ -27,8 +28,8 @@ class AdventEntryCard extends StatelessWidget {
       final compact = constraints.maxWidth < 300;
       return Semantics(
         button: true, enabled: true, excludeSemantics: true, onTap: onOpen,
-        label: days == 0 ? 'Открой календарь. С Новым годом!'
-            : 'Открой календарь. До 2027 года $days ' + _dayWord(days) + '.',
+        label: days == 0 ? 'Открой свой декабрь. С Новым годом!'
+            : 'Открой свой декабрь. До 2027 года $days ' + _dayWord(days) + '.',
         child: DecoratedBox(
           decoration: const BoxDecoration(
             borderRadius: _radius,
@@ -43,25 +44,32 @@ class AdventEntryCard extends StatelessWidget {
                   begin: Alignment.centerLeft, end: Alignment.bottomRight,
                   colors: [Color(0xFF193D30), Color(0xFF113428), Color(0xFF0A2A21)],
                 ),
+                // Approved v9: photograph-based pine needles and warm light from
+                // the isolated HTML reference, subdued so typography stays primary.
+                image: DecorationImage(
+                  image: AssetImage('assets/advent/entry_fir_v9.webp'),
+                  fit: BoxFit.fill,
+                  opacity: .90,
+                ),
               ),
               child: InkWell(
                 onTap: onOpen,
                 customBorder: const RoundedRectangleBorder(borderRadius: _radius),
                 child: SizedBox(
-                  height: compact ? 121 : 126,
+                  height: compact ? 114 : 120,
                   child: Padding(
-                    padding: EdgeInsets.all(compact ? 14 : 16),
+                    padding: const EdgeInsets.all(16),
                     child: Row(children: [
                       Expanded(child: Text(
-                        'Открой\nкалендарь',
+                        'Открой свой\nдекабрь',
                         maxLines: 2,
                         style: TextStyle(
                           fontFamily: 'Yeseva One', fontFamilyFallback: const ['Georgia'],
-                          fontSize: compact ? 27 : 30, height: 1.06, letterSpacing: -0.5,
+                          fontSize: compact ? 23 : 26, height: 1.13, letterSpacing: -1.0,
                           color: const Color(0xFFFFF8E8),
                         ),
                       )),
-                      SizedBox(width: compact ? 12 : 14),
+                      SizedBox(width: compact ? 9 : 10),
                       _CountdownCalendar(days: days, compact: compact),
                     ]),
                   ),
@@ -83,7 +91,7 @@ class _CountdownCalendar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: compact ? 98 : 104, height: compact ? 83 : 86,
+      width: compact ? 82 : 88, height: compact ? 82 : 88,
       child: Stack(children: [
         DecoratedBox(
           decoration: BoxDecoration(
