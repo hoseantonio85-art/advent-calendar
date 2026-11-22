@@ -23,7 +23,7 @@ button{font:inherit} button:focus-visible{outline:2px solid #f9d999;outline-offs
 .brand-glyph svg{width:17px;height:17px}
 .icon-btn{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;border:1px solid #d4efcc2b;color:#ebf3e3;background:#f5ffed0d;cursor:pointer}
 .icon-btn svg{width:18px;height:18px}
-.hero{min-height:260px;padding:37px 6px 19px;position:relative}
+.hero{position:relative}
 .eyebrow{font-size:10px;letter-spacing:.21em;text-transform:uppercase;font-weight:800;color:#bdd7ad;display:flex;gap:8px;align-items:center}
 .eyebrow::before{content:"";width:17px;height:1px;background:#dbe2a5}
 .hero h1{font-size:45px;line-height:1.015;letter-spacing:-.065em;font-weight:780;position:relative;z-index:2;margin:17px 0 13px;max-width:295px}
@@ -135,7 +135,7 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 .app{max-width:450px;background:radial-gradient(ellipse 370px 260px at 94% 5%,#1d5844 0%,transparent 82%),linear-gradient(175deg,#0b2b20,#09261d 50%,#061e18);border-color:#dce6c41a}
 .content{padding:0 16px 29px}
 .topbar{padding-top:calc(16px + env(safe-area-inset-top))}
-.hero{min-height:210px;padding:30px 5px 14px}
+
 .hero h1{font-size:40px;line-height:1.02;max-width:275px;margin:13px 0 10px;letter-spacing:-.064em}
 .hero-description{font-size:12px;max-width:248px;line-height:1.6}
 .hero-art{width:171px;height:171px;right:-48px;top:18px;transform:rotate(0);animation:float 7s ease-in-out infinite}
@@ -215,9 +215,10 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 /* v3 — immersive cropped hero + restrained snow on empty days */
 .hero{
   isolation:isolate;
-  min-height:254px;
+  /* Text sits in normal flow; equal breathing room above and below. */
+  min-height:0;
   margin:0 -16px;
-  padding:49px 21px 23px;
+  padding:24px 21px;
   overflow:hidden;
   background:radial-gradient(ellipse 200px 180px at 91% 25%,#56764a35,transparent 78%);
 }
@@ -287,13 +288,13 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
   100%{transform:translate3d(8px,61px,0);opacity:0}
 }
 @media(max-width:380px){
- .hero{min-height:240px;margin:0 -12px;padding:44px 17px 18px}
+ .hero{min-height:0;margin:0 -12px;padding:24px 17px}
  .hero h1{font-size:39px;max-width:213px}
  .hero-description{font-size:11px;max-width:195px}
  .hero-art{width:325px;height:325px;right:-138px;top:-45px}
 }
 @media(max-width:335px){
- .hero{min-height:225px;padding-top:40px}
+ .hero{min-height:0;padding:20px 17px}
  .hero h1{font-size:36px;max-width:193px}
  .hero-description{max-width:178px}
  .hero-art{width:310px;height:310px;right:-145px;top:-38px}
@@ -372,7 +373,8 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
   position:relative;
   z-index:6;
   width:100%;
-  margin-top:-13px;
+  /* No card/hero overlap: only the decorative tree crosses visually. */
+  margin-top:0;
   text-align:left;
   appearance:none;
   -webkit-appearance:none;
