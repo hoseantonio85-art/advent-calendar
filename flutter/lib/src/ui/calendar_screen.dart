@@ -73,7 +73,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
       if (!mounted) return;
       setState(() => _opened = opened);
       await showModalBottomSheet<void>(context: context, isScrollControlled: true,
-        useSafeArea: true, showDragHandle: false, backgroundColor: const Color(0xfffaf2e6),
+        useSafeArea: true, showDragHandle: false, barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor: const Color(0xfffaf2e6),
         builder: (_) => _DaySheet(day: day, content: widget.content, time: widget.time,
           actions: widget.actions, savedAdvice: widget.savedAdvice));
     } catch (_) {
@@ -104,14 +104,14 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
           ])),
           _Hero(content: widget.content, motion:_heroMotion),
           Semantics(button: true, label: 'Твоя история декабря. Открыто ${_opened.length} из 31',
-            child: InkWell(onTap:()=>showModalBottomSheet<void>(context:context,isScrollControlled:true,useSafeArea:true,showDragHandle:false,backgroundColor:const Color(0xfffaf2e6),
+            child: InkWell(onTap:()=>showModalBottomSheet<void>(context:context,isScrollControlled:true,useSafeArea:true,showDragHandle:false,barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor:const Color(0xfffaf2e6),
               builder:(_)=>_HistorySheet(opened:_opened.length,content:widget.content,time:widget.time)),
               child: Container(padding: const EdgeInsets.symmetric(horizontal:13,vertical:12), margin: const EdgeInsets.only(bottom:24),
                 decoration: BoxDecoration(color: const Color(0x1fd9eec0), borderRadius: BorderRadius.circular(19), border: Border.all(color: const Color(0x30d9eec0))),
                 child: Row(children:[Container(width:36,height:36,decoration:BoxDecoration(color:const Color(0x16d9eec0),borderRadius:BorderRadius.circular(12),border:Border.all(color:const Color(0x22d9eec0))),
                   child:const CustomPaint(painter:_MedalPainter())),const SizedBox(width:12),
                   Expanded(child:Column(children:[Row(children:[
-                    const Expanded(child:Text('Твоя история декабря',style:TextStyle(color:Color(0xffe3e9d5),fontSize:10,fontWeight:FontWeight.w700))),
+                    const Expanded(child:Text('Твоя история декабря',style:TextStyle(color:Color(0xffe3e9d5),fontSize:11,fontWeight:FontWeight.w700))),
                     Text('${_opened.length} / 31',key:const ValueKey('progress-count'),style:const TextStyle(color:_gold,fontSize:10,fontWeight:FontWeight.w700))]),
                     const SizedBox(height:8),LinearProgressIndicator(value:_opened.length/31,minHeight:3,color:_gold,backgroundColor:const Color(0x22ffffff)),
                   ])),
@@ -450,11 +450,11 @@ class _SourceText extends StatelessWidget {
     for (final match in RegExp(r'\*\*(.+?)\*\*|\*(.+?)\*').allMatches(text)) {
       spans.add(TextSpan(text: text.substring(offset, match.start)));
       spans.add(TextSpan(text: match.group(1) ?? match.group(2), style: TextStyle(
-        fontWeight: match.group(1) == null ? null : FontWeight.w700, fontStyle: match.group(2) == null ? null : FontStyle.italic)));
+        fontWeight: match.group(1) == null ? null : FontWeight.w800, color:match.group(1)==null?null:const Color(0xff304d38),fontStyle: match.group(2) == null ? null : FontStyle.italic)));
       offset = match.end;
     }
     spans.add(TextSpan(text: text.substring(offset)));
-    return Text.rich(TextSpan(children: spans), style: const TextStyle(color: Color(0xff284936), fontSize: 13, height: 1.65));
+    return Text.rich(TextSpan(children: spans), style: const TextStyle(color: Color(0xff4f6258), fontSize: 13, height: 1.63));
   }
 }
 
@@ -463,7 +463,7 @@ String _dateCaption(AdventDay day){
   return '${day.date.day} ДЕКАБРЯ · ${names[day.date.weekday-1]} · ${day.event==null?'СОВЕТ ДНЯ':'СОБЫТИЕ'}';
 }
 final _primaryButtonStyle=FilledButton.styleFrom(backgroundColor:const Color(0xff183e30),foregroundColor:Colors.white,
-  minimumSize:const Size.fromHeight(48),textStyle:const TextStyle(fontFamily: 'packages/advent_calendar/Roboto',fontSize:12,fontWeight:FontWeight.w700),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13)));
+  minimumSize:const Size.fromHeight(48),padding:const EdgeInsets.symmetric(horizontal:18,vertical:15),textStyle:const TextStyle(fontFamily: 'packages/advent_calendar/Roboto',fontSize:13,fontWeight:FontWeight.w700),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13)));
 Widget _detail(IconData icon,String label,String value,double width,{bool first=false}){
   final iconSize=width<=360?34.0:38.0,valueSize=width<=335&&first?10.0:width<=360?11.0:12.0;
   return Container(padding:const EdgeInsets.all(8),decoration:BoxDecoration(color:const Color(0xffeff0e8),border:Border.all(color:const Color(0xffe4e7dc)),borderRadius:BorderRadius.circular(13)),
