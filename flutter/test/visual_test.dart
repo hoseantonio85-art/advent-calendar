@@ -34,6 +34,8 @@ void main(){
       for(final font in [('Yeseva One','YesevaOne-Regular.ttf'),('Roboto','Roboto-Variable.ttf')]){
         await (FontLoader('packages/advent_calendar/${font.$1}')..addFont(Future.value(ByteData.sublistView(File('assets/fonts/${font.$2}').readAsBytesSync())))).load();
       }
+      final emoji=File('/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf');
+      if(await emoji.exists()){await (FontLoader('Noto Color Emoji')..addFont(Future.value(ByteData.sublistView(await emoji.readAsBytes())))).load();}
       await (FontLoader('MaterialIcons')..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
     });
     final content=AdventContent.decode(File('assets/advent/calendar_2026.json').readAsStringSync());

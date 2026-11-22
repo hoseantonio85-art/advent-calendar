@@ -117,7 +117,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
                   ])),
                 ])))),
           if (_error != null) TextButton(onPressed: _refresh, child: Text(_error!, style: const TextStyle(color: _gold))),
-          for (final row in rows) Padding(padding: EdgeInsets.only(bottom: gap), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          for (final row in rows) Padding(padding: EdgeInsets.only(bottom: row == rows.last ? 0 : gap), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             for (var i = 0; i < row.length; i++) ...[
               if (i > 0) SizedBox(width: gap),
               SizedBox(width: ((width - (width <= 380 ? 24 : 32) - gap * 2) / 3) * row[i].columns + gap * (row[i].columns - 1),
@@ -127,11 +127,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
                   motion: _motion, onTap: () => _open(row[i])))
             ]
           ])),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 30), child: Column(children: [
-            Text('✳', style: TextStyle(color: _gold, fontSize: 26)), SizedBox(height: 12),
-            Text('Праздник в деталях', style: TextStyle(fontFamily: 'packages/advent_calendar/Yeseva One', color: _gold, fontSize: 24)),
-            SizedBox(height: 12), Text('Самое волшебное часто прячется в небольших моментах. Открывай свой декабрь каждый день.', textAlign: TextAlign.center, style: TextStyle(color: Color(0xffa3bba9), height: 1.5)),
-          ])),
+          const _MonthFooter(),
         ]))));
       })),
   ))));
@@ -150,6 +146,8 @@ class _Hero extends StatelessWidget {
     Positioned(right: MediaQuery.sizeOf(context).width<=335?-157:MediaQuery.sizeOf(context).width<=380?-150:-158, top:MediaQuery.sizeOf(context).width<=335?-69:MediaQuery.sizeOf(context).width<=380?-76:-82, child: ShaderMask(shaderCallback: (rect) => const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
       colors: [Colors.white, Colors.white, Colors.transparent], stops: [0, .63, .93]).createShader(rect), child: AnimatedBuilder(animation:motion,child:_art(content,'hero_tree',size:MediaQuery.sizeOf(context).width<=335?310:MediaQuery.sizeOf(context).width<=380?325:356),builder:(_,child)=>Transform.rotate(angle:-8*math.pi/180,child:Transform.scale(scale:1+.018*math.sin(motion.value*2*math.pi),child:child))))),
     Positioned.fill(child:ShaderMask(blendMode:BlendMode.dstIn,shaderCallback:(rect)=>const LinearGradient(begin:Alignment.topCenter,end:Alignment.bottomCenter,colors:[Colors.transparent,Colors.white,Colors.white,Colors.transparent],stops:[0,.16,.61,1]).createShader(rect),child:DecoratedBox(decoration:BoxDecoration(gradient:LinearGradient(colors:[_forest,_forest.withValues(alpha:.75),Colors.transparent],stops:const [0,.43,.79]))))),
+    const Positioned(right:26,top:1,child:CustomPaint(size:Size.square(17),painter:_SparkPainter(Color(0xb3f1dbaf)))),
+    const Positioned(right:7,top:188,child:CustomPaint(size:Size.square(12),painter:_SparkPainter(Color(0xb3f1dbaf)))),
     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text.rich(TextSpan(children: [const TextSpan(text: '31 день\nмаленьких\n'), TextSpan(text: 'чудес', style: const TextStyle(color: _gold))]),
         style: _serif.copyWith(color: const Color(0xfff8f2e8), fontSize: MediaQuery.sizeOf(context).width <= 335 ? 36 : MediaQuery.sizeOf(context).width <= 380 ? 39 : 43, height: .99, letterSpacing: -1.4)),
@@ -248,7 +246,7 @@ class _Tile extends StatelessWidget {
                     shadows:const [Shadow(color:Color(0x99250c0b),offset:Offset(0,1),blurRadius:10)]))))),
             ],
             Positioned.fill(child:IgnorePointer(child:AnimatedBuilder(animation:motion,builder:(_,__)=>CustomPaint(painter:_WinterPainter(day:n,phase:motion.value,today:today,snow:event==null,locked:locked,radius:radius))))),
-            if(today)const Positioned(top:9,right:10,child:Text('✦',style:TextStyle(color:_gold,fontSize:17))),
+            if(today)const Positioned(top:9,right:10,child:CustomPaint(size:Size.square(17),painter:_SparkPainter(_gold))),
           ])),
         )))));
   }
@@ -298,8 +296,8 @@ class _CardTexturePainter extends CustomPainter {
   void paint(Canvas canvas,Size size){
     final rect=Offset.zero&size;
     if(locked){
-      canvas.drawRect(rect,Paint()..shader=RadialGradient(center:const Alignment(-1.14,-1.2),radius:1.4,colors:[light?const Color(0x78f1ffff):const Color(0x91f1ffff),const Color(0x23e3faff),Colors.transparent],stops:const [0,.39,.64]).createShader(rect));
-      canvas.drawRect(rect,Paint()..shader=RadialGradient(center:const Alignment(1.16,1.12),radius:1.3,colors:[light?const Color(0x50e8fbff):const Color(0x6ce8fbff),Colors.transparent],stops:const [0,.54]).createShader(rect));
+      canvas.drawRect(rect,Paint()..shader=RadialGradient(center:const Alignment(-1.14,-1.2),radius:3,colors:[light?const Color(0x78f1ffff):const Color(0x91f1ffff),const Color(0x23e3faff),Colors.transparent],stops:const [0,.39,.64]).createShader(rect));
+      canvas.drawRect(rect,Paint()..shader=RadialGradient(center:const Alignment(1.16,1.12),radius:3,colors:[light?const Color(0x50e8fbff):const Color(0x6ce8fbff),Colors.transparent],stops:const [0,.54]).createShader(rect));
       canvas.drawRect(rect,Paint()..shader=LinearGradient(begin:Alignment.topLeft,end:Alignment.bottomRight,colors:[light?const Color(0x23e9faff):const Color(0x2fe9faff),Colors.transparent,const Color(0x18d6f2ff)],stops:const [0,.47,1]).createShader(rect));
       for(var grid=0;grid<2;grid++){
         final dx=grid==0?15.0:21.0,dy=grid==0?19.0:23.0;
@@ -386,7 +384,7 @@ class _SheetState extends State<_DaySheet> {
       const _SheetChrome(),
       Flexible(child:SingleChildScrollView(key:const ValueKey('day-sheet-scroll'),padding:EdgeInsets.fromLTRB(horizontal,2,horizontal,20),
         child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-          Padding(padding:const EdgeInsets.only(top:3,bottom:6),child:Text(_dateCaption(day),style:const TextStyle(color:Color(0xff688576),fontSize:10,fontWeight:FontWeight.w800,letterSpacing:1.3))),
+          Padding(padding:const EdgeInsets.only(top:3,bottom:6),child:Text(_dateCaption(day),style:const TextStyle(color:Color(0xff688576),fontSize:10,height:1.1,fontWeight:FontWeight.w800,letterSpacing:1.3))),
           Align(alignment:Alignment.centerLeft,child:ConstrainedBox(constraints:const BoxConstraints(maxWidth:340),child:Text(day.title,style:_serif.copyWith(fontSize:titleSize,height:1.04,letterSpacing:-.025*titleSize,color:const Color(0xff21372b))))),
           const SizedBox(height:17),
           if(event!=null)...[
@@ -398,12 +396,18 @@ class _SheetState extends State<_DaySheet> {
               Center(child:OverflowBox(maxWidth:188,maxHeight:188,child:_art(widget.content,day.art,size:188))),
             ]))),
             const SizedBox(height:17),
+            if(MediaQuery.textScalerOf(context).scale(1)>1.4)...[
+              _detail(Icons.calendar_today_outlined,'Дата','${day.date.day} декабря 2026',width,first:true),SizedBox(height:width<=360?7:9),
+              _detail(Icons.schedule,'Время',event['time'] as String,width),SizedBox(height:width<=360?7:9),
+              _detail(Icons.location_on_outlined,'Место',event['place'] as String,width),
+            ]else...[
             IntrinsicHeight(child:Row(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
               Expanded(child:_detail(Icons.calendar_today_outlined,'Дата','${day.date.day} декабря 2026',width,first:true)),
               SizedBox(width:width<=360?7:9),Expanded(child:_detail(Icons.schedule,'Время',event['time'] as String,width)),
             ])),SizedBox(height:width<=360?7:9),_detail(Icons.location_on_outlined,'Место',event['place'] as String,width),
-            const SizedBox(height:17),const Text('О СОБЫТИИ',style:TextStyle(color:Color(0xff789083),fontSize:10,fontWeight:FontWeight.w800,letterSpacing:1)),const SizedBox(height:9),
-            _SourceText(event['desc'] as String),const SizedBox(height:26),const Divider(height:1,color:Color(0xffe1e3d8)),const SizedBox(height:16),
+            ],
+            const SizedBox(height:17),const Text('О СОБЫТИИ',style:TextStyle(color:Color(0xff789083),fontSize:10,height:1.1,fontWeight:FontWeight.w800,letterSpacing:1)),const SizedBox(height:9),
+            _SourceText(event['desc'] as String),const SizedBox(height:19),const Divider(height:1,color:Color(0xffe1e3d8)),const SizedBox(height:16),
             FilledButton.icon(style:_primaryButtonStyle,icon:const Icon(Icons.event_available,size:18),onPressed:widget.actions==null||_busy?null:()=>_action(()=>widget.actions!.addToCalendar(day,widget.time.location)),
               label:Text(event['cta'] as String? ?? 'Добавить в календарь')),
             const SizedBox(height:9),
@@ -414,14 +418,14 @@ class _SheetState extends State<_DaySheet> {
               decoration:BoxDecoration(border:Border.all(color:const Color(0xffdce4cf)),borderRadius:BorderRadius.circular(17),gradient:const LinearGradient(begin:Alignment.topLeft,end:Alignment.bottomRight,colors:[Color(0xffe2ead4),Color(0xfff2e9d9)])),
               child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
                 SizedBox(width:62,height:52,child:OverflowBox(alignment:Alignment.topLeft,maxWidth:62,maxHeight:62,child:_art(widget.content,day.art,size:62))),const SizedBox(height:13),
-                const Text('✦  МАЛЕНЬКАЯ МУДРОСТЬ',style:TextStyle(fontSize:9,fontWeight:FontWeight.w800,letterSpacing:.99,color:Color(0xff69836c))),const SizedBox(height:9),
+                const _Kicker('МАЛЕНЬКАЯ МУДРОСТЬ'),const SizedBox(height:9),
                 Text('«${day.advice['text']}»',style:const TextStyle(fontSize:26,height:1.2,letterSpacing:-1.3,fontWeight:FontWeight.w700,color:Color(0xff284936))),
                 const SizedBox(height:18),Text.rich(TextSpan(children:[const TextSpan(text:'Попробуй сегодня: ',style:TextStyle(fontWeight:FontWeight.w700)),TextSpan(text:day.advice['action'] as String)]),style:const TextStyle(fontSize:13,height:1.55,color:Color(0xff758476))),
               ])),const SizedBox(height:19),
-            FilledButton(style:_primaryButtonStyle,onPressed:widget.savedAdvice==null||!_loaded||_busy?null:()=>_action(()async{
+            FilledButton.icon(style:_primaryButtonStyle,onPressed:widget.savedAdvice==null||!_loaded||_busy?null:()=>_action(()async{
               await widget.savedAdvice!.setSaved(AdventProgress.campaignId,day.id,!_saved);
               if(mounted)setState(()=>_saved=!_saved);return SystemActionResult.completed;
-            }),child:Text(!_loaded?'Загрузка…':_saved?'✓ Совет сохранён':'♡ Сохранить совет')),
+            }),icon:Icon(!_loaded?Icons.hourglass_empty:_saved?Icons.check:Icons.favorite_border,size:14),label:Text(!_loaded?'Загрузка…':_saved?'Совет сохранён':'Сохранить совет')),
             TextButton(style:TextButton.styleFrom(padding:const EdgeInsets.fromLTRB(12,15,12,4),foregroundColor:const Color(0xff486457),textStyle:const TextStyle(fontFamily:'packages/advent_calendar/Roboto',fontSize:12,fontWeight:FontWeight.w700)),
               onPressed:widget.actions==null||_busy?null:()=>_action(()=>widget.actions!.share(day)),child:const Text('Поделиться советом')),
           ],
@@ -454,7 +458,7 @@ class _SourceText extends StatelessWidget {
       offset = match.end;
     }
     spans.add(TextSpan(text: text.substring(offset)));
-    return Text.rich(TextSpan(children: spans), style: const TextStyle(color: Color(0xff4f6258), fontSize: 13, height: 1.63));
+    return Text.rich(TextSpan(children: spans), style: const TextStyle(color: Color(0xff4f6258), fontSize: 13, height: 1.63,fontFamilyFallback:const ['Noto Color Emoji','Apple Color Emoji']));
   }
 }
 
@@ -493,7 +497,7 @@ class _BackdropPainter extends CustomPainter {
     canvas.save();canvas.translate(size.width*.94,size.height*.05);canvas.scale(370,260);
     canvas.drawCircle(Offset.zero,1,Paint()..shader=const RadialGradient(colors:[Color(0xff1d5844),Colors.transparent],stops:[0,.82]).createShader(const Rect.fromLTWH(-1,-1,2,2)));canvas.restore();
     for(var x=14.0;x<size.width;x+=28){for(var y=14.0;y<size.height*.43;y+=28){
-      canvas.drawCircle(Offset(x,y),.65,Paint()..color=const Color(0xffd5eac1).withValues(alpha:.19*(1-y/(size.height*.43))));
+      canvas.drawCircle(Offset(x,y),.65,Paint()..isAntiAlias=false..color=const Color(0xffd5eac1).withValues(alpha:.19*(1-y/(size.height*.43))));
     }}
   }
   @override
@@ -528,7 +532,7 @@ class _HistoryState extends State<_HistorySheet>{
           ClipRRect(borderRadius:BorderRadius.circular(18),child:Container(padding:const EdgeInsets.fromLTRB(12,16,12,12),decoration:BoxDecoration(border:Border.all(color:const Color(0x369fc69d)),gradient:const LinearGradient(colors:[Color(0xff174638),Color(0xff10382c),Color(0xff0a291f)],stops:[0,.53,1])),
             child:Stack(children:[
               Positioned(right:-54,top:-56,child:Opacity(opacity:.28,child:Transform.rotate(angle:-9*math.pi/180,child:_art(widget.content,'hero_tree',size:192)))),
-              Column(children:[const Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[Text('✦ До Нового года',style:TextStyle(color:Color(0xfff6efdb),fontSize:12,fontWeight:FontWeight.w700)),Text('2027',style:TextStyle(color:_gold,fontSize:11))]),
+              Column(children:[const Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[Row(mainAxisSize:MainAxisSize.min,children:[CustomPaint(size:Size.square(10),painter:_SparkPainter(Color(0xfff6efdb))),SizedBox(width:4),Text('До Нового года',style:TextStyle(color:Color(0xfff6efdb),fontSize:12,fontWeight:FontWeight.w700))]),Text('2027',style:TextStyle(color:_gold,fontSize:11))]),
                 const SizedBox(height:12),LayoutBuilder(builder:(context,box){
                   final columns=large?2:4,gap=7.0;
                   return Wrap(spacing:gap,runSpacing:gap,children:[for(var i=0;i<4;i++)SizedBox(width:(box.maxWidth-gap*(columns-1))/columns,
@@ -541,9 +545,41 @@ class _HistoryState extends State<_HistorySheet>{
             ]))),const SizedBox(height:20),
           const Text('Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.',style:TextStyle(fontSize:13.5,height:1.68,color:Color(0xff526257))),const SizedBox(height:16),
           Container(padding:const EdgeInsets.symmetric(vertical:16,horizontal:17),decoration:BoxDecoration(gradient:const LinearGradient(colors:[Color(0xffeaf0dd),Color(0xffe7e8d6)]),border:Border.all(color:const Color(0xffdce4cf)),borderRadius:BorderRadius.circular(17)),
-            child:const Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('✦  О КАЛЕНДАРЕ',style:TextStyle(fontSize:9,fontWeight:FontWeight.w800,letterSpacing:.99,color:Color(0xff69836c))),SizedBox(height:9),Text('У каждого дня — своё время',style:TextStyle(fontSize:17,height:1.38,letterSpacing:-.425,fontWeight:FontWeight.w700,color:Color(0xff284936))),SizedBox(height:9),Text('Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже.',style:TextStyle(fontSize:12,height:1.45,color:Color(0xff758476)))])),
+            child:const Column(crossAxisAlignment:CrossAxisAlignment.start,children:[_Kicker('О КАЛЕНДАРЕ'),SizedBox(height:9),Text('У каждого дня — своё время',style:TextStyle(fontSize:17,height:1.38,letterSpacing:-.425,fontWeight:FontWeight.w700,color:Color(0xff284936))),SizedBox(height:9),Text('Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже.',style:TextStyle(fontSize:12,height:1.45,color:Color(0xff758476)))])),
           const SizedBox(height:19),FilledButton(style:_primaryButtonStyle,onPressed:()=>Navigator.pop(context),child:const Text('Понятно!')),
         ]))),
     ]))));
   }
+}
+
+class _SparkPainter extends CustomPainter{
+  const _SparkPainter(this.color);final Color color;
+  @override
+  void paint(Canvas canvas,Size size){canvas.save();canvas.scale(size.width/160,size.height/160);
+    canvas.drawPath(Path()..moveTo(81,10)..cubicTo(85,54,108,75,151,80)..cubicTo(111,87,87,109,81,150)..cubicTo(74,108,50,87,10,80)..cubicTo(51,73,75,53,81,10)..close(),Paint()..color=color);canvas.restore();}
+  @override
+  bool shouldRepaint(_SparkPainter old)=>color!=old.color;
+}
+class _Kicker extends StatelessWidget{
+  const _Kicker(this.text);final String text;
+  @override
+  Widget build(BuildContext context)=>Row(children:[const CustomPaint(size:Size.square(8),painter:_SparkPainter(Color(0xff69836c))),const SizedBox(width:7),Expanded(child:Text(text,style:const TextStyle(fontSize:9,fontWeight:FontWeight.w800,letterSpacing:.99,color:Color(0xff69836c))))]);
+}
+class _MonthFooter extends StatelessWidget{
+  const _MonthFooter();
+  @override
+  Widget build(BuildContext context)=>Padding(padding:const EdgeInsets.only(top:20,bottom:15),child:Container(padding:const EdgeInsets.all(20),clipBehavior:Clip.antiAlias,
+    decoration:BoxDecoration(gradient:const LinearGradient(begin:Alignment.topLeft,end:Alignment.bottomRight,colors:[Color(0x33e0ca94),Color(0x1396b17b)]),border:Border.all(color:const Color(0x2befdbac)),borderRadius:BorderRadius.circular(23)),
+    child:Stack(clipBehavior:Clip.none,children:[
+      const Positioned(right:-1,top:-15,child:CustomPaint(size:Size.square(73),painter:_FooterStarPainter())),
+      Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('Праздник в деталях',style:_serif.copyWith(color:const Color(0xfff7f9ed),fontSize:19,letterSpacing:-.475)),const SizedBox(height:7),
+        ConstrainedBox(constraints:const BoxConstraints(maxWidth:270),child:const Text('Самое волшебное часто прячется в небольших моментах. Открывай свой декабрь каждый день.',style:TextStyle(color:Color(0xffbfd0bc),fontSize:12,height:1.56)))])
+    ])));
+}
+class _FooterStarPainter extends CustomPainter{
+  const _FooterStarPainter();
+  @override
+  void paint(Canvas canvas,Size size){final c=Offset(size.width/2,size.height/2),p=Paint()..color=const Color(0x38f9dba9)..strokeWidth=4;for(var i=0;i<8;i++){final angle=i*math.pi/4;canvas.drawLine(c,c+Offset(math.cos(angle)*26,math.sin(angle)*26),p);}}
+  @override
+  bool shouldRepaint(_FooterStarPainter old)=>false;
 }
