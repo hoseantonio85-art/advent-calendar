@@ -5,12 +5,12 @@ This folder is a **portable UI candidate**, not a standalone Flutter app. Source
 ## Files
 
 - [lib/advent_entry_card.dart](lib/advent_entry_card.dart) — entry widget on the home screen.
-- [assets/advent/hero_tree.webp](assets/advent/hero_tree.webp) — **the exact approved glass 3D Christmas tree** from the hero of the calendar's `index.html`.
+- [assets/advent/hero_tree.webp](assets/advent/hero_tree.webp) — preserved approved 3D tree for a possible **future background treatment**; not displayed in the current entry banner.
 - [UX spec (RU)](../docs/flutter-entry-card.md) and [ROADMAP](../docs/ROADMAP.md).
 
 ## Host integration
 
-Copy `lib/advent_entry_card.dart` and `assets/advent/hero_tree.webp` into the host project (the latter at `assets/advent/hero_tree.webp`), then register the file in the host's `pubspec.yaml`:
+Copy `lib/advent_entry_card.dart` into the host project. The current entry banner **does not require a tree asset**. If the approved 3D image is later reintroduced as background, copy and register the WebP in `pubspec.yaml`:
 
 ```yaml
 flutter:
@@ -37,7 +37,7 @@ AdventEntryCard(
 
 **Important:** `AdventCalendarScreen` is a placeholder for the **future native full-screen calendar**, not a working class in this repository. The entry card must route to a **normal page**, not a modal bottom sheet. Events/advice *within* that page continue to use bottom sheets.
 
-The banner has **no openedDays/progress or “Открыто N из 31”**. The host provides the days remaining to 2027 in the campaign's timezone, and updates it on date changes.
+The banner has a **single black translucent capsule** around the calendar icon and `АДВЕНТ · 2026`, with no nested icon frame; there is no foreground 3D tree. It has **no openedDays/progress or “Открыто N из 31”**. The host provides the days remaining to 2027 in the campaign's timezone, and updates it on date changes.
 
 ## Status
 
