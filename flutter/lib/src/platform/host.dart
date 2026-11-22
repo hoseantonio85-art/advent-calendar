@@ -4,9 +4,12 @@ import '../domain/calendar.dart';
 abstract interface class AdventClock { DateTime nowUtc(); }
 
 /// Host initializes IANA timezone data and explicitly supplies a location.
-/// Europe/Moscow is the pilot proposal, not an approved product setting.
+/// Campaign timezone confirmed by the owner: Europe/Moscow (22 November 2026).
 class CampaignTime {
   CampaignTime({required this.clock, required this.location});
+  static const campaignTimeZone = 'Europe/Moscow';
+  factory CampaignTime.moscow({required AdventClock clock}) => CampaignTime(
+    clock: clock, location: tz.getLocation(campaignTimeZone));
   final AdventClock clock;
   final tz.Location location;
   DateTime get today => civilDate(tz.TZDateTime.from(clock.nowUtc().toUtc(), location));

@@ -73,6 +73,17 @@ void main() {
     clock.value = DateTime.parse('2026-03-08T06:59:59Z');
     final before = ny.today;clock.value = clock.value.add(const Duration(seconds:1));expect(ny.today,before);
   });
+  test('approved Moscow factory ignores device timezone', () {
+    final clock = Clock(DateTime.parse('2026-12-02T21:00:00Z'));
+    final previous = tz.local;
+    try {
+      tz.setLocalLocation(tz.getLocation('America/Los_Angeles'));
+      final time = CampaignTime.moscow(clock: clock);
+      expect(time.location.name, 'Europe/Moscow');
+      expect(time.today, DateTime.utc(2026, 12, 3));
+      expect(time.daysUntilNewYear, 29);
+    } finally { tz.setLocalLocation(previous); }
+  });
   test('host service rejects locked opens and store merges concurrent repeats', () async {
     final clock=Clock(DateTime.parse('2026-12-02T20:59:59Z')), store=Store();
     final service=AdventProgress(calendar:calendar,time:CampaignTime(clock:clock,location:tz.getLocation('Europe/Moscow')),repository:store);
