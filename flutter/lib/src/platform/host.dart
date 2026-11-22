@@ -51,3 +51,9 @@ class AdventProgress {
     return true;
   }
 }
+
+/// Stored per host user/campaign; independent of opened-day progress.
+abstract interface class SavedAdviceRepository {
+  Future<Set<String>> readSaved(String campaignId);
+  Future<void> setSaved(String campaignId, String dayId, bool saved);
+}
