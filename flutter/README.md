@@ -40,7 +40,7 @@ AdventEntryCard(
 
 The **approved v9** banner has no icon, no 'АДВЕНТ · 2026' capsule and no foreground 3D tree. It shows two lines «Открой свой / декабрь» (Yeseva One 26px / 23px on narrow screens), dark-green pine background with warm lights, height 120px (114px narrow), 16px padding, and a translucent square countdown tile 88×88px (82×82px narrow) with two small holes. The caption `дней до 2027` is a single line. No openedDays/progress/secondary CTA. The host supplies day count in the campaign timezone and updates it on date changes.
 
-**Web reference:** [isolated approved v9 entry card](../docs/prototypes/advent-entry-card-v9.html). The full screenshot-backed HTML is archived privately in the materials library. Do not put the internal app screenshot in this public repository. The Flutter candidate reproduces the geometry, copy and image, **not the HTML snow animation 1:1**.
+**Web reference:** The approved screenshot-backed v9 entry-card HTML is archived privately in the materials library. The standalone public preview was deleted during repo cleanup; the canonical published calendar is [index.html](../index.html). Do not publish the internal host screenshot. The Flutter candidate reproduces geometry, copy and image, **not the HTML snow animation 1:1**.
 
 ## Status
 
