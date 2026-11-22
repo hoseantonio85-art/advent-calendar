@@ -504,12 +504,16 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 }
 /* A compact year-end summary lives inside the history widget */
 .history-progress{margin:9px 0 16px;font-size:13px;color:#686b66}
-.history-countdown{padding:16px 12px 10px;border-radius:18px;background:linear-gradient(140deg,#faf0e4,#f4ede7);border:1px solid #e5dcd4;margin:0 0 20px}
-.history-countdown-title{display:flex;justify-content:space-between;align-items:center;gap:6px;color:#785b56;font-size:12px;font-weight:700}
-.history-countdown-title span:last-child{font-variant-numeric:lining-nums tabular-nums;font-weight:500;font-size:11px;opacity:.65}
-.history-countdown .countdown-digits{margin:12px 0}
-.history-countdown .countdown-digit{background:linear-gradient(145deg,#fffdf9,#f7ede7);border-color:#ece0d4}
-.history-countdown .countdown-note{margin:4px 0 0}
+.history-countdown{position:relative;isolation:isolate;overflow:hidden;padding:16px 12px 12px;border-radius:18px;background:radial-gradient(circle at 85% 8%,#52745372,transparent 62%),linear-gradient(140deg,#174638 0%,#10382c 53%,#0a291f 100%);border:1px solid #9fc69d36;box-shadow:inset 0 1px #ffffff1d,0 12px 22px #0d301e26;margin:0 0 20px}
+.history-countdown-title{display:flex;justify-content:space-between;align-items:center;gap:6px;color:#f6efdb;font-size:12px;font-weight:700}
+.history-countdown-title span:last-child{font-variant-numeric:lining-nums tabular-nums;font-weight:600;font-size:11px;color:#f2d89e;opacity:.86}
+.history-countdown .countdown-digits{margin:12px 0;position:relative;z-index:1}
+.history-countdown .countdown-digit{background:linear-gradient(145deg,#f3ffe51c,#f3ffe508);border-color:#e7f3ce2e;box-shadow:inset 0 1px #fff1}
+.history-countdown .countdown-number{color:#ffdfa0;text-shadow:0 2px 12px #05241988}
+.history-countdown .countdown-unit{color:#d0ddca}
+.history-countdown .countdown-note{position:relative;z-index:1;margin:4px 0 0;color:#c2d3bf}
+.history-countdown-title{position:relative;z-index:1}
+.history-countdown-tree{position:absolute;z-index:0;right:-54px;top:-56px;width:192px;height:192px;object-fit:contain;opacity:.28;filter:saturate(.9) brightness(.96);transform:rotate(-9deg);pointer-events:none;user-select:none;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000a 24%,#000 58%);mask-image:linear-gradient(90deg,transparent 0%,#000a 24%,#000 58%)}
 
 /* Advent frost v1: frozen glass communicates locked advice, not a padlock or checkmark.
    Keep every date crisp while ice texture stays behind the numeral. */
@@ -763,6 +767,7 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  }
  function historyCountdownMarkup(){
    return '<div class="history-countdown" aria-label="Обратный отсчёт до Нового года">'+
+      '<img class="history-countdown-tree" src="'+assets.hero_tree+'" alt="" aria-hidden="true" loading="lazy" draggable="false">'+
      '<div class="history-countdown-title"><span>✦ До Нового года</span><span>2027</span></div>'+
      '<div class="countdown-digits">'+[['days','дней'],['hours','часов'],['minutes','минут'],['seconds','секунд']].map(([key,title])=>'<div class="countdown-digit"><strong class="countdown-number" data-countdown="'+key+'">00</strong><span class="countdown-unit">'+title+'</span></div>').join('')+'</div>'+
      '<p class="countdown-note" id="countdownStatus">До 1 января, 00:00 по местному времени устройства</p>'+
