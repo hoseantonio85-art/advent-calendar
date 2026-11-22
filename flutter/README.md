@@ -1,4 +1,4 @@
-# Flutter entry card · «Открой свой декабрь»
+# Flutter entry card · «Открой календарь»
 
 This folder is a **portable UI candidate**, not a standalone Flutter app. Sources of the real «ВтороеКрыло» app are not available on the connected GitHub account, so no production APK was modified.
 
@@ -37,7 +37,7 @@ AdventEntryCard(
 
 **Important:** `AdventCalendarScreen` is a placeholder for the **future native full-screen calendar**, not a working class in this repository. The entry card must route to a **normal page**, not a modal bottom sheet. Events/advice *within* that page continue to use bottom sheets.
 
-The banner has a **single black translucent capsule** around the calendar icon and `АДВЕНТ · 2026`, with no nested icon frame; there is no foreground 3D tree. It has **no openedDays/progress or “Открыто N из 31”**. The host provides the days remaining to 2027 in the campaign's timezone, and updates it on date changes.
+The current v6 banner has **no icon, no 'АДВЕНТ · 2026' capsule and no foreground 3D tree**. It has a large two-line «Открой календарь» heading and a lighter, shorter countdown calendar with two small holes. The caption `дней до 2027` is a single line. It has **no openedDays/progress or “Открыто N из 31”**. The host provides the days remaining to 2027 in the campaign's timezone, and updates it on date changes.
 
 ## Status
 
