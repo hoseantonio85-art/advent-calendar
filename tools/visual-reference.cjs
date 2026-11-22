@@ -14,7 +14,7 @@ const {chromium}=require('playwright');
   console.log('ADVENT_METRICS|'+width+'|'+JSON.stringify(await page.evaluate(()=>Object.fromEntries(['.hero h1','.hero-art','.progress-panel','.day-card[data-day="2"] .illustration','.day-card[data-day="9"] .illustration','.day-card[data-day="25"] .illustration','.day-card[data-day="31"] .illustration'].map(q=>{const e=document.querySelector(q),s=getComputedStyle(e),r=e.getBoundingClientRect();return[q,{x:r.x,y:r.y,width:r.width,height:r.height,font:s.fontSize,top:s.top,right:s.right}]})))));
   await capture(page,`calendar-${width}`);
   if(width==320||width==390){await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));await capture(page,`finale-${width}`);}
-  async function show(day){await page.locator(`[data-day="${day}"]`).click();await page.waitForTimeout(50);}
+  async function show(day){if(day==1||day==3)await page.evaluate(()=>window.scrollTo(0,0));await page.locator(`[data-day="${day}"]`).click();await page.waitForTimeout(50);}
   async function close(){await page.locator('#closeSheet').click();await page.waitForTimeout(50);}
   if(width==390){
    await page.locator('[data-day="15"]').evaluate(el=>window.scrollTo(0,el.getBoundingClientRect().top+window.scrollY-(window.innerHeight-el.offsetHeight)*.4));await capture(page,'middle-390');

@@ -64,7 +64,10 @@ void main(){
       await tester.pumpAndSettle();
     }
     Future<void> show(int day)async{
-      await tester.ensureVisible(find.byKey(ValueKey('day-$day')));await tester.pumpAndSettle();
+      if(day==1||day==3){
+        tester.state<ScrollableState>(find.descendant(of:find.byKey(const ValueKey('calendar-scroll')),matching:find.byType(Scrollable)).first).position.jumpTo(0);
+      }else{await tester.ensureVisible(find.byKey(ValueKey('day-$day')));}
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(ValueKey('day-$day')));await tester.pumpAndSettle();
       expect(find.byTooltip('Закрыть').hitTestable(),findsOneWidget);
     }
@@ -79,7 +82,7 @@ void main(){
         await Scrollable.ensureVisible(tester.element(find.byKey(const ValueKey('day-15'))),alignment:.4);await capture('middle-390');
         await show(1);await capture('event-390');await close();
         await show(3);await capture('advice-390');await close();
-        await tester.ensureVisible(find.byKey(const ValueKey('progress-count')));await tester.pumpAndSettle();
+        tester.state<ScrollableState>(find.descendant(of:find.byKey(const ValueKey('calendar-scroll')),matching:find.byType(Scrollable)).first).position.jumpTo(0);await tester.pumpAndSettle();
         await tester.tap(find.text('Твоя история декабря'));await capture('history-390');await close();
       }
     }

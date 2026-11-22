@@ -94,7 +94,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
         if (row.isNotEmpty) rows.add(row);
         final gap = width <= 335 ? 5.0 : width <= 380 ? 6.0 : 8.0;
         final tileHeight = width <= 335 ? 104.0 : width <= 380 ? 111.0 : 124.0;
-        return SingleChildScrollView(key:const ValueKey('calendar-scroll'),child:CustomPaint(painter:const _BackdropPainter(),child:Padding(padding: EdgeInsets.symmetric(horizontal: width <= 380 ? 12 : 16), child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children: [
+        return SingleChildScrollView(key:const ValueKey('calendar-scroll'),child:CustomPaint(painter:const _BackdropPainter(),child:Padding(padding: EdgeInsets.fromLTRB(width<=380?12:16,0,width<=380?12:16,29), child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children: [
           Padding(padding: const EdgeInsets.only(top: 16), child: Row(children: [
             SizedBox(width: 32, height: 32, child: IconButton(padding: EdgeInsets.zero,
               tooltip: 'Назад на главный экран', onPressed: widget.onExit ?? () => Navigator.maybePop(context),
@@ -426,7 +426,7 @@ class _SheetState extends State<_DaySheet> {
               await widget.savedAdvice!.setSaved(AdventProgress.campaignId,day.id,!_saved);
               if(mounted)setState(()=>_saved=!_saved);return SystemActionResult.completed;
             }),icon:Icon(!_loaded?Icons.hourglass_empty:_saved?Icons.check:Icons.favorite_border,size:14),label:Text(!_loaded?'Загрузка…':_saved?'Совет сохранён':'Сохранить совет')),
-            TextButton(style:TextButton.styleFrom(padding:const EdgeInsets.fromLTRB(12,15,12,4),foregroundColor:const Color(0xff486457),textStyle:const TextStyle(fontFamily:'packages/advent_calendar/Roboto',fontSize:12,fontWeight:FontWeight.w700)),
+            TextButton(style:TextButton.styleFrom(minimumSize:Size.zero,tapTargetSize:MaterialTapTargetSize.shrinkWrap,padding:const EdgeInsets.fromLTRB(12,15,12,4),foregroundColor:const Color(0xff486457),textStyle:const TextStyle(fontFamily:'packages/advent_calendar/Roboto',fontSize:12,height:1.2,fontWeight:FontWeight.w700)),
               onPressed:widget.actions==null||_busy?null:()=>_action(()=>widget.actions!.share(day)),child:const Text('Поделиться советом')),
           ],
           if(_loadError)TextButton(onPressed:_load,child:const Text('Повторить загрузку совета')),
@@ -572,7 +572,7 @@ class _MonthFooter extends StatelessWidget{
     decoration:BoxDecoration(gradient:const LinearGradient(begin:Alignment.topLeft,end:Alignment.bottomRight,colors:[Color(0x33e0ca94),Color(0x1396b17b)]),border:Border.all(color:const Color(0x2befdbac)),borderRadius:BorderRadius.circular(23)),
     child:Stack(clipBehavior:Clip.none,children:[
       const Positioned(right:-1,top:-15,child:CustomPaint(size:Size.square(73),painter:_FooterStarPainter())),
-      Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('Праздник в деталях',style:_serif.copyWith(color:const Color(0xfff7f9ed),fontSize:19,letterSpacing:-.475)),const SizedBox(height:7),
+      Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('Праздник в деталях',style:_serif.copyWith(color:const Color(0xfff7f9ed),fontSize:19,height:1.2,letterSpacing:-.475)),const SizedBox(height:7),
         ConstrainedBox(constraints:const BoxConstraints(maxWidth:270),child:const Text('Самое волшебное часто прячется в небольших моментах. Открывай свой декабрь каждый день.',style:TextStyle(color:Color(0xffbfd0bc),fontSize:12,height:1.56)))])
     ])));
 }
