@@ -9,7 +9,7 @@ import '../domain/calendar.dart';
 import '../platform/host.dart';
 
 const _forest = Color(0xff0a2a20), _gold = Color(0xfff3d495);
-const _serif = TextStyle(fontFamily: 'Yeseva One', fontWeight: FontWeight.w400);
+const _serif = TextStyle(fontFamily: 'packages/advent_calendar/Yeseva One', fontWeight: FontWeight.w400);
 
 /// Full-page route. Host owns persistence, time, system actions and routing.
 class AdventCalendarScreen extends StatefulWidget {
@@ -124,7 +124,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
           ])),
           const Padding(padding: EdgeInsets.symmetric(vertical: 30), child: Column(children: [
             Text('✳', style: TextStyle(color: _gold, fontSize: 26)), SizedBox(height: 12),
-            Text('Праздник в деталях', style: TextStyle(fontFamily: 'Yeseva One', color: _gold, fontSize: 24)),
+            Text('Праздник в деталях', style: TextStyle(fontFamily: 'packages/advent_calendar/Yeseva One', color: _gold, fontSize: 24)),
             SizedBox(height: 12), Text('Самое волшебное часто прячется в небольших моментах. Открывай свой декабрь каждый день.', textAlign: TextAlign.center, style: TextStyle(color: Color(0xffa3bba9), height: 1.5)),
           ])),
         ]);

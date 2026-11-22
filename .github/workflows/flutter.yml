@@ -21,6 +21,8 @@ jobs:
         working-directory: flutter
       - run: flutter test
         working-directory: flutter
+      - run: flutter test --dart-define=ADVENT_VISUALS=true test/visual_test.dart
+        working-directory: flutter
       - run: flutter pub get
         working-directory: flutter/example
       - run: flutter analyze

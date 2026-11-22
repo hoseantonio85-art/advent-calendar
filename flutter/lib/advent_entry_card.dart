@@ -66,7 +66,7 @@ class AdventEntryCard extends StatelessWidget {
                         'Открой свой\nдекабрь',
                         maxLines: 2,
                         style: TextStyle(
-                          fontFamily: 'Yeseva One', fontFamilyFallback: const ['Georgia'],
+                          fontFamily: 'packages/advent_calendar/Yeseva One', fontFamilyFallback: const ['Georgia'],
                           fontSize: compact ? 23 : 26, height: 1.13, letterSpacing: -1.0,
                           color: const Color(0xFFFFF8E8),
                         ),
@@ -111,14 +111,14 @@ class _CountdownCalendar extends StatelessWidget {
           if (days > 0) ...[
             const SizedBox(height: 4),
             Text('$days', maxLines: 1, style: TextStyle(
-              fontFamily: 'Yeseva One', fontFamilyFallback: const ['Georgia'],
+              fontFamily: 'packages/advent_calendar/Yeseva One', fontFamilyFallback: const ['Georgia'],
               fontSize: compact ? 36 : 39, height: 1,
               color: const Color(0xFFFFE0A3),
             )),
             const SizedBox(height: 6),
             Text(AdventEntryCard._dayWord(days) + ' до 2027',
               maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontFamily: 'Roboto',
+              style: TextStyle(fontFamily: 'packages/advent_calendar/Roboto',
                 fontSize: compact ? 9 : 9.5, fontWeight: FontWeight.w600,
                 color: const Color(0xFFF1E2C5)),
             ),
