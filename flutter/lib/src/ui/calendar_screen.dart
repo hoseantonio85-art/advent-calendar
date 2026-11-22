@@ -81,7 +81,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
     } finally { _opening = false; }
   }
   @override
-  Widget build(BuildContext context) => Scaffold(backgroundColor: _forest, body: SafeArea(
+  Widget build(BuildContext context) => _featureTheme(context,Scaffold(backgroundColor: _forest, body: SafeArea(
     child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 480),
       child: LayoutBuilder(builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -135,7 +135,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
           ])),
         ]);
       })),
-  )));
+  ))));
 }
 
 Widget _art(AdventContent content, String key, {double? size}) => Image.asset(
@@ -277,7 +277,7 @@ class _SheetState extends State<_DaySheet> {
   @override
   Widget build(BuildContext context) {
     final day = widget.day, event = day.event;
-    return FractionallySizedBox(heightFactor: .9, child: SafeArea(top: false, child: Column(children: [
+    return _featureTheme(context,FractionallySizedBox(heightFactor: .91, child: SafeArea(top: false, child: Column(children: [
       SizedBox(height:60,child:Stack(children:[
         Align(alignment:Alignment.topCenter,child:Container(width:42,height:5,margin:const EdgeInsets.only(top:14),decoration:BoxDecoration(color:const Color(0xffc6cfc5),borderRadius:BorderRadius.circular(5)))),
         Positioned(right:14,top:14,child:SizedBox(width:38,height:38,child:IconButton(onPressed:()=>Navigator.pop(context),tooltip:'Закрыть',
@@ -315,7 +315,7 @@ class _SheetState extends State<_DaySheet> {
         OutlinedButton.icon(style:OutlinedButton.styleFrom(minimumSize:const Size.fromHeight(46),foregroundColor:const Color(0xff284936),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13))),icon:const Icon(Icons.share_outlined,size:18),onPressed: widget.actions == null || _busy ? null : () => _action(() => widget.actions!.share(day)),
           label: Text(event == null ? 'Поделиться советом' : 'Поделиться')),
       ]))),
-    ])));
+    ]))));
   }
 }
 
@@ -354,3 +354,5 @@ class _MedalPainter extends CustomPainter{
   @override
   bool shouldRepaint(_MedalPainter old)=>false;
 }
+
+Widget _featureTheme(BuildContext context,Widget child)=>Theme(data:Theme.of(context).copyWith(textTheme:Theme.of(context).textTheme.apply(fontFamily:'packages/advent_calendar/Roboto')),child:child);
