@@ -647,22 +647,27 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 /* One clipped, stationary sheet shell for date and history views; only the
    content below the permanent drag handle / close control scrolls. */
 .sheet-chrome{
- /* The shell, not this bar, owns the close button's coordinates. */
- position:static;z-index:3;flex:0 0 44px;height:44px;width:100%;align-self:stretch;
+ /* Three equal-edge grid tracks: the handle stays centered; the close control
+    is in its own right-hand cell, never absolutely positioned. */
+ position:relative;z-index:3;flex:0 0 60px;width:100%;height:60px;
+ display:grid;grid-template-columns:38px minmax(0,1fr) 38px;
+ grid-template-rows:38px;align-items:start;
+ padding:14px 14px 8px;
  background:#faf2e6;border-radius:27px 27px 0 0;
 }
 .sheet-scroll{
  flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
  scrollbar-width:none;padding:2px 21px calc(20px + env(safe-area-inset-bottom));
 }
-.sheet .sheet-grabber{
- width:calc(100% - 94px);max-width:310px;height:44px;
- margin:0 auto;position:relative;
+.sheet > .sheet-chrome > .sheet-grabber{
+ grid-column:2;grid-row:1;justify-self:stretch;align-self:start;
+ width:100%;max-width:none;height:38px;margin:0;position:relative;
 }
-.sheet .sheet-grabber::after{top:14px}
+.sheet > .sheet-chrome > .sheet-grabber::after{top:0}
 .sheet > .sheet-chrome > .close-btn{
- /* Anchor to the full sheet width even when the grabber is narrower. */
- position:absolute;top:3px;right:14px;left:auto;margin:0;
+ grid-column:3;grid-row:1;justify-self:end;align-self:start;
+ position:static;top:auto;right:auto;left:auto;margin:0;
+ width:38px;height:38px;flex:none;
 }
 .sheet .sheet-head{padding-right:0}
 @media(max-width:360px){.sheet-scroll{padding-left:16px;padding-right:16px}}
