@@ -73,7 +73,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
       if (!mounted) return;
       setState(() => _opened = opened);
       await showModalBottomSheet<void>(context: context, isScrollControlled: true,
-        useSafeArea: true, showDragHandle: true, backgroundColor: const Color(0xfff8f2e8),
+        useSafeArea: true, showDragHandle: false, backgroundColor: const Color(0xfff8f2e8),
         builder: (_) => _DaySheet(day: day, content: widget.content, time: widget.time,
           actions: widget.actions, savedAdvice: widget.savedAdvice));
     } catch (_) {
@@ -95,10 +95,10 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
         final gap = width <= 335 ? 5.0 : width <= 380 ? 6.0 : 8.0;
         final tileHeight = width <= 335 ? 104.0 : width <= 380 ? 111.0 : 124.0;
         return ListView(padding: EdgeInsets.symmetric(horizontal: width <= 380 ? 12 : 16), children: [
-          Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [
+          Padding(padding: const EdgeInsets.only(top: 16), child: Row(children: [
             SizedBox(width: 32, height: 32, child: IconButton(padding: EdgeInsets.zero,
               tooltip: 'Назад на главный экран', onPressed: widget.onExit ?? () => Navigator.maybePop(context),
-              icon: const Icon(Icons.chevron_left, color: _gold, size: 22))),
+              style:IconButton.styleFrom(backgroundColor:const Color(0x18edf4d9),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(10),side:const BorderSide(color:Color(0x2be6edd4)))), icon: const Icon(Icons.chevron_left, color: _gold, size: 18))),
             const SizedBox(width: 10), const Expanded(child: Text('ДЕКАБРЬ ЧУДЕС · 2026',
               style: TextStyle(color: _gold, fontSize: 10, letterSpacing: 1, fontWeight: FontWeight.w800))),
           ])),
@@ -107,12 +107,16 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
             child: InkWell(onTap: () => showModalBottomSheet<void>(context: context, useSafeArea: true,
               showDragHandle: true, builder: (_) => SafeArea(child: Padding(padding: const EdgeInsets.all(24),
                 child: Text('Твоя история декабря\n\nМероприятия доступны заранее. Советы открываются каждый день в полночь по Москве.\n\nДо Нового года: ${widget.time.daysUntilNewYear} дней.', style: const TextStyle(fontSize: 18))))),
-              child: Container(padding: const EdgeInsets.all(16), margin: const EdgeInsets.only(bottom: 16),
+              child: Container(padding: const EdgeInsets.symmetric(horizontal:13,vertical:12), margin: const EdgeInsets.only(bottom:24),
                 decoration: BoxDecoration(color: const Color(0x1fd9eec0), borderRadius: BorderRadius.circular(19), border: Border.all(color: const Color(0x30d9eec0))),
-                child: Column(children: [Row(children: [const Icon(Icons.auto_awesome, color: _gold), const SizedBox(width: 10),
-                  const Expanded(child: Text('Твоя история декабря', style: TextStyle(color: Color(0xffe3e9d5), fontSize: 12))),
-                  Text('${_opened.length} / 31', key: const ValueKey('progress-count'), style: const TextStyle(color: _gold, fontSize: 12))]),
-                  const SizedBox(height: 10), LinearProgressIndicator(value: _opened.length / 31, minHeight: 3, color: _gold, backgroundColor: const Color(0x22ffffff))])))),
+                child: Row(children:[Container(width:36,height:36,decoration:BoxDecoration(color:const Color(0x16d9eec0),borderRadius:BorderRadius.circular(12),border:Border.all(color:const Color(0x22d9eec0))),
+                  child:const CustomPaint(painter:_MedalPainter())),const SizedBox(width:12),
+                  Expanded(child:Column(children:[Row(children:[
+                    const Expanded(child:Text('Твоя история декабря',style:TextStyle(color:Color(0xffe3e9d5),fontSize:10,fontWeight:FontWeight.w700))),
+                    Text('${_opened.length} / 31',key:const ValueKey('progress-count'),style:const TextStyle(color:_gold,fontSize:10,fontWeight:FontWeight.w700))]),
+                    const SizedBox(height:8),LinearProgressIndicator(value:_opened.length/31,minHeight:3,color:_gold,backgroundColor:const Color(0x22ffffff)),
+                  ])),
+                ])))),
           if (_error != null) TextButton(onPressed: _refresh, child: Text(_error!, style: const TextStyle(color: _gold))),
           for (final row in rows) Padding(padding: EdgeInsets.only(bottom: gap), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             for (var i = 0; i < row.length; i++) ...[
@@ -143,8 +147,8 @@ class _Hero extends StatelessWidget {
   final Animation<double> motion;
   final AdventContent content;
   @override
-  Widget build(BuildContext context) => Padding(padding: const EdgeInsets.symmetric(vertical: 32), child: Stack(clipBehavior: Clip.hardEdge, children: [
-    Positioned(right: -142, top: -55, child: ShaderMask(shaderCallback: (rect) => const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
+  Widget build(BuildContext context) => Padding(padding: const EdgeInsets.fromLTRB(5,39,0,29), child: Stack(clipBehavior: Clip.none, children: [
+    Positioned(right: -158, top: -82, child: ShaderMask(shaderCallback: (rect) => const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
       colors: [Colors.white, Colors.white, Colors.transparent], stops: [0, .63, .93]).createShader(rect), child: AnimatedBuilder(animation:motion,child:_art(content,'hero_tree',size:356),builder:(_,child)=>Transform.rotate(angle:-8*math.pi/180,child:Transform.scale(scale:1+.018*math.sin(motion.value*2*math.pi),child:child))))),
     Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(colors: [_forest, _forest.withValues(alpha: .75), Colors.transparent], stops: const [0, .43, .79])))),
     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -274,22 +278,27 @@ class _SheetState extends State<_DaySheet> {
   Widget build(BuildContext context) {
     final day = widget.day, event = day.event;
     return FractionallySizedBox(heightFactor: .9, child: SafeArea(top: false, child: Column(children: [
-      Padding(padding: const EdgeInsets.fromLTRB(20, 0, 8, 8), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('${day.date.day} декабря 2026 · ${event == null ? 'совет дня' : 'событие'}', style: const TextStyle(color: Color(0xff69836c), fontSize: 12)),
-          const SizedBox(height: 8), Text(day.title, style: _serif.copyWith(fontSize: 28, height: 1.04, color: const Color(0xff284936))),
-        ])), IconButton(onPressed: () => Navigator.pop(context), tooltip: 'Закрыть', icon: const Icon(Icons.close)),
+      SizedBox(height:60,child:Stack(children:[
+        Align(alignment:Alignment.topCenter,child:Container(width:42,height:5,margin:const EdgeInsets.only(top:14),decoration:BoxDecoration(color:const Color(0xffc6cfc5),borderRadius:BorderRadius.circular(5)))),
+        Positioned(right:14,top:14,child:SizedBox(width:38,height:38,child:IconButton(onPressed:()=>Navigator.pop(context),tooltip:'Закрыть',
+          style:IconButton.styleFrom(backgroundColor:const Color(0xffeff0e8),side:const BorderSide(color:Color(0xffd3ddd3))),icon:const Icon(Icons.close,size:18,color:Color(0xff284936)))))
+      ])),
+      Padding(padding:const EdgeInsets.symmetric(horizontal:21),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+        SizedBox(width:double.infinity,child:Text(_dateCaption(day),style:const TextStyle(color:Color(0xff69836c),fontSize:9,fontWeight:FontWeight.w800,letterSpacing:.7))),
+        const SizedBox(height:8),Text(day.title,style:_serif.copyWith(fontSize:28,height:1.04,color:const Color(0xff284936))),
       ])),
       Expanded(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 24), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         if (event != null) ...[
-          Container(height: 160, decoration: BoxDecoration(gradient: LinearGradient(colors: _colors(day)), borderRadius: BorderRadius.circular(17)), child: _art(widget.content, day.art)),
+          Container(height: 174, decoration: BoxDecoration(gradient: LinearGradient(colors: _colors(day)), borderRadius: BorderRadius.circular(17)), child: _art(widget.content, day.art)),
           const SizedBox(height: 16),
-          for (final field in [('Дата', '${day.date.day} декабря 2026'), ('Время', event['time'] as String), ('Место', event['place'] as String)])
-            Padding(padding: const EdgeInsets.only(bottom: 12), child: Text('${field.$1}\n${field.$2}', style: const TextStyle(color: Color(0xff284936), height: 1.5))),
-          const Text('О событии', style: TextStyle(color: Color(0xff69836c), fontSize: 12)), const SizedBox(height: 10),
+          Row(crossAxisAlignment:CrossAxisAlignment.start,children:[
+            Expanded(child:_detail(Icons.calendar_today_outlined,'Дата','${day.date.day} декабря 2026')),
+            const SizedBox(width:9),Expanded(child:_detail(Icons.schedule,'Время',event['time'] as String)),
+          ]),const SizedBox(height:9),_detail(Icons.location_on_outlined,'Место',event['place'] as String),
+          const SizedBox(height:18),const Text('О СОБЫТИИ',style:TextStyle(color:Color(0xff69836c),fontSize:9,fontWeight:FontWeight.w800,letterSpacing:.7)),const SizedBox(height:10),
           _SourceText(event['desc'] as String), const SizedBox(height: 20),
-          FilledButton(onPressed: widget.actions == null || _busy ? null : () => _action(() => widget.actions!.addToCalendar(day, widget.time.location)),
-            child: Text(event['cta'] as String? ?? 'Добавить в календарь')),
+          FilledButton.icon(style:_primaryButtonStyle,icon:const Icon(Icons.event_available,size:18),onPressed: widget.actions == null || _busy ? null : () => _action(() => widget.actions!.addToCalendar(day, widget.time.location)),
+            label: Text(event['cta'] as String? ?? 'Добавить в календарь')),
         ] else ...[
           Container(padding: const EdgeInsets.all(22), decoration: BoxDecoration(borderRadius: BorderRadius.circular(17), gradient: const LinearGradient(colors: [Color(0xffe2ead4), Color(0xfff2e9d9)])),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_art(widget.content, day.art, size: 62),
@@ -297,14 +306,14 @@ class _SheetState extends State<_DaySheet> {
               Text('«${day.advice['text']}»', style: const TextStyle(fontSize: 26, height: 1.2, color: Color(0xff284936))),
               const SizedBox(height: 18), Text('Попробуй сегодня: ${day.advice['action']}', style: const TextStyle(fontSize: 13, height: 1.55, color: Color(0xff69836c))),
             ])), const SizedBox(height: 20),
-          FilledButton(onPressed: widget.savedAdvice == null || !_loaded || _busy ? null : () => _action(() async {
+          FilledButton(style:_primaryButtonStyle,onPressed: widget.savedAdvice == null || !_loaded || _busy ? null : () => _action(() async {
             await widget.savedAdvice!.setSaved(AdventProgress.campaignId, day.id, !_saved);
             if(mounted) setState(() => _saved = !_saved); return SystemActionResult.completed;
           }), child: Text(!_loaded ? 'Загрузка…' : _saved ? '✓ Совет сохранён' : 'Сохранить совет')),
         ],
         if(_loadError) TextButton(onPressed:_load,child:const Text('Повторить загрузку совета')),
-        TextButton(onPressed: widget.actions == null || _busy ? null : () => _action(() => widget.actions!.share(day)),
-          child: Text(event == null ? 'Поделиться советом' : 'Поделиться')),
+        OutlinedButton.icon(style:OutlinedButton.styleFrom(minimumSize:const Size.fromHeight(46),foregroundColor:const Color(0xff284936),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13))),icon:const Icon(Icons.share_outlined,size:18),onPressed: widget.actions == null || _busy ? null : () => _action(() => widget.actions!.share(day)),
+          label: Text(event == null ? 'Поделиться советом' : 'Поделиться')),
       ]))),
     ])));
   }
@@ -323,6 +332,25 @@ class _SourceText extends StatelessWidget {
       offset = match.end;
     }
     spans.add(TextSpan(text: text.substring(offset)));
-    return Text.rich(TextSpan(children: spans), style: const TextStyle(color: Color(0xff284936), fontSize: 14, height: 1.6));
+    return Text.rich(TextSpan(children: spans), style: const TextStyle(color: Color(0xff284936), fontSize: 13, height: 1.65));
   }
+}
+
+String _dateCaption(AdventDay day){
+  const names=['ПОНЕДЕЛЬНИК','ВТОРНИК','СРЕДА','ЧЕТВЕРГ','ПЯТНИЦА','СУББОТА','ВОСКРЕСЕНЬЕ'];
+  return '${day.date.day} ДЕКАБРЯ · ${names[day.date.weekday-1]} · ${day.event==null?'СОВЕТ ДНЯ':'СОБЫТИЕ'}';
+}
+final _primaryButtonStyle=FilledButton.styleFrom(backgroundColor:const Color(0xff183e30),foregroundColor:Colors.white,
+  minimumSize:const Size.fromHeight(48),textStyle:const TextStyle(fontSize:12,fontWeight:FontWeight.w700),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13)));
+Widget _detail(IconData icon,String label,String value)=>Container(padding:const EdgeInsets.all(8),decoration:BoxDecoration(color:const Color(0xffeff0e8),border:Border.all(color:const Color(0xffe4e7dc)),borderRadius:BorderRadius.circular(13)),
+  child:Row(children:[Container(width:38,height:38,decoration:BoxDecoration(color:const Color(0xffdce8dd),borderRadius:BorderRadius.circular(11),border:Border.all(color:const Color(0xffd3ddd3))),child:Icon(icon,size:18,color:const Color(0xff557e65))),
+    const SizedBox(width:8),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(label,style:const TextStyle(fontSize:9,color:Color(0xff69836c))),const SizedBox(height:3),Text(value,style:const TextStyle(fontSize:11,fontWeight:FontWeight.w700,color:Color(0xff284936)))]))]));
+class _MedalPainter extends CustomPainter{
+  const _MedalPainter();
+  @override
+  void paint(Canvas canvas,Size size){canvas.save();canvas.translate(5,5);canvas.scale((size.width-10)/160);
+    final path=Path()..moveTo(81,10)..cubicTo(85,54,108,75,151,80)..cubicTo(111,87,87,109,81,150)..cubicTo(74,108,50,87,10,80)..cubicTo(51,73,75,53,81,10)..close();
+    canvas.drawPath(path,Paint()..shader=const LinearGradient(colors:[Color(0xfffff2c0),Color(0xffbf914b)]).createShader(const Rect.fromLTWH(0,0,160,160)));canvas.restore();}
+  @override
+  bool shouldRepaint(_MedalPainter old)=>false;
 }

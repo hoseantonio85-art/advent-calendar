@@ -13,7 +13,11 @@ class VisualClock implements AdventClock {
   @override
   DateTime nowUtc()=>DateTime.utc(2026,12,15,9);
 }
-class VisualStore implements ProgressRepository {
+class VisualStore implements ProgressRepository, SavedAdviceRepository {
+  @override
+  Future<Set<String>> readSaved(String c) async => {};
+  @override
+  Future<void> setSaved(String c,String id,bool saved) async {}
   final ids=<String>{};
   @override
   Future<Set<String>> read(String c)async=>ids;
@@ -32,6 +36,8 @@ void main(){
       final loader=FontLoader('packages/advent_calendar/${font.$1}')..addFont(Future.value(ByteData.sublistView(File('assets/fonts/${font.$2}').readAsBytesSync())));
       await loader.load();
     }
+      final icons=FontLoader('MaterialIcons')..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
+      await icons.load();
     });
     final content=AdventContent.decode(File('assets/advent/calendar_2026.json').readAsStringSync());
     final time=CampaignTime.moscow(clock:VisualClock()), store=VisualStore();
@@ -50,10 +56,12 @@ void main(){
     }
     for(final width in [320.0,360.0,390.0,430.0]){
       tester.view.physicalSize=Size(width,844);tester.view.devicePixelRatio=1;
-      await tester.pumpWidget(RepaintBoundary(key:const ValueKey('capture'),child:MaterialApp(
-        theme:ThemeData(fontFamily:'packages/advent_calendar/Roboto'),
-        home:DefaultAssetBundle(bundle:TestAssets(),child:MediaQuery(data:MediaQueryData(size:Size(width,844),disableAnimations:true),
-          child:AdventCalendarScreen(content:content,time:time,progress:AdventProgress(calendar:content.calendar,time:time,repository:store)))))));
+      await tester.pumpWidget(RepaintBoundary(key:const ValueKey('capture'),child:DefaultAssetBundle(bundle:TestAssets(),child:MaterialApp(
+        debugShowCheckedModeBanner:false,
+        theme:ThemeData(colorSchemeSeed:const Color(0xff284936),fontFamily:'packages/advent_calendar/Roboto'),
+        home:MediaQuery(data:MediaQueryData(size:Size(width,844),disableAnimations:true),
+          child:AdventCalendarScreen(content:content,time:time,progress:AdventProgress(calendar:content.calendar,time:time,repository:store),
+            savedAdvice:store,actions:NativeAdventActions(confirmCalendar:(_)async=>null,shareOrigin:()=>const Rect.fromLTWH(0,0,10,10))))))));
       await tester.pumpAndSettle();
       await tester.runAsync(()=>Future<void>.delayed(const Duration(milliseconds:200)));
       await tester.pumpAndSettle();

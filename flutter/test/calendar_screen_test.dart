@@ -51,7 +51,7 @@ void main() {
     for(var i=0;i<2;i++) {
       await tester.tap(find.byKey(const ValueKey('day-1')));await tester.pumpAndSettle();
       expect(find.text('Конец регистрации в игре «Тайный Санта»'),findsOneWidget);
-      expect(find.text('Время\n18:00'),findsOneWidget);
+      expect(find.text('18:00'),findsOneWidget);
       await tester.tap(find.byTooltip('Закрыть'));await tester.pumpAndSettle();
     }
     expect(store.ids,hasLength(1));expect(find.text('1 / 31'),findsOneWidget);
