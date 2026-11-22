@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' show ImageByteFormat;
 // ignore: deprecated_member_use
@@ -45,8 +44,8 @@ void main(){
       await tester.runAsync(()async{
         final image=await tester.renderObject<RenderRepaintBoundary>(find.byKey(const ValueKey('capture'))).toImage(pixelRatio:1);
         final bytes=await image.toByteData(format:ImageByteFormat.png);image.dispose();
-        final data=base64Encode(bytes!.buffer.asUint8List());
-        for(var i=0;i<data.length;i+=40000){print('ADVENT_PNG|$name|${i~/40000}|${data.substring(i,(i+40000).clamp(0,data.length))}');}
+        final folder=Directory('build/visual-qa');await folder.create(recursive:true);
+        await File('${folder.path}/$name.png').writeAsBytes(bytes!.buffer.asUint8List());
       });
     }
     Future<void> mount(double width,{double scale=1})async{

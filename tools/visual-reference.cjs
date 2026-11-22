@@ -2,7 +2,7 @@ const path=require('node:path'),fs=require('node:fs');
 const {chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true});
- async function capture(page,name){const data=(await page.screenshot()).toString('base64');for(let i=0;i<data.length;i+=40000)console.log(`ADVENT_PNG|reference-${name}|${i/40000}|${data.slice(i,i+40000)}`);}
+ async function capture(page,name){fs.mkdirSync('build/visual-qa',{recursive:true});await page.screenshot({path:`build/visual-qa/reference-${name}.png`});}
  for(const width of [320,360,390,430]){
   const context=await browser.newContext({viewport:{width,height:844},deviceScaleFactor:1,reducedMotion:'reduce',timezoneId:'Europe/Moscow'});
   const page=await context.newPage();
@@ -17,7 +17,7 @@ const {chromium}=require('playwright');
   async function show(day){await page.locator(`[data-day="${day}"]`).click();await page.waitForTimeout(50);}
   async function close(){await page.locator('#closeSheet').click();await page.waitForTimeout(50);}
   if(width==390){
-   await page.locator('[data-day="15"]').scrollIntoViewIfNeeded();await capture(page,'middle-390');
+   await page.locator('[data-day="15"]').evaluate(el=>window.scrollTo(0,el.getBoundingClientRect().top+window.scrollY-(window.innerHeight-el.offsetHeight)*.4));await capture(page,'middle-390');
    await show(1);await capture(page,'event-390');await close();
    await show(3);await capture(page,'advice-390');await close();
    await page.locator('#aboutBtn').click();await page.waitForTimeout(50);await capture(page,'history-390');await close();

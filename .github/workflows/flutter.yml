@@ -29,6 +29,14 @@ jobs:
           npm install --prefix /tmp/advent-visual playwright
           /tmp/advent-visual/node_modules/.bin/playwright install --with-deps chromium
           NODE_PATH=/tmp/advent-visual/node_modules node tools/visual-reference.cjs
+      - name: Assemble lossless visual comparison
+        run: |
+          python -m pip install pillow
+          python tools/visual-report.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-visual-review
+          path: build/visual-review/
       - run: flutter pub get
         working-directory: flutter/example
       - run: flutter analyze
