@@ -647,7 +647,8 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 /* One clipped, stationary sheet shell for date and history views; only the
    content below the permanent drag handle / close control scrolls. */
 .sheet-chrome{
- position:relative;z-index:3;flex:0 0 44px;height:44px;
+ /* The shell, not this bar, owns the close button's coordinates. */
+ position:static;z-index:3;flex:0 0 44px;height:44px;width:100%;align-self:stretch;
  background:#faf2e6;border-radius:27px 27px 0 0;
 }
 .sheet-scroll{
@@ -659,7 +660,10 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  margin:0 auto;position:relative;
 }
 .sheet .sheet-grabber::after{top:14px}
-.sheet .sheet-chrome .close-btn{top:3px;right:14px}
+.sheet > .sheet-chrome > .close-btn{
+ /* Anchor to the full sheet width even when the grabber is narrower. */
+ position:absolute;top:3px;right:14px;left:auto;margin:0;
+}
 .sheet .sheet-head{padding-right:0}
 @media(max-width:360px){.sheet-scroll{padding-left:16px;padding-right:16px}}
 </style>
