@@ -27,14 +27,17 @@ class TestAssets extends CachingAssetBundle {
 void main(){
   testWidgets('capture real-font native screens', (tester)async{
     tzdata.initializeTimeZones();
+    await tester.runAsync(() async {
     for(final font in [('Yeseva One','YesevaOne-Regular.ttf'),('Roboto','Roboto-Variable.ttf')]){
       final loader=FontLoader('packages/advent_calendar/${font.$1}')..addFont(Future.value(ByteData.sublistView(File('assets/fonts/${font.$2}').readAsBytesSync())));
       await loader.load();
     }
+    });
     final content=AdventContent.decode(File('assets/advent/calendar_2026.json').readAsStringSync());
     final time=CampaignTime.moscow(clock:VisualClock()), store=VisualStore();
     addTearDown(tester.view.resetPhysicalSize);addTearDown(tester.view.resetDevicePixelRatio);
     Future<void> capture(String name)async{
+      await tester.runAsync(() async {
       final boundary=tester.renderObject<RenderRepaintBoundary>(find.byKey(const ValueKey('capture')));
       final image=await boundary.toImage(pixelRatio:1);
       final bytes=await image.toByteData(format:ImageByteFormat.png);image.dispose();
@@ -43,6 +46,7 @@ void main(){
         // Machine-readable QA artifact, only enabled by the CI flag below.
         print('ADVENT_PNG|$name|${i~/40000}|${encoded.substring(i, (i+40000).clamp(0,encoded.length))}');
       }
+      });
     }
     for(final width in [320.0,360.0,390.0,430.0]){
       tester.view.physicalSize=Size(width,844);tester.view.devicePixelRatio=1;
@@ -63,5 +67,5 @@ void main(){
       expect(tester.takeException(),isNull);
       await tester.pumpWidget(const SizedBox());
     }
-  },skip:!const bool.fromEnvironment('ADVENT_VISUALS'));
+  },timeout:const Timeout(Duration(minutes:1)),skip:!const bool.fromEnvironment('ADVENT_VISUALS'));
 }

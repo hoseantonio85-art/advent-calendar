@@ -5,6 +5,7 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,6 +24,11 @@ jobs:
         working-directory: flutter
       - run: flutter test --dart-define=ADVENT_VISUALS=true test/visual_test.dart
         working-directory: flutter
+      - name: Capture approved HTML reference
+        run: |
+          npm install --prefix /tmp/advent-visual playwright
+          /tmp/advent-visual/node_modules/.bin/playwright install --with-deps chromium
+          NODE_PATH=/tmp/advent-visual/node_modules node tools/visual-reference.cjs
       - run: flutter pub get
         working-directory: flutter/example
       - run: flutter analyze
