@@ -15,7 +15,6 @@ class AdventEntryCard extends StatelessWidget {
     super.key,
     required this.daysUntilNewYear,
     required this.onOpen,
-    this.treeAssetPath = 'assets/advent/hero_tree.webp',
   });
 
   /// Computed using the campaign's timezone by the host; clamps at zero.
@@ -24,7 +23,8 @@ class AdventEntryCard extends StatelessWidget {
   /// Opens the FULL calendar as a normal screen, not a bottom sheet.
   final VoidCallback onOpen;
 
-  final String treeAssetPath;
+  // The 3D tree is intentionally absent from the current entry candidate.
+  // It can return later as a *background* motif, not a separate object.
 
   static const _gold = Color(0xFFFFDEA2);
   static const _text = Color(0xFFFFF8E8);
@@ -55,7 +55,7 @@ class AdventEntryCard extends StatelessWidget {
 
         return Semantics(
           label: days > 0
-              ? 'Адвент 2026. Открой свой декабрь. '
+              ? 'Адвент 2026. Открой свой календарь. '
                   'До 2027 года $days ' + _dayWord(days) + '.'
               : 'Адвент 2026. С Новым годом! Открой календарь.',
           button: true,
@@ -115,56 +115,53 @@ class AdventEntryCard extends StatelessWidget {
                           ),
                         ),
                         Positioned(
-                          right: compact ? -20 : -24,
-                          top: compact ? -7 : -8,
-                          width: compact ? 133 : 145,
-                          height: compact ? 133 : 145,
-                          child: IgnorePointer(
-                            child: Transform.rotate(
-                              angle: 0.09,
-                              child: Image.asset(
-                                treeAssetPath,
-                                fit: BoxFit.contain,
-                                filterQuality: FilterQuality.medium,
-                                errorBuilder: (context, error, stack) =>
-                                    const SizedBox.shrink(),
+                          left: compact ? 13 : 16,
+                          top: compact ? 16 : 18,
+                          right: 12,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: .32),
+                                borderRadius: BorderRadius.circular(11),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: compact ? 9 : 10,
+                                  vertical: compact ? 8 : 9,
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_month_outlined,
+                                      size: 17,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'АДВЕНТ · 2026',
+                                      style: TextStyle(
+                                        fontFamily: 'Roboto',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 1.15,
+                                        color: Color(0xFFF2F4EF),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
                         Positioned(
                           left: compact ? 13 : 16,
-                          top: compact ? 16 : 18,
-                          right: 12,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(
-                                Icons.calendar_month_outlined,
-                                size: 15,
-                                color: Color(0xFFD6E8C9),
-                              ),
-                              SizedBox(width: 7),
-                              Text(
-                                'АДВЕНТ · 2026',
-                                style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 1.3,
-                                  color: Color(0xFFD6E8C9),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Positioned(
-                          left: compact ? 13 : 16,
-                          top: compact ? 53 : 55,
+                          top: compact ? 60 : 62,
                           right: compact ? 88 : 92,
                           child: Text(
-                            'Открой свой декабрь',
-                            maxLines: 1,
+                            'Открой свой календарь',
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             softWrap: false,
                             style: TextStyle(
