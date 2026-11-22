@@ -25,8 +25,9 @@ class AdventCalendarScreen extends StatefulWidget {
   State<AdventCalendarScreen> createState() => _CalendarState();
 }
 
-class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
+class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObserver, TickerProviderStateMixin {
   late final AnimationController _motion;
+  late final AnimationController _heroMotion;
   Timer? _midnight;
   Set<String> _opened = {};
   String? _error;
@@ -36,12 +37,13 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _motion = AnimationController(vsync: this, duration: const Duration(milliseconds: 5500));
+    _heroMotion = AnimationController(vsync:this,duration:const Duration(seconds:9));
     _refresh();
   }
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (MediaQuery.disableAnimationsOf(context)) { _motion.stop(); } else { _motion.repeat(); }
+    if (MediaQuery.disableAnimationsOf(context)) { _motion.stop(); _heroMotion.stop(); } else { _motion.repeat(); _heroMotion.repeat(); }
   }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -60,7 +62,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _midnight?.cancel(); _motion.dispose(); super.dispose();
+    _midnight?.cancel(); _motion.dispose(); _heroMotion.dispose(); super.dispose();
   }
   Future<void> _open(AdventDay day) async {
     if (_opening || !widget.content.calendar.isAvailable(day, widget.time.today)) return;
@@ -100,7 +102,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
             const SizedBox(width: 10), const Expanded(child: Text('ДЕКАБРЬ ЧУДЕС · 2026',
               style: TextStyle(color: _gold, fontSize: 10, letterSpacing: 1, fontWeight: FontWeight.w800))),
           ])),
-          _Hero(content: widget.content),
+          _Hero(content: widget.content, motion:_heroMotion),
           Semantics(button: true, label: 'Твоя история декабря. Открыто ${_opened.length} из 31',
             child: InkWell(onTap: () => showModalBottomSheet<void>(context: context, useSafeArea: true,
               showDragHandle: true, builder: (_) => SafeArea(child: Padding(padding: const EdgeInsets.all(24),
@@ -137,12 +139,13 @@ Widget _art(AdventContent content, String key, {double? size}) => Image.asset(
   excludeFromSemantics: true, errorBuilder: (_, __, ___) => SizedBox(width: size, height: size));
 
 class _Hero extends StatelessWidget {
-  const _Hero({required this.content});
+  const _Hero({required this.content,required this.motion});
+  final Animation<double> motion;
   final AdventContent content;
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.symmetric(vertical: 32), child: Stack(clipBehavior: Clip.hardEdge, children: [
     Positioned(right: -142, top: -55, child: ShaderMask(shaderCallback: (rect) => const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
-      colors: [Colors.white, Colors.white, Colors.transparent], stops: [0, .63, .93]).createShader(rect), child: _art(content, 'hero_tree', size: 356))),
+      colors: [Colors.white, Colors.white, Colors.transparent], stops: [0, .63, .93]).createShader(rect), child: AnimatedBuilder(animation:motion,child:_art(content,'hero_tree',size:356),builder:(_,child)=>Transform.rotate(angle:-8*math.pi/180,child:Transform.scale(scale:1+.018*math.sin(motion.value*2*math.pi),child:child))))),
     Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(colors: [_forest, _forest.withValues(alpha: .75), Colors.transparent], stops: const [0, .43, .79])))),
     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text.rich(TextSpan(children: [const TextSpan(text: '31 день\nмаленьких\n'), TextSpan(text: 'чудес', style: const TextStyle(color: _gold))]),
@@ -252,13 +255,13 @@ class _DaySheet extends StatefulWidget {
   State<_DaySheet> createState() => _SheetState();
 }
 class _SheetState extends State<_DaySheet> {
-  bool _saved = false, _busy = false;
+  bool _saved = false, _busy = false, _loaded = false, _loadError = false;
   @override
   void initState() { super.initState(); _load(); }
   Future<void> _load() async {
     try { final ids = await widget.savedAdvice?.readSaved(AdventProgress.campaignId);
-      if (mounted) setState(() => _saved = ids?.contains(widget.day.id) ?? false);
-    } catch (_) { if(mounted) _message('Не удалось загрузить сохранённые советы'); }
+      if (mounted) setState(() { _saved = ids?.contains(widget.day.id) ?? false; _loaded = true; _loadError = false; });
+    } catch (_) { if(mounted) setState(() => _loadError = true); }
   }
   void _message(String message) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   Future<void> _action(Future<SystemActionResult> Function() action) async {
@@ -294,11 +297,12 @@ class _SheetState extends State<_DaySheet> {
               Text('«${day.advice['text']}»', style: const TextStyle(fontSize: 26, height: 1.2, color: Color(0xff284936))),
               const SizedBox(height: 18), Text('Попробуй сегодня: ${day.advice['action']}', style: const TextStyle(fontSize: 13, height: 1.55, color: Color(0xff69836c))),
             ])), const SizedBox(height: 20),
-          FilledButton(onPressed: widget.savedAdvice == null || _busy ? null : () => _action(() async {
+          FilledButton(onPressed: widget.savedAdvice == null || !_loaded || _busy ? null : () => _action(() async {
             await widget.savedAdvice!.setSaved(AdventProgress.campaignId, day.id, !_saved);
             if(mounted) setState(() => _saved = !_saved); return SystemActionResult.completed;
-          }), child: Text(_saved ? '✓ Совет сохранён' : 'Сохранить совет')),
+          }), child: Text(!_loaded ? 'Загрузка…' : _saved ? '✓ Совет сохранён' : 'Сохранить совет')),
         ],
+        if(_loadError) TextButton(onPressed:_load,child:const Text('Повторить загрузку совета')),
         TextButton(onPressed: widget.actions == null || _busy ? null : () => _action(() => widget.actions!.share(day)),
           child: Text(event == null ? 'Поделиться советом' : 'Поделиться')),
       ]))),
