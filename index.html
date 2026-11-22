@@ -605,6 +605,43 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 }
 .sheet .close-btn:focus-visible{outline:2px solid #5a8670;outline-offset:3px}
 
+
+/* v10 · centered hero and four targeted event art refinements (22 Nov 2026).
+   Entry card v9 and all calendar interaction/state logic stay untouched. */
+.topbar{
+  position:relative;
+  z-index:7;
+  padding-bottom:8px;
+}
+.hero{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+/* Remove the hard horizontal start of the hero shading beneath Back. */
+.hero::after{
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 61%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 61%,transparent 100%);
+}
+/* 2 December · Santa draw: lift the glass snowflake. */
+.day-card.event[data-day="2"] .illustration{top:7px}
+/* 9 December · citrus: bigger, higher, without covering the caption. */
+.day-card.event[data-day="9"] .illustration{width:111px;height:111px;top:3px;right:-23px}
+/* 25 December · move the bag slightly right, keeping a two-line title. */
+.day-card.event.wide[data-day="25"] .illustration{right:-23px}
+/* 31 December · show the tree's crown, keep its current horizontal position. */
+.day-card.event.wide[data-day="31"] .illustration{top:-11px}
+@media(max-width:380px){
+  .day-card.event[data-day="2"] .illustration{top:6px}
+  .day-card.event[data-day="9"] .illustration{width:101px;height:101px;top:2px;right:-22px}
+  .day-card.event.wide[data-day="25"] .illustration{right:-20px}
+  .day-card.event.wide[data-day="31"] .illustration{top:-6px}
+}
+@media(max-width:335px){
+  .day-card.event[data-day="9"] .illustration{width:94px;height:94px;top:3px;right:-21px}
+  .day-card.event.wide[data-day="31"] .illustration{top:-4px}
+}
+
 </style>
 </head>
 <body>
@@ -748,7 +785,7 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
   16:{"title":"Прямая линия Германа Грефа","shortTitle":"Прямая линия Грефа","art":"bell","theme":"ice","time":"11:00","duration":90,"place":"Корпоративная онлайн-трансляция","desc":"Включаемся в прямую линию: поговорим об итогах года, главных направлениях развития и вопросах, которые волнуют сотрудников. Смотри трансляцию и следи за обсуждением в удобном формате."},
   17:{"title":"Новогодний КОРТ","shortTitle":"КОРТ","art":"star","theme":"purple","time":"16:00","duration":90,"place":"Конференц-пространство · зал 3","desc":"Новогодняя встреча КОРТ — повод увидеться с коллегами перед праздниками, обменяться впечатлениями и завершить рабочий год на позитивной ноте. Формат и подробности программы уточним позднее."},
   18:{"title":"Обмен подарками в игре «Тайный Санта»","shortTitle":"Санта: обмен подарками","art":"gift","theme":"moss","time":"17:00","duration":60,"place":"У большой ёлки · главный холл","desc":"Самый волшебный момент «Тайного Санты»! Приноси красиво упакованный подарок, найди своего получателя и приготовься удивляться. Будут сюрпризы, улыбки и, конечно, немного праздничной интриги."},
-  25:{"title":"Выплата премии","shortTitle":"Выплата премии","art":"moneybag","theme":"sand","time":"В течение дня","duration":null,"place":"Зачисление на зарплатный счёт","desc":"Приятный повод заглянуть в календарь: в этом демонстрационном расписании на сегодня запланирована выплата премии. Дата — часть примера, а порядок и суммы начислений здесь не отображаются.","cta":"Сохранить дату"},
+  25:{"title":"Выплата премии","shortTitle":"Выплата премии","cardLines":["Выплата","премии"],"art":"moneybag","theme":"sand","time":"В течение дня","duration":null,"place":"Зачисление на зарплатный счёт","desc":"Приятный повод заглянуть в календарь: в этом демонстрационном расписании на сегодня запланирована выплата премии. Дата — часть примера, а порядок и суммы начислений здесь не отображаются.","cta":"Сохранить дату"},
   31:{"title":"Новый год","shortTitle":"Новый год","art":"hero_tree","theme":"ruby","time":"23:00","duration":60,"place":"Там, где тебе хорошо","desc":"Финальная карточка календаря — и начало новой истории. Пусть вечер будет наполнен близкими людьми, тёплыми словами и ощущением праздника. Спасибо за этот декабрь, увидимся в новом году!"}
  };
  const thoughts=[
