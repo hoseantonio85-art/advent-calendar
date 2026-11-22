@@ -65,6 +65,12 @@ void main(){
       await tester.pumpAndSettle();
       await tester.runAsync(()=>Future<void>.delayed(const Duration(milliseconds:200)));
       await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        for(final asset in content.assets.values) {
+          await precacheImage(AssetImage(asset,package:'advent_calendar'),tester.element(find.byType(AdventCalendarScreen)));
+        }
+      });
+      await tester.pumpAndSettle();
       await capture('calendar-${width.toInt()}');
       if(width==390){
         await tester.tap(find.byKey(const ValueKey('day-1')));await tester.pumpAndSettle();await capture('event-390');

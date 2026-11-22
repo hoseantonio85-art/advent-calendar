@@ -73,7 +73,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
       if (!mounted) return;
       setState(() => _opened = opened);
       await showModalBottomSheet<void>(context: context, isScrollControlled: true,
-        useSafeArea: true, showDragHandle: false, backgroundColor: const Color(0xfff8f2e8),
+        useSafeArea: true, showDragHandle: false, backgroundColor: const Color(0xfffaf2e6),
         builder: (_) => _DaySheet(day: day, content: widget.content, time: widget.time,
           actions: widget.actions, savedAdvice: widget.savedAdvice));
     } catch (_) {
@@ -312,7 +312,7 @@ class _SheetState extends State<_DaySheet> {
           }), child: Text(!_loaded ? 'Загрузка…' : _saved ? '✓ Совет сохранён' : 'Сохранить совет')),
         ],
         if(_loadError) TextButton(onPressed:_load,child:const Text('Повторить загрузку совета')),
-        OutlinedButton.icon(style:OutlinedButton.styleFrom(minimumSize:const Size.fromHeight(46),foregroundColor:const Color(0xff284936),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13))),icon:const Icon(Icons.share_outlined,size:18),onPressed: widget.actions == null || _busy ? null : () => _action(() => widget.actions!.share(day)),
+        OutlinedButton.icon(style:OutlinedButton.styleFrom(side:const BorderSide(color:Color(0xffdce4cf)),textStyle:const TextStyle(fontFamily:'packages/advent_calendar/Roboto',fontSize:12,fontWeight:FontWeight.w700),minimumSize:const Size.fromHeight(46),foregroundColor:const Color(0xff284936),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13))),icon:const Icon(Icons.share_outlined,size:18),onPressed: widget.actions == null || _busy ? null : () => _action(() => widget.actions!.share(day)),
           label: Text(event == null ? 'Поделиться советом' : 'Поделиться')),
       ]))),
     ]))));
@@ -341,7 +341,7 @@ String _dateCaption(AdventDay day){
   return '${day.date.day} ДЕКАБРЯ · ${names[day.date.weekday-1]} · ${day.event==null?'СОВЕТ ДНЯ':'СОБЫТИЕ'}';
 }
 final _primaryButtonStyle=FilledButton.styleFrom(backgroundColor:const Color(0xff183e30),foregroundColor:Colors.white,
-  minimumSize:const Size.fromHeight(48),textStyle:const TextStyle(fontSize:12,fontWeight:FontWeight.w700),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13)));
+  minimumSize:const Size.fromHeight(48),textStyle:const TextStyle(fontFamily: 'packages/advent_calendar/Roboto',fontSize:12,fontWeight:FontWeight.w700),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13)));
 Widget _detail(IconData icon,String label,String value)=>Container(padding:const EdgeInsets.all(8),decoration:BoxDecoration(color:const Color(0xffeff0e8),border:Border.all(color:const Color(0xffe4e7dc)),borderRadius:BorderRadius.circular(13)),
   child:Row(children:[Container(width:38,height:38,decoration:BoxDecoration(color:const Color(0xffdce8dd),borderRadius:BorderRadius.circular(11),border:Border.all(color:const Color(0xffd3ddd3))),child:Icon(icon,size:18,color:const Color(0xff557e65))),
     const SizedBox(width:8),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(label,style:const TextStyle(fontSize:9,color:Color(0xff69836c))),const SizedBox(height:3),Text(value,style:const TextStyle(fontSize:11,fontWeight:FontWeight.w700,color:Color(0xff284936)))]))]));
