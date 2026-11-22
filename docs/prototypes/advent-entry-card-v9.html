@@ -135,7 +135,9 @@
         if(push && location.hash!=='#advent')history.pushState({page:'advent'},'','#advent');
         if(!loaded){
           const previewDay=at.getFullYear()===2026&&at.getMonth()===11&&[1,15,31].includes(at.getDate())?'?preview='+at.getDate():'';
-          frame.src='https://hoseantonio85-art.github.io/advent-calendar/'+(previewDay?previewDay+'&v=9':'?v=9');
+          // Refresh only the embedded calendar, preserving the approved v9 entry card.
+          // A distinct URL each time avoids old HTML from mobile/browser/iframe caches.
+          frame.src='https://hoseantonio85-art.github.io/advent-calendar/'+(previewDay?previewDay+'&':'?')+'fresh='+Date.now();
           loaded=true;
         }
         route.setAttribute('tabindex','-1');route.focus();
