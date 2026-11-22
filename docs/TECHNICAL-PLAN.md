@@ -118,6 +118,8 @@
 - [ROADMAP](ROADMAP.md) — текущие этапы и статусы.
 - [Issue #1](https://github.com/hoseantonio85-art/advent-calendar/issues/1) — нативная карточка v9: подключение и QA.
 - [Issue #2](https://github.com/hoseantonio85-art/advent-calendar/issues/2) — перенос календаря во Flutter.
+- [Issue #3](https://github.com/hoseantonio85-art/advent-calendar/issues/3) — единая модель 31 дня, архитектура и часы кампании.
+- [Issue #4](https://github.com/hoseantonio85-art/advent-calendar/issues/4) — интеграционные адаптеры, прогресс, системные действия и решение по backend.
 - [README](../README.md) — историческая летопись решений.
 
 **Правило:** этот документ планирует работы, а README сохраняет историю. При изменении требований обновляем источник плана и связанные Issues, не переписывая историю задним числом.
