@@ -8,8 +8,7 @@ import 'package:flutter/material.dart';
 /// native route (e.g. Navigator.push), never a modal bottom sheet.
 /// The detailed event/advice cards inside the calendar can use bottom sheets.
 ///
-/// Add the exact glass Christmas tree file from this repository to the host
-/// assets and register 'assets/advent/hero_tree.webp' in pubspec.yaml.
+/// The current UI deliberately has no foreground illustration.
 class AdventEntryCard extends StatelessWidget {
   const AdventEntryCard({
     super.key,
@@ -122,7 +121,7 @@ class AdventEntryCard extends StatelessWidget {
                             alignment: Alignment.centerLeft,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: .32),
+                                color: const Color(0x52000000),
                                 borderRadius: BorderRadius.circular(11),
                               ),
                               child: Padding(
