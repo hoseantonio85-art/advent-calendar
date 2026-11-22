@@ -321,10 +321,10 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 /* v5 event-sheet: legible event details and functional actions */
 .sheet .sheet-title{font-size:clamp(23px,6.6vw,29px);line-height:1.12;letter-spacing:-.04em;max-width:340px}
 .sheet-event-info{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 17px}
-.sheet-detail{display:flex;gap:9px;align-items:flex-start;min-width:0;padding:12px 11px 11px;border-radius:13px;border:1px solid #e4e7dc;background:#eff0e8}
+.sheet-detail{--detail-icon-size:38px;display:flex;gap:8px;align-items:center;min-width:0;padding:8px;border-radius:13px;border:1px solid #e4e7dc;background:#eff0e8}
 .sheet-detail:last-child{grid-column:1/-1}
-.sheet-detail-icon{color:#77917b;flex:none;display:grid;place-items:center;width:20px;height:20px;margin-top:1px}
-.sheet-detail-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sheet-detail-icon{color:#557e65;flex:0 0 var(--detail-icon-size);display:grid;place-items:center;width:var(--detail-icon-size);height:var(--detail-icon-size);margin:0;border-radius:11px;border:1px solid #d3ddd3;background:linear-gradient(145deg,#dce8dd,#e5ebdf)}
+.sheet-detail-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .sheet-detail-text{min-width:0;display:flex;flex-direction:column;gap:3px}
 .sheet-detail-label{font-size:10px;color:#819285;font-weight:600}
 .sheet-detail-value{color:#2d4536;font-size:12px;font-weight:750;line-height:1.4;overflow-wrap:anywhere}
@@ -338,7 +338,8 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 .sheet-icon-action svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .sheet .action-main{min-height:48px}
 .sheet .action-main svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-@media(max-width:360px){.sheet-event-info{gap:7px}.sheet-detail{padding:10px 8px;gap:6px}.sheet-detail-value{font-size:11px}}
+@media(max-width:360px){.sheet-event-info{gap:7px}.sheet-detail{--detail-icon-size:34px;padding:8px;gap:8px}.sheet-detail-icon{border-radius:10px}.sheet-detail-value{font-size:11px}}
+@media(max-width:335px){.sheet-detail:first-child .sheet-detail-value{font-size:10px;letter-spacing:-.01em}}
 
 /* v5.2 · seamless hero and accessible progress action */
 .hero{
