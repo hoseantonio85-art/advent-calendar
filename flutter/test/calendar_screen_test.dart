@@ -29,7 +29,11 @@ void main() {
         await tester.pumpWidget(MaterialApp(home: MediaQuery(data: MediaQueryData(size: Size(width,1000), disableAnimations: true, textScaler: TextScaler.linear(scale)),
           child: AdventCalendarScreen(content: content, time: time, progress: AdventProgress(calendar: content.calendar,time:time,repository:store)))));
         await tester.pumpAndSettle();
-        expect(find.text('Твоя история декабря'), findsOneWidget);
+        await tester.scrollUntilVisible(find.byKey(const ValueKey('progress-count')), 200, scrollable: find.byType(Scrollable).first);
+        expect(find.byKey(const ValueKey('progress-count')), findsOneWidget);
+        await tester.scrollUntilVisible(find.byKey(const ValueKey('day-31')), 250, scrollable: find.byType(Scrollable).first);
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('day-31')), findsOneWidget);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
       }
