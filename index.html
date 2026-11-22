@@ -93,9 +93,8 @@ button{font:inherit} button:focus-visible{outline:2px solid #f9d999;outline-offs
 .month-footer{margin:26px 0 15px;background:linear-gradient(120deg,#e0ca9433,#96b17b13);border:1px solid #efdbac2b;border-radius:23px;padding:20px;position:relative;overflow:hidden}
 .month-footer h3{margin:0 0 7px;font-size:19px;letter-spacing:-.04em}.month-footer p{color:#bfd0bc;font-size:12px;line-height:1.56;max-width:270px;margin:0}
 .footer-spark{position:absolute;right:19px;top:5px;font-size:73px;color:#f9dba9;opacity:.22;font-weight:200}
-.proto-note{text-align:center;color:#688a78;font-size:10px;line-height:1.6;letter-spacing:.018em;padding:9px 10px calc(18px + env(safe-area-inset-bottom))}
-.overlay{position:fixed;inset:0;z-index:20;background:#0009;opacity:0;pointer-events:none;transition:opacity .27s ease;backdrop-filter:blur(0)}
-.overlay.show{opacity:1;pointer-events:auto;backdrop-filter:blur(5px)}
+.overlay{position:fixed;inset:0;z-index:20;border-radius:0;background:rgba(2,16,12,.76);opacity:0;pointer-events:none;transition:opacity .27s ease;backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0)}
+.overlay.show{opacity:1;pointer-events:auto;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .sheet{position:fixed;z-index:21;left:50%;bottom:0;transform:translate(-50%,105%);width:min(100%,440px);max-height:min(91dvh,900px);overflow-y:auto;overscroll-behavior:contain;border-radius:27px 27px 0 0;background:#f8f3e8;color:#21372b;box-shadow:0 -20px 100px #0008;transition:transform .38s cubic-bezier(.22,.85,.25,1);visibility:hidden;padding:9px 21px calc(20px + env(safe-area-inset-bottom));scrollbar-width:none}
 .sheet::-webkit-scrollbar{display:none}
 .sheet.show{transform:translate(-50%,0);visibility:visible}
@@ -202,7 +201,7 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 .day-card.wisdom .card-bottom{display:none}
 .card-name:empty{display:none}
 .month-footer{margin-top:20px}
-.sheet{width:min(100%,450px);background:#faf2e6}
+.sheet{width:min(100%,450px);background:#faf2e6;background-clip:padding-box;isolation:isolate}
 .sheet-visual{height:174px}
 .sheet-visual .illustration{width:176px;height:176px;object-fit:contain}
 .sheet-visual img{display:block}
@@ -321,8 +320,6 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 
 /* v5 event-sheet: legible event details and functional actions */
 .sheet .sheet-title{font-size:clamp(23px,6.6vw,29px);line-height:1.12;letter-spacing:-.04em;max-width:340px}
-.sheet-demotag{display:inline-flex;align-items:center;gap:6px;margin:9px 0 0;padding:5px 9px;border-radius:8px;color:#70816d;background:#ebede2;border:1px solid #dce2d5;font-size:10px;font-weight:650;letter-spacing:.005em}
-.sheet-demotag::before{content:"";width:5px;height:5px;border-radius:50%;background:#a9ac84}
 .sheet-event-info{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 17px}
 .sheet-detail{display:flex;gap:9px;align-items:flex-start;min-width:0;padding:12px 11px 11px;border-radius:13px;border:1px solid #e4e7dc;background:#eff0e8}
 .sheet-detail:last-child{grid-column:1/-1}
@@ -341,8 +338,6 @@ body{background:radial-gradient(ellipse at 50% -12%,#1e5542 0%,transparent 40%),
 .sheet-icon-action svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .sheet .action-main{min-height:48px}
 .sheet .action-main svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.sheet-event-actions + .sheet-hint{margin-top:13px}
-.sheet-hint{font-size:10px;color:#899789;line-height:1.4;text-align:center;margin:11px 0 2px}
 @media(max-width:360px){.sheet{padding-left:16px;padding-right:16px}.sheet-event-info{gap:7px}.sheet-detail{padding:10px 8px;gap:6px}.sheet-detail-value{font-size:11px}}
 
 /* v5.2 · seamless hero and accessible progress action */
@@ -727,7 +722,6 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
    <div class="calendar-grid" id="calendarGrid"></div>
   </section>
   <section class="month-footer"><div class="footer-spark" aria-hidden="true">✳</div><h3>Праздник в деталях</h3><p>Самое волшебное часто прячется в небольших моментах. Открывай свой декабрь каждый день.</p></section>
-  <div class="proto-note">GLASS BENTO / V5 · названия и даты событий из списка · время, места и описания — демо</div>
  </div>
 </main>
 <div class="overlay" id="overlay" aria-hidden="true"></div>
@@ -787,7 +781,7 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
   16:{"title":"Прямая линия Германа Грефа","shortTitle":"Прямая линия Грефа","art":"bell","theme":"ice","time":"11:00","duration":90,"place":"Корпоративная онлайн-трансляция","desc":"Включаемся в прямую линию: поговорим об итогах года, главных направлениях развития и вопросах, которые волнуют сотрудников. Смотри трансляцию и следи за обсуждением в удобном формате."},
   17:{"title":"Новогодний КОРТ","shortTitle":"КОРТ","art":"star","theme":"purple","time":"16:00","duration":90,"place":"Конференц-пространство · зал 3","desc":"Новогодняя встреча КОРТ — повод увидеться с коллегами перед праздниками, обменяться впечатлениями и завершить рабочий год на позитивной ноте. Формат и подробности программы уточним позднее."},
   18:{"title":"Обмен подарками в игре «Тайный Санта»","shortTitle":"Санта: обмен подарками","art":"gift","theme":"moss","time":"17:00","duration":60,"place":"У большой ёлки · главный холл","desc":"Самый волшебный момент «Тайного Санты»! Приноси красиво упакованный подарок, найди своего получателя и приготовься удивляться. Будут сюрпризы, улыбки и, конечно, немного праздничной интриги."},
-  25:{"title":"Выплата премии","shortTitle":"Выплата премии","cardLines":["Выплата","премии"],"art":"moneybag","theme":"sand","time":"В течение дня","duration":null,"place":"Зачисление на зарплатный счёт","desc":"Приятный повод заглянуть в календарь: в этом демонстрационном расписании на сегодня запланирована выплата премии. Дата — часть примера, а порядок и суммы начислений здесь не отображаются.","cta":"Сохранить дату"},
+  25:{"title":"Выплата премии","shortTitle":"Выплата премии","cardLines":["Выплата","премии"],"art":"moneybag","theme":"sand","time":"В течение дня","duration":null,"place":"Зачисление на зарплатный счёт","desc":"В этот день можно проверить начисление премии на зарплатном счёте. Информация о суммах и порядке выплаты здесь не отображается.","cta":"Сохранить дату"},
   31:{"title":"Новый год","shortTitle":"Новый год","art":"hero_tree","theme":"ruby","time":"23:00","duration":60,"place":"Там, где тебе хорошо","desc":"Финальная карточка календаря — и начало новой истории. Пусть вечер будет наполнен близкими людьми, тёплыми словами и ощущением праздника. Спасибо за этот декабрь, увидимся в новом году!"}
  };
  const thoughts=[
@@ -900,7 +894,7 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  function renderSheet(day){
     const event=events[day],t=thoughts[day-1];
     return `<div class="sheet-grabber"></div>
-     <header class="sheet-head"><div><p class="sheet-eyebrow">${escapeHtml(dateLabel(day))} · ${event?'событие':'совет дня'}</p><h2 class="sheet-title" id="sheetTitle">${escapeHtml(event?.title||t[0])}</h2>${event?(event.sourceCopy?'<span class="sheet-demotag">Время не указано</span>':'<span class="sheet-demotag">Время и место — пример</span>'):''}</div><button class="close-btn" aria-label="Закрыть" id="closeSheet">×</button></header>
+     <header class="sheet-head"><div><p class="sheet-eyebrow">${escapeHtml(dateLabel(day))} · ${event?'событие':'совет дня'}</p><h2 class="sheet-title" id="sheetTitle">${escapeHtml(event?.title||t[0])}</h2></div><button class="close-btn" aria-label="Закрыть" id="closeSheet">×</button></header>
      ${event?`<div class="sheet-visual theme-${event.theme}">${icon(event.art,'illustration')}</div>
        <div class="sheet-event-info" aria-label="Информация о событии">
          ${eventDetails('date','Дата',`${day} декабря 2026`)}
@@ -914,7 +908,7 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
        <div class="sheet-event-actions">
          <button class="sheet-icon-action" id="secondaryAction" type="button">${detailIcon('share')}<span>Поделиться</span></button>
        </div>
-       <p class="sheet-hint">${event.sourceCopy?"Время не указано · добавление в календарь создаёт событие на весь день":"Демо-контент · время и место не подтверждены"}</p>`:tipMarkup(day,true)+`<button class="action-main" id="mainAction">${saved.has(day)?'✓ Совет сохранён':'♡ Сохранить совет'}</button><button class="action-secondary" id="secondaryAction">Поделиться советом</button>`}`;
+       `:tipMarkup(day,true)+`<button class="action-main" id="mainAction">${saved.has(day)?'✓ Совет сохранён':'♡ Сохранить совет'}</button><button class="action-secondary" id="secondaryAction">Поделиться советом</button>`}`;
  }
  function openDay(day){
    if(isLockedAdvice(day)){showToast('Совет откроется '+day+' декабря ✦');return}
@@ -947,13 +941,13 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
    const stampNow=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
    const start=e.duration===null?new Date(year,month-1,day):new Date(year,month-1,day,...e.time.split(':').map(Number));
    const end=e.duration===null?new Date(year,month-1,day+1):new Date(start.getTime()+e.duration*60000);
-   const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//December Wonders//Advent Demo//RU','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:advent-demo-${pad(day)}-12-${year}@december-wonders`,`DTSTAMP:${stampNow}`,`DTSTART${e.duration===null?';VALUE=DATE:'+dateStamp(start):':'+stamp(start)}`,`DTEND${e.duration===null?';VALUE=DATE:'+dateStamp(end):':'+stamp(end)}`,`SUMMARY:${escapeICS(e.title+' (демо)')}`,`DESCRIPTION:${escapeICS(e.desc+'\nДемо-событие: время и место условные.')}`,`LOCATION:${escapeICS(e.place)}`,'END:VEVENT','END:VCALENDAR'];
+   const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//December Wonders//Advent Calendar//RU','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:advent-${pad(day)}-12-${year}@december-wonders`,`DTSTAMP:${stampNow}`,`DTSTART${e.duration===null?';VALUE=DATE:'+dateStamp(start):':'+stamp(start)}`,`DTEND${e.duration===null?';VALUE=DATE:'+dateStamp(end):':'+stamp(end)}`,`SUMMARY:${escapeICS(e.title)}`,`DESCRIPTION:${escapeICS(e.desc)}`,`LOCATION:${escapeICS(e.place)}`,'END:VEVENT','END:VCALENDAR'];
    const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
    const url=URL.createObjectURL(blob),a=document.createElement('a');
-   a.href=url;a.download=`advent-demo-${pad(day)}-12-${year}.ics`;
+   a.href=url;a.download=`advent-${pad(day)}-12-${year}.ics`;
    document.body.appendChild(a);a.click();a.remove();
    setTimeout(()=>URL.revokeObjectURL(url),1000);
-   showToast('Демо-событие подготовлено для календаря');
+   showToast('Файл события для календаря скачан');
  }
 
  // Drag downward by the sheet's top handle; content remains natively scrollable.
@@ -1012,14 +1006,14 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  async function shareDay(day){
   const e=events[day],t=thoughts[day-1];
   const title=e?.title||t[0];
-  const text=e?`${day} декабря · ${title}\n${e.time} · ${e.place}\n${e.desc}\n(Демо: время и место условные)`:`${day} декабря · ${title}\n${t[1]}`;
+  const text=e?`${day} декабря · ${title}\n${e.time} · ${e.place}\n${e.desc}`:`${day} декабря · ${title}\n${t[1]}`;
   try{if(navigator.share){await navigator.share({title,text});return}if(navigator.clipboard){await navigator.clipboard.writeText(text);showToast('Текст скопирован');return}const copy=document.createElement('textarea');copy.value=text;document.body.appendChild(copy);copy.select();document.execCommand('copy');copy.remove();showToast('Текст скопирован')}catch(err){if(err.name!=='AbortError')showToast('Не удалось поделиться')}
  }
  function showToast(message){const t=document.getElementById('toast');t.textContent=message;t.classList.add('visible');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>t.classList.remove('visible'),2600)}
  overlay.addEventListener('click',()=>closeSheet());
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeDay!==null)closeSheet();if(e.key==='Tab'&&activeDay!==null){const focusable=Array.from(sheet.querySelectorAll('button'));if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
  document.getElementById('aboutBtn').addEventListener('click',()=>{
-  lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Открыто <strong>${visibleVisitedCount()} из 31</strong> дней календаря</p>${historyCountdownMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>У каждого дня — своё время</blockquote><p>Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже. Некоторые детали событий пока демонстрационные.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
+  lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Открыто <strong>${visibleVisitedCount()} из 31</strong> дней календаря</p>${historyCountdownMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>У каждого дня — своё время</blockquote><p>Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
   sheet.setAttribute('aria-hidden','false');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';requestAnimationFrame(()=>{overlay.classList.add('show');sheet.classList.add('show')});sheet.scrollTop=0;
   sheet.querySelector('#closeSheet').onclick=()=>closeSheet();sheet.querySelector('#mainAction').onclick=()=>closeSheet();sheet.querySelector('#closeSheet').focus({preventScroll:true});refreshCountdown();
  });
