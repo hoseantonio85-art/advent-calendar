@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' show FontFeature;
 // Compatibility with hosts using Flutter before the Material package split.
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
@@ -195,7 +194,7 @@ class _Tile extends StatelessWidget {
               (event['cardLines'] as List?)?.join('\n') ?? event['shortTitle'] as String? ?? day.title,
               style: TextStyle(color: const Color(0xfff9f7ee), fontSize: wide ? (compact ? 13 : 15) : (compact ? 10.2 : 12), height: 1.13, fontWeight: FontWeight.w700))),
           ] else ...[
-            Positioned(right: -18, top: 10, child: Opacity(opacity: .12, child: Icon(Icons.circle_outlined, size: 112, color: dark ? Colors.white : const Color(0xff774f4b)))),
+            Positioned(right: -18, top: 10, child: CustomPaint(size: const Size(90,112), painter: _OrnamentPainter(dark ? const Color(0x20ffe2ca) : const Color(0x20774f4b)))),
             Positioned.fill(child: Center(child: Text('${day.date.day}', style: _serif.copyWith(fontSize: compact ? 60 : 70,
               fontFeatures: const [FontFeature.tabularFigures()], color: dark ? const Color(0xfff7e8d6) : const Color(0xff774f4b))))),
           ],
@@ -205,6 +204,21 @@ class _Tile extends StatelessWidget {
         ])),
       )));
   }
+}
+
+class _OrnamentPainter extends CustomPainter {
+  const _OrnamentPainter(this.color); final Color color;
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.save(); canvas.scale(size.width / 100, size.height / 124);
+    final paint = Paint()..color = color;
+    canvas.drawOval(const Rect.fromLTWH(9,36,82,84),paint);
+    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(38,26,24,11),const Radius.circular(3)),paint);
+    canvas.drawCircle(const Offset(50,17),9,paint..style=PaintingStyle.stroke..strokeWidth=4);
+    canvas.restore();
+  }
+  @override
+  bool shouldRepaint(_OrnamentPainter old) => color != old.color;
 }
 
 class _WinterPainter extends CustomPainter {
