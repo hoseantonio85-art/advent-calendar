@@ -675,9 +675,11 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 
 
 /* Saved wisdom: a quiet heart on the day, never a like count. */
-.day-card.wisdom .saved-heart{position:absolute;z-index:6;right:10px;top:10px;display:grid;place-items:center;width:26px;height:26px;border-radius:9px;color:#a64659;background:#fff9f2d9;border:1px solid #fff8ecaa;box-shadow:0 2px 11px #210e172a;pointer-events:none}
-.day-card.wisdom .saved-heart svg{display:block;width:15px;height:15px;fill:currentColor;stroke:currentColor;stroke-width:1.5}
+.day-card.wisdom .saved-heart{position:absolute;z-index:6;right:11px;top:10px;display:grid;place-items:center;width:17px;height:17px;padding:0;color:#e04460;background:transparent;border:0;box-shadow:none;pointer-events:none}
+.day-card.wisdom .saved-heart svg{display:block;width:15px;height:15px;fill:currentColor;stroke:currentColor;stroke-width:1.5;animation:saved-heart-glint 8s ease-in-out infinite}
 .day-card.wisdom.is-today .saved-heart{top:35px}
+@keyframes saved-heart-glint{0%,82%,95%,100%{filter:drop-shadow(0 1px 1px #531e3138) brightness(1)}88%{filter:drop-shadow(0 0 4px #ffb1c0a8) brightness(1.28)}}
+@media(prefers-reduced-motion:reduce){.day-card.wisdom .saved-heart svg{animation:none}}
 .action-main.save-advice svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.75;flex:none}
 .action-main.save-advice.is-saved svg{fill:#eab0b4;stroke:#eab0b4}
 .history-saved-section{margin:1px 0 20px}
