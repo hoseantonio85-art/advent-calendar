@@ -706,6 +706,20 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .history-saved-more{width:100%;border:0;background:transparent;padding:13px;color:#406d56;font-size:12px;font-weight:760;text-align:center;cursor:pointer;border-top:1px solid #dce4d7}
 .history-saved-empty{margin:0;padding:15px 14px;background:#eff2e9;border:1px solid #dce4d7;border-radius:15px;color:#6d8073;font-size:12px;line-height:1.55}
 @media(prefers-reduced-motion:reduce){.history-saved-item-arrow{transition:none}}
+
+/* Four surprise events: frosted and undisclosed until campaign midnight. */
+.day-card.surprise .ornament-mark{display:none}
+.day-card.surprise .surprise-mark{position:absolute;right:-8px;top:12px;z-index:3;pointer-events:none;user-select:none;font-family:"Yeseva One",Georgia,serif;font-size:116px;line-height:1;color:#e9d7b8;opacity:.25;text-shadow:0 3px 16px #243b3040;transform:rotate(9deg)}
+.day-card.surprise.wide .surprise-mark{right:15px;top:-4px;font-size:156px}
+.day-card.surprise:nth-child(4n+1) .surprise-mark,.day-card.surprise:nth-child(4n+2) .surprise-mark{color:#875c61;opacity:.21}
+.day-card.surprise.is-locked .surprise-mark{filter:drop-shadow(0 0 8px #f5faff40)}
+/* One-off celebration stays inside the existing event illustration, not a second modal. */
+.sheet-visual .surprise-confetti{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none}
+.sheet-visual .surprise-confetti i{position:absolute;left:50%;top:52%;width:5px;height:10px;border-radius:2px;background:var(--piece);box-shadow:0 0 5px #fff8;opacity:0;transform:translate(-50%,-50%) scale(.3);animation:surprise-confetti-pop 1.45s cubic-bezier(.20,.75,.30,1) var(--wait) both}
+.sheet-visual .surprise-confetti i:nth-child(3n){width:6px;height:6px;border-radius:50%}
+.sheet-visual .surprise-confetti i:nth-child(4n){width:4px;height:8px}
+@keyframes surprise-confetti-pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(0deg)}15%{opacity:1}72%{opacity:.9}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.7) rotate(var(--spin))}}
+@media(prefers-reduced-motion:reduce){.sheet-visual .surprise-confetti{display:none}}
 </style>
 </head>
 <body>
@@ -800,8 +814,10 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 
  // Date preview exists only for QA, not as an alternate visual design.
  const query=new URLSearchParams(location.search);
- let previewDay=[1,15,31].includes(Number(query.get('preview')))?Number(query.get('preview')):null;
- const appTZ=window.ADVENT_CONFIG?.timeZone||null;
+ const qaDay=Number(query.get('preview'));
+ let previewDay=Number.isInteger(qaDay)&&qaDay>=1&&qaDay<=31?qaDay:null;
+ // Campaign midnight is Moscow time. An embedding host may explicitly override the clock.
+ const appTZ=window.ADVENT_CONFIG?.timeZone||'Europe/Moscow';
  function displayToday(){
    if(previewDay!==null)return {y:2026,m:12,d:previewDay};
    const now=new Date();
@@ -897,6 +913,9 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  const weekNames=['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
  const readStore=(key)=>{try{return new Set(JSON.parse(localStorage.getItem(key)||'[]'))}catch{return new Set()}};
  const visited=readStore('advent2026-visited'),saved=readStore('advent2026-saved');
+ // This is deliberately separate from 'visited': old pre-release visits must not count as revealed surprises.
+ const revealedSurprises=readStore('advent2026-surprise-opened'),qaRevealedSurprises=new Set();
+ const hasOpenedSurprise=day=>(previewDay===null?revealedSurprises:qaRevealedSurprises).has(day);
  const grid=document.getElementById('calendarGrid'),sheet=document.getElementById('sheet'),overlay=document.getElementById('overlay');
  // A full-page back action: an embedding host handles the navigation history.
  // Standalone GitHub Pages falls back to browser history.
@@ -919,7 +938,17 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  const escapeHtml=(str)=>String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
  const dateLabel=(d)=>`${d} декабря · ${weekNames[new Date(year,month-1,d).getDay()]}`;
  const cardTitleMarkup=(event,title)=>event?.cardLines?event.cardLines.map(line=>'<span class="card-line">'+escapeHtml(line)+'</span>').join(''):escapeHtml(event?.shortTitle||title);
+ const surpriseDays=new Set([4,9,11,15]);
+ function isLockedSurprise(day){return surpriseDays.has(day)&&dayState(day)==='is-future'}
  function isLockedAdvice(day){return !events[day]&&dayState(day)==='is-future'}
+ function surpriseConfettiMarkup(){
+   const colors=['#ffe0a0','#ffe5e7','#ec9c95','#f8fcdf','#b8e6cd','#ffffff'];
+   return '<div class="surprise-confetti" aria-hidden="true">'+Array.from({length:18},(_,i)=>{
+     const angle=(i*137.5+18)*Math.PI/180,dist=70+(i%4)*13;
+     const dx=Math.round(Math.cos(angle)*dist),dy=Math.round(Math.sin(angle)*dist*.68-15);
+     return '<i style="--dx:'+dx+'px;--dy:'+dy+'px;--spin:'+(i%2?-270:270)+'deg;--wait:'+(i%4*35)+'ms;--piece:'+colors[i%colors.length]+'"></i>';
+   }).join('')+'</div>';
+ }
  // Saved days share the same lightweight heart marker and never affect opened-day progress.
 function heartSvg(){
  return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.8 8.4c0 4.1-5 7.9-8.8 11.1C8.2 16.3 3.2 12.5 3.2 8.4a4.6 4.6 0 0 1 8.8-1.7 4.6 4.6 0 0 1 8.8 1.7Z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -951,15 +980,16 @@ function historySavedMarkup(){
  const more=days.length>3?'<button class="history-saved-more" id="showAllSaved" type="button" aria-expanded="false">Показать все '+days.length+'</button>':'';
  return '<section class="history-saved-section" aria-label="Сохранённые советы">'+heading+'<div class="history-saved-list">'+items+more+'</div></section>';
 }
- function visibleVisitedCount(){return [...visited].filter(day=>Number.isInteger(day)&&day>=1&&day<=31&&!isLockedAdvice(day)).length}
+ function visibleVisitedCount(){return [...visited].filter(day=>Number.isInteger(day)&&day>=1&&day<=31&&!isLockedAdvice(day)&&!isLockedSurprise(day)&&(!surpriseDays.has(day)||hasOpenedSurprise(day))).length}
  function renderGrid(){
    grid.innerHTML=Array.from({length:31},(_,i)=>{
-    const day=i+1,event=events[day],w=wideDays.has(day),thought=thoughts[i],state=dayState(day),locked=isLockedAdvice(day);
+    const day=i+1,lockedSurprise=isLockedSurprise(day),event=lockedSurprise?null:events[day],w=wideDays.has(day),thought=thoughts[i],state=dayState(day),locked=isLockedAdvice(day)||lockedSurprise;
     const theme=event?`theme-${event.theme}`:(i%3===0?'alt':'');
     const title=event?.title||thought[0];
-    return `<button class="day-card ${event?'event':'wisdom'} ${theme} ${w?'wide':''} ${state} ${locked?'is-locked':''}" data-day="${day}" aria-label="${day} декабря, ${event?'мероприятие: '+escapeHtml(title):locked?'закрыто, совет откроется '+day+' декабря':'совет дня: '+escapeHtml(title)+(saved.has(day)&&!locked?', совет сохранён':'')}">
+    return `<button class="day-card ${event?'event':'wisdom'} ${theme} ${w?'wide':''} ${state} ${locked?'is-locked':''} ${lockedSurprise?'surprise':''}" data-day="${day}" aria-label="${day} декабря, ${lockedSurprise?'сюрприз, откроется '+day+' декабря':event?'мероприятие: '+escapeHtml(title):locked?'закрыто, совет откроется '+day+' декабря':'совет дня: '+escapeHtml(title)+(saved.has(day)&&!locked?', совет сохранён':'')}">
       <span class="card-top"><span class="card-date">${day}</span></span>
       ${event?'':'<span class="empty-date" aria-hidden="true">'+day+'</span>'}
+      ${lockedSurprise?'<span class="surprise-mark" aria-hidden="true">?</span>':''}
       ${event?'':'<span class="ornament-mark" aria-hidden="true"><svg viewBox="0 0 100 124" focusable="false"><path d="M50 8c-5.2 0-9 3.9-9 9 0 5.2 3.8 9 9 9s9-3.8 9-9c0-5.1-3.8-9-9-9Z" fill="none" stroke="currentColor" stroke-width="4"/><rect x="38" y="26" width="24" height="11" rx="3" fill="currentColor"/><path d="M50 36c-23.8 0-41 18.1-41 42.4S26.9 120 50 120s41-17.3 41-41.6S73.8 36 50 36Z" fill="currentColor"/></svg></span>'}
       ${event?'':'<span class="winter-corner" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.75v18.5M2.75 12h18.5M5.45 5.45l13.1 13.1M18.55 5.45l-13.1 13.1"/><path d="m9.4 5.3 2.6 2.5 2.6-2.5M9.4 18.7l2.6-2.5 2.6 2.5M5.3 9.4 7.8 12l-2.5 2.6M18.7 9.4 16.2 12l2.5 2.6"/></svg></span>'}
       ${!event&&!locked&&saved.has(day)?savedHeartMarkup():''}
@@ -992,11 +1022,11 @@ function historySavedMarkup(){
  };
  const eventDetails=(key,label,value)=>`<div class="sheet-detail"><span class="sheet-detail-icon">${detailIcon(key)}</span><span class="sheet-detail-text"><span class="sheet-detail-label">${label}</span><span class="sheet-detail-value">${escapeHtml(value)}</span></span></div>`;
  const eventTextHtml=v=>escapeHtml(v).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>');
- function renderSheet(day){
+ function renderSheet(day,celebrate=false){
     const event=events[day],t=thoughts[day-1];
     return `<div class="sheet-grabber"></div>
      <header class="sheet-head"><div><p class="sheet-eyebrow">${escapeHtml(dateLabel(day))} · ${event?'событие':'совет дня'}</p><h2 class="sheet-title" id="sheetTitle">${escapeHtml(event?.title||t[0])}</h2></div><button class="close-btn" aria-label="Закрыть" id="closeSheet">×</button></header>
-     ${event?`<div class="sheet-visual theme-${event.theme}">${icon(event.art,'illustration')}</div>
+     ${event?`<div class="sheet-visual theme-${event.theme}">${icon(event.art,'illustration')}${celebrate?surpriseConfettiMarkup():''}</div>
        <div class="sheet-event-info" aria-label="Информация о событии">
          ${eventDetails('date','Дата',`${day} декабря 2026`)}
          ${eventDetails('clock','Время',event.time)}
@@ -1029,12 +1059,18 @@ function historySavedMarkup(){
    scroll.scrollTop=0;
  }
  function openDay(day){
+   if(isLockedSurprise(day)){showToast('Сюрприз откроется '+day+' декабря ✦');return}
    if(isLockedAdvice(day)){showToast('Совет откроется '+day+' декабря ✦');return}
    if(activeDay!==null)closeSheet(false);
+   const celebrate=surpriseDays.has(day)&&!hasOpenedSurprise(day);
+   if(celebrate){
+     (previewDay===null?revealedSurprises:qaRevealedSurprises).add(day);
+     if(previewDay===null)try{localStorage.setItem('advent2026-surprise-opened',JSON.stringify([...revealedSurprises]))}catch{}
+   }
    activeDay=day;lastFocus=document.activeElement;visited.add(day);
    try{localStorage.setItem('advent2026-visited',JSON.stringify([...visited]))}catch{}
    updateProgress();
-   sheet.innerHTML=renderSheet(day);
+   sheet.innerHTML=renderSheet(day,celebrate);
    prepareSheetShell();
    sheet.setAttribute('aria-hidden','false');overlay.setAttribute('aria-hidden','false');
    document.body.style.overflow='hidden';
@@ -1136,7 +1172,7 @@ function historySavedMarkup(){
  overlay.addEventListener('click',()=>closeSheet());
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeDay!==null)closeSheet();if(e.key==='Tab'&&activeDay!==null){const focusable=Array.from(sheet.querySelectorAll('button'));if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
  document.getElementById('aboutBtn').addEventListener('click',()=>{
-  lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Открыто <strong>${visibleVisitedCount()} из 31</strong> дней календаря</p>${historyCountdownMarkup()}${historySavedMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>У каждого дня — своё время</blockquote><p>Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
+  lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Открыто <strong>${visibleVisitedCount()} из 31</strong> дней календаря</p>${historyCountdownMarkup()}${historySavedMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>У каждого дня — своё время</blockquote><p>Просмотр доступных дней отмечается в прогрессе. Большинство событий видно заранее; четыре сюрприза открываются в свои даты, а советы доступны со своего дня.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
   prepareSheetShell();
   sheet.setAttribute('aria-hidden','false');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';requestAnimationFrame(()=>{overlay.classList.add('show');sheet.classList.add('show')});sheet.querySelector('.sheet-scroll').scrollTop=0;
   sheet.querySelector('#closeSheet').onclick=()=>closeSheet();sheet.querySelector('#mainAction').onclick=()=>closeSheet();
@@ -1151,8 +1187,18 @@ function historySavedMarkup(){
  });
  const previewControl=document.getElementById('previewCycle');
  if(previewDay!==null){previewControl.hidden=false;previewControl.textContent='Просмотр: '+previewDay+' декабря · сменить';previewControl.addEventListener('click',()=>{previewDay=previewDay===1?15:previewDay===15?31:1;previewControl.textContent='Просмотр: '+previewDay+' декабря · сменить';renderGrid();updateProgress()})}
- renderGrid();updateProgress();refreshCountdown();setInterval(refreshCountdown,1000);
- setInterval(()=>{if(previewDay===null)renderGrid()},60000);
+ renderGrid();updateProgress();refreshCountdown();
+ // Check the campaign date, not just elapsed minutes; the four surprises reveal at 00:00 Moscow.
+ const campaignDateKey=()=>{const d=displayToday();return d.y*10000+d.m*100+d.d};
+ let drawnCampaignDate=campaignDateKey();
+ function syncCalendarDate(){
+   if(previewDay!==null)return;
+   const key=campaignDateKey();
+   if(key!==drawnCampaignDate){drawnCampaignDate=key;renderGrid();updateProgress()}
+ }
+ setInterval(()=>{refreshCountdown();syncCalendarDate()},1000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncCalendarDate()});
+ window.addEventListener('focus',syncCalendarDate);
 })();
 </script>
 </body>
