@@ -1,3 +1,6 @@
+> 23.11.2026: custom progress-адаптеру требуется также SurpriseRepository для
+> первого просмотра четырёх сюрпризов. [Контракт и миграция](FLUTTER-SYNC-REPORT-2026-11-23.md#сюрпризы-и-хранение).
+
 # Локальное хранение и системные действия · Issue #4
 
 LocalAdventRepository реализует ProgressRepository и SavedAdviceRepository поверх

@@ -648,7 +648,7 @@ class _SavedListState extends State<_SavedAdviceList>{
 class _SurpriseTile extends StatelessWidget {
   const _SurpriseTile({required this.day,required this.onTap});final AdventDay day;final VoidCallback onTap;
   @override
-  Widget build(BuildContext context)=>Semantics(button:true,label:'${day.date.day} декабря, сюрприз, откроется ${day.date.day} декабря',child:Material(borderRadius:BorderRadius.circular(17),clipBehavior:Clip.antiAlias,color:Colors.transparent,
+  Widget build(BuildContext context)=>Semantics(button:true,label:'${day.date.day} декабря, сюрприз, откроется ${day.date.day} декабря',child:Material(borderRadius:BorderRadius.circular(MediaQuery.sizeOf(context).width<=380?15:17),clipBehavior:Clip.antiAlias,color:Colors.transparent,
     child:InkWell(onTap:onTap,child:Stack(fit:StackFit.expand,children:[
       Image.asset('assets/advent/snow_maiden_surprise.webp',package:'advent_calendar',fit:BoxFit.cover,alignment:Alignment.center,excludeFromSemantics:true),
       const DecoratedBox(decoration:BoxDecoration(gradient:LinearGradient(begin:Alignment.topCenter,end:Alignment.bottomCenter,colors:[Color(0x61081c38),Color(0x1f081c38),Colors.transparent],stops:[0,.26,.57]))),
