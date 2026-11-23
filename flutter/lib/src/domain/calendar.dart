@@ -31,9 +31,9 @@ DateTime civilDate(DateTime value) => DateTime.utc(value.year, value.month, valu
 class AdventCalendar {
   AdventCalendar(Iterable<AdventDay> values) : days = List.unmodifiable(values) {
     if (days.length != 31 || days.map((d) => d.id).toSet().length != 31 ||
-        days.where((d) => d.kind == DayKind.event).length != 13 ||
-        days.where((d) => d.kind == DayKind.advice).length != 18) {
-      throw FormatException('Expected 31 unique days / 13 events / 18 advice');
+        days.where((d) => d.kind == DayKind.event).length != 14 ||
+        days.where((d) => d.kind == DayKind.advice).length != 17) {
+      throw FormatException('Expected 31 unique days / 14 events / 17 advice');
     }
     for (var i = 0; i < days.length; i++) {
       final d = days[i];
