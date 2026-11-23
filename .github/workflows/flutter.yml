@@ -57,3 +57,44 @@ jobs:
         with:
           name: advent-demo-debug-apk
           path: flutter/example/build/app/outputs/flutter-apk/app-debug.apk
+
+  android-motion:
+    if: github.event_name == 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Prepare Android integration host
+        working-directory: flutter/example
+        run: |
+          flutter pub get
+          flutter create --platforms=android --project-name advent_demo .
+          flutter build apk --debug --target=integration_test/calendar_motion_test.dart
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise real Android runtime and record movement
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash tools/android-motion.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: advent-android-motion
+          path: flutter/example/build/android-motion/

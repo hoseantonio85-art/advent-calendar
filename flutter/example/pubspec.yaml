@@ -8,5 +8,10 @@ dependencies:
   advent_calendar:
     path: ../
   timezone: ^0.10.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
 flutter:
   uses-material-design: true

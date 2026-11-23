@@ -3,15 +3,16 @@ const {chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true});
  async function capture(page,name){fs.mkdirSync('build/visual-qa',{recursive:true});await page.screenshot({path:`build/visual-qa/reference-${name}.png`});}
- for(const [width,day] of [[320,15],[360,15],[390,15],[430,15],[390,3],[390,4]]){
+ for(const [width,day,progress] of [[320,15],[360,15],[390,15],[430,15],[390,3],[390,4],[320,15,true],[360,15,true],[390,15,true],[430,15,true]]){
   const context=await browser.newContext({viewport:{width,height:844},deviceScaleFactor:1,reducedMotion:'reduce',timezoneId:'Europe/Moscow'});
   const page=await context.newPage();
-  await page.addInitScript((day)=>{localStorage.setItem('advent2026-saved',JSON.stringify([3,5,6,7]));const Native=Date,iso='2026-12-'+String(day).padStart(2,'0')+'T09:00:00Z';window.Date=class extends Native{constructor(...args){super(...(args.length?args:[iso]));}static now(){return new Native(iso).getTime();}};window.ADVENT_CONFIG={timeZone:'Europe/Moscow'};},day);
+  await page.addInitScript(({day,progress})=>{if(progress)localStorage.setItem('advent2026-visited',JSON.stringify([1,2,8,10,12,14,16]));localStorage.setItem('advent2026-saved',JSON.stringify([3,5,6,7]));const Native=Date,iso='2026-12-'+String(day).padStart(2,'0')+'T09:00:00Z';window.Date=class extends Native{constructor(...args){super(...(args.length?args:[iso]));}static now(){return new Native(iso).getTime();}};window.ADVENT_CONFIG={timeZone:'Europe/Moscow'};},{day,progress});
   await page.route('https://fonts.googleapis.com/**',route=>route.fulfill({contentType:'text/css',body:
    `@font-face{font-family:'Roboto';font-weight:100 900;src:url(data:font/ttf;base64,${fs.readFileSync('flutter/assets/fonts/Roboto-Variable.ttf').toString('base64')});}@font-face{font-family:'Yeseva One';font-weight:400;src:url(data:font/ttf;base64,${fs.readFileSync('flutter/assets/fonts/YesevaOne-Regular.ttf').toString('base64')});}`}));
   await page.goto('file://'+path.resolve('index.html').split(path.sep).join('/'));await page.evaluate(()=>document.fonts.ready);
   if(!await page.evaluate(()=>document.fonts.check('400 12px "Roboto"')&&document.fonts.check('400 28px "Yeseva One"')))throw Error('Reference font fallback');
   console.log('ADVENT_METRICS|'+width+'|'+JSON.stringify(await page.evaluate(()=>Object.fromEntries(['.hero h1','.hero-art','.progress-panel','.day-card[data-day="2"] .illustration','.day-card[data-day="9"] .illustration','.day-card[data-day="25"] .illustration','.day-card[data-day="31"] .illustration'].map(q=>{const e=document.querySelector(q);if(!e)return[q,null];const s=getComputedStyle(e),r=e.getBoundingClientRect();return[q,{x:r.x,y:r.y,width:r.width,height:r.height,font:s.fontSize,top:s.top,right:s.right}]})))));
+  if(progress){await capture(page,`xxs-progress-${width}`);await context.close();continue;}
   if(day!=15){await capture(page,`surprise-${day}-390`);await context.close();continue;}
   await capture(page,`calendar-${width}`);
   if(width==320||width==390){await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));await capture(page,`finale-${width}`);}

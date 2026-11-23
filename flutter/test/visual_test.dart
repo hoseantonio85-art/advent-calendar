@@ -56,10 +56,11 @@ void main(){
         await File('${folder.path}/$name.png').writeAsBytes(bytes!.buffer.asUint8List());
       });
     }
-    Future<void> mount(double width,{double scale=1,DateTime? date,int savedCount=4})async{
+    Future<void> mount(double width,{double scale=1,DateTime? date,int savedCount=4,int openedCount=0})async{
       await tester.pumpWidget(const SizedBox());
       tester.view.physicalSize=Size(width,844);tester.view.devicePixelRatio=1;
       final time=CampaignTime.moscow(clock:VisualClock(date)),store=VisualStore();
+      store.ids.addAll(content.calendar.days.where((d)=>d.kind==DayKind.event&&!d.revealOnDate).take(openedCount).map((d)=>d.id));
       store.saved.addAll(content.calendar.days.where((d)=>d.kind==DayKind.advice).take(savedCount).map((d)=>d.id));
       await tester.pumpWidget(RepaintBoundary(key:const ValueKey('capture'),child:DefaultAssetBundle(bundle:assets,child:MaterialApp(
         debugShowCheckedModeBanner:false,theme:ThemeData(fontFamily:'packages/advent_calendar/Roboto',colorSchemeSeed:const Color(0xff284936)),
@@ -103,6 +104,11 @@ void main(){
       expect(find.text('Поделиться').hitTestable(),findsOneWidget);
       await capture(scale==1?'long-event-bottom-320':'text200-long-event-bottom-320');await close();
     }
+    for(final width in [320.0,360.0,390.0,430.0]){
+      await mount(width,scale:.8,openedCount:7);await capture('xxs-progress-'+width.toInt().toString());
+    }
+    await mount(390,date:DateTime.utc(2026,12,2,9));
+    await tester.tap(find.byKey(const ValueKey('day-3')));await capture('locked-advice-toast-390');
     for(final count in [0,1]){
       await mount(390,savedCount:count);await tester.tap(find.text('Твоя история декабря'));
       await capture('history-saved-$count-390');
@@ -113,7 +119,7 @@ void main(){
     }
     for(final day in [3,4]){
       await mount(390,date:DateTime.utc(2026,12,day,9));await capture('surprise-$day-390');
-      if(day==3){await tester.ensureVisible(find.byKey(const ValueKey('day-4')));await tester.tap(find.byKey(const ValueKey('day-4')));await tester.pumpAndSettle();expect(find.text('День какао'),findsNothing);expect(find.text('Сюрприз откроется 4 декабря ✦'),findsOneWidget);}
+      if(day==3){await tester.ensureVisible(find.byKey(const ValueKey('day-4')));await tester.tap(find.byKey(const ValueKey('day-4')));await tester.pumpAndSettle();expect(find.text('День какао'),findsNothing);expect(find.text('Сюрприз откроется 4 декабря'),findsOneWidget);}
       else{await show(4);await capture('surprise-revealed-sheet-390');await close();}
     }
     await tester.pumpWidget(const SizedBox());

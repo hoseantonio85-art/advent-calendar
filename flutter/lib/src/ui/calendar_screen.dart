@@ -9,6 +9,8 @@ import '../content/content.dart';
 import '../domain/calendar.dart';
 import '../platform/host.dart';
 
+part 'calendar_feedback.dart';
+
 const _forest = Color(0xff0a2a20), _gold = Color(0xfff3d495);
 const _serif = TextStyle(fontFamily: 'packages/advent_calendar/Yeseva One', fontWeight: FontWeight.w400);
 
@@ -29,6 +31,11 @@ class AdventCalendarScreen extends StatefulWidget {
 class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObserver, TickerProviderStateMixin {
   late final AnimationController _motion;
   late final AnimationController _heroMotion;
+  late final AnimationController _starMotion, _noticeMotion;
+  OverlayEntry? _noticeEntry;
+  Timer? _noticeTimer;
+  String? _noticeMessage;
+  int _noticeVersion = 0;
   Timer? _midnight;
   Set<String> _opened = {}, _savedIds = {};
   String? _error;
@@ -39,12 +46,14 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
     WidgetsBinding.instance.addObserver(this);
     _motion = AnimationController(vsync: this, duration: const Duration(milliseconds: 5500));
     _heroMotion = AnimationController(vsync:this,duration:const Duration(seconds:9));
+    _starMotion = AnimationController(vsync: this, duration: const Duration(seconds: 4));
+    _noticeMotion = AnimationController(vsync: this, duration: const Duration(milliseconds: 230), reverseDuration: const Duration(milliseconds: 180));
     _refresh();
   }
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (MediaQuery.disableAnimationsOf(context)) { _motion.stop(); _heroMotion.stop(); } else { _motion.repeat(); _heroMotion.repeat(); }
+    if (MediaQuery.disableAnimationsOf(context)) { _motion.stop(); _heroMotion.stop(); _starMotion.stop(); } else { _motion.repeat(); _heroMotion.repeat(); _starMotion.repeat(); }
   }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -64,11 +73,39 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _midnight?.cancel(); _motion.dispose(); _heroMotion.dispose(); super.dispose();
+    _midnight?.cancel(); _noticeTimer?.cancel(); _noticeEntry?.remove(); _noticeEntry?.dispose();
+    _noticeMotion.dispose(); _starMotion.dispose(); _motion.dispose(); _heroMotion.dispose(); super.dispose();
   }
+  void _showClosedNotice(String message) {
+    final version = ++_noticeVersion;
+    final reduced = MediaQuery.disableAnimationsOf(context);
+    _noticeTimer?.cancel();
+    final changed = _noticeMessage != message;
+    _noticeMessage = message;
+    if (_noticeEntry == null) {
+      _noticeEntry = OverlayEntry(builder: (_) => _ClosedDateNotice(message: _noticeMessage!,
+        motion: _noticeMotion.drive(CurveTween(curve: Curves.easeOutCubic))));
+      Overlay.of(context).insert(_noticeEntry!);
+    } else {
+      _noticeEntry!.markNeedsBuild();
+    }
+    if (reduced) { _noticeMotion.value = 1; }
+    else { _noticeMotion.forward(from: changed ? 0 : _noticeMotion.value); }
+    _noticeTimer = Timer(const Duration(milliseconds: 2700), () async {
+      if (!reduced) await _noticeMotion.reverse();
+      if (!mounted || version != _noticeVersion) return;
+      _noticeEntry?.remove(); _noticeEntry?.dispose(); _noticeEntry = null; _noticeMessage = null;
+    });
+  }
+
   Future<void> _open(AdventDay day) async {
-    if(day.revealOnDate&&!widget.content.calendar.isAvailable(day,widget.time.today)){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('Сюрприз откроется ${day.date.day} декабря ✦')));return;}
-    if (_opening || !widget.content.calendar.isAvailable(day, widget.time.today)) return;
+    if (!widget.content.calendar.isAvailable(day, widget.time.today)) {
+      _showClosedNotice((day.revealOnDate ? 'Сюрприз откроется ' : 'Откроется ') + day.date.day.toString() + ' декабря');
+      return;
+    }
+    if (_opening) return;
+    _noticeTimer?.cancel(); ++_noticeVersion;
+    _noticeEntry?.remove(); _noticeEntry?.dispose(); _noticeEntry = null; _noticeMessage = null;
     _opening = true;
     try {
       if (!await widget.progress.open(day.id) || !mounted) return;
@@ -77,7 +114,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
       if (!mounted) return;
       setState(() => _opened = opened);
       await showModalBottomSheet<void>(context: context, isScrollControlled: true,
-        useSafeArea: true, showDragHandle: false, barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor: const Color(0xfffaf2e6),
+        useSafeArea: true, sheetAnimationStyle: _calendarSheetMotion(context), showDragHandle: false, barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor: const Color(0xfffaf2e6),
         builder: (_) => _DaySheet(day: day, content: widget.content, time: widget.time,
           actions: widget.actions, savedAdvice: widget.savedAdvice,celebrate:celebrate,onSaved:(){_refresh();}));
     } catch (_) {
@@ -106,27 +143,20 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
             const SizedBox(width: 10), const Expanded(child: Text('ДЕКАБРЬ ЧУДЕС · 2026',
               style: TextStyle(color: _gold, fontSize: 10, letterSpacing: 1, fontWeight: FontWeight.w800))),
           ])),
-          _Hero(content: widget.content, motion:_heroMotion),
-          Semantics(button: true, label: 'Твоя история декабря. Открыто ${_opened.length} из 31',
-            child: InkWell(onTap:()=>showModalBottomSheet<void>(context:context,isScrollControlled:true,useSafeArea:true,showDragHandle:false,barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor:const Color(0xfffaf2e6),
-              builder:(_)=>_HistorySheet(opened:_opened.length,content:widget.content,time:widget.time,saved:_savedIds)),
-              child: Container(padding: const EdgeInsets.symmetric(horizontal:13,vertical:12), margin: const EdgeInsets.only(bottom:24),
-                decoration: BoxDecoration(color: const Color(0x1fd9eec0), borderRadius: BorderRadius.circular(19), border: Border.all(color: const Color(0x30d9eec0))),
-                child: Row(children:[Container(width:36,height:36,decoration:BoxDecoration(color:const Color(0x16d9eec0),borderRadius:BorderRadius.circular(12),border:Border.all(color:const Color(0x22d9eec0))),
-                  child:const CustomPaint(painter:_MedalPainter())),const SizedBox(width:12),
-                  Expanded(child:Column(children:[Row(children:[
-                    const Expanded(child:Text('Твоя история декабря',style:TextStyle(color:Color(0xffe3e9d5),fontSize:11,fontWeight:FontWeight.w700))),
-                    Text('${_opened.length} / 31',key:const ValueKey('progress-count'),style:const TextStyle(color:_gold,fontSize:10,fontWeight:FontWeight.w700))]),
-                    const SizedBox(height:8),LinearProgressIndicator(value:_opened.length/31,minHeight:3,color:_gold,backgroundColor:const Color(0x22ffffff)),
-                  ])),
-                ])))),
+          _Hero(content: widget.content, motion: _heroMotion, stars: _starMotion, width: width),
+          _ProgressPanel(opened: _opened.length, onTap: () => showModalBottomSheet<void>(
+            context: context, isScrollControlled: true, useSafeArea: true, showDragHandle: false,
+            sheetAnimationStyle: _calendarSheetMotion(context), barrierColor: const Color(0xc202100c),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(27))),
+            backgroundColor: const Color(0xfffaf2e6),
+            builder: (_) => _HistorySheet(opened: _opened.length, content: widget.content, time: widget.time, saved: _savedIds))),
           if (_error != null) TextButton(onPressed: _refresh, child: Text(_error!, style: const TextStyle(color: _gold))),
           for (final row in rows) Padding(padding: EdgeInsets.only(bottom: row == rows.last ? 0 : gap), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             for (var i = 0; i < row.length; i++) ...[
               if (i > 0) SizedBox(width: gap),
               SizedBox(width: ((width - (width <= 380 ? 24 : 32) - gap * 2) / 3) * row[i].columns + gap * (row[i].columns - 1),
                 height: tileHeight * math.max(1, MediaQuery.textScalerOf(context).scale(1)),
-                child: _Tile(day: row[i], content: widget.content, date: widget.time.today,
+                child: _Tile(day: row[i], viewportWidth: width, content: widget.content, date: widget.time.today,
                   available: widget.content.calendar.isAvailable(row[i], widget.time.today),
                   motion: _motion, saved:_savedIds.contains(row[i].id), onTap: () => _open(row[i])))
             ]
@@ -142,23 +172,65 @@ Widget _art(AdventContent content, String key, {double? size}) => Image.asset(
   excludeFromSemantics: true, errorBuilder: (_, __, ___) => SizedBox(width: size, height: size));
 
 class _Hero extends StatelessWidget {
-  const _Hero({required this.content,required this.motion});
-  final Animation<double> motion;
+  const _Hero({required this.content, required this.motion, required this.stars, required this.width});
+  final Animation<double> motion, stars;
   final AdventContent content;
+  final double width;
+
   @override
-  Widget build(BuildContext context) => Padding(padding: const EdgeInsets.fromLTRB(5,39,0,29), child: Stack(clipBehavior: Clip.none, children: [
-    Positioned(right: MediaQuery.sizeOf(context).width<=335?-157:MediaQuery.sizeOf(context).width<=380?-150:-158, top:MediaQuery.sizeOf(context).width<=335?-69:MediaQuery.sizeOf(context).width<=380?-76:-82, child: ShaderMask(shaderCallback: (rect) => const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
-      colors: [Colors.white, Colors.white, Colors.transparent], stops: [0, .63, .93]).createShader(rect), child: AnimatedBuilder(animation:motion,child:_art(content,'hero_tree',size:MediaQuery.sizeOf(context).width<=335?310:MediaQuery.sizeOf(context).width<=380?325:356),builder:(_,child)=>Transform.rotate(angle:-8*math.pi/180,child:Transform.scale(scale:1+.018*math.sin(motion.value*2*math.pi),child:child))))),
-    Positioned.fill(child:ShaderMask(blendMode:BlendMode.dstIn,shaderCallback:(rect)=>const LinearGradient(begin:Alignment.topCenter,end:Alignment.bottomCenter,colors:[Colors.transparent,Colors.white,Colors.white,Colors.transparent],stops:[0,.16,.61,1]).createShader(rect),child:DecoratedBox(decoration:BoxDecoration(gradient:LinearGradient(colors:[_forest,_forest.withValues(alpha:.75),Colors.transparent],stops:const [0,.43,.79]))))),
-    const Positioned(right:26,top:1,child:CustomPaint(size:Size.square(17),painter:_SparkPainter(Color(0xb3f1dbaf)))),
-    const Positioned(right:7,top:188,child:CustomPaint(size:Size.square(12),painter:_SparkPainter(Color(0xb3f1dbaf)))),
-    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text.rich(TextSpan(children: [const TextSpan(text: '31 день\nмаленьких\n'), TextSpan(text: 'чудес', style: const TextStyle(color: _gold))]),
-        style: _serif.copyWith(color: const Color(0xfff8f2e8), fontSize: MediaQuery.sizeOf(context).width <= 335 ? 36 : MediaQuery.sizeOf(context).width <= 380 ? 39 : 43, height: .99, letterSpacing: -1.4)),
-      const SizedBox(height: 16), SizedBox(width: MediaQuery.sizeOf(context).width<=335?178:MediaQuery.sizeOf(context).width<=380?195:218, child: Text('События, тёплые мысли и немного волшебства — в каждом дне.', style: TextStyle(color:const Color(0xffd1dccb),fontSize:MediaQuery.sizeOf(context).width<=380?11:12,height:1.58))),
-    ]),
-  ]));
+  Widget build(BuildContext context) {
+    final compact = width <= 380, small = width <= 335;
+    final large = MediaQuery.textScalerOf(context).scale(1) > 1.4;
+    final titleSize = small ? 36.0 : compact ? 39.0 : 43.0;
+    return Padding(padding: const EdgeInsets.fromLTRB(5, 39, 0, 29),
+      child: Stack(clipBehavior: Clip.none, children: [
+        Positioned(right: small ? -157 : compact ? -150 : -158, top: small ? -69 : compact ? -76 : -82,
+          child: Opacity(opacity: large ? .32 : 1,
+            child: ShaderMask(shaderCallback: (rect) => const LinearGradient(
+              begin: Alignment.topCenter, end: Alignment.bottomCenter,
+              colors: [Colors.white, Colors.white, Colors.transparent], stops: [0, .63, .93]).createShader(rect),
+              child: AnimatedBuilder(animation: motion,
+                child: _art(content, 'hero_tree', size: small ? 310 : compact ? 325 : 356),
+                builder: (_, child) => Transform.rotate(angle: -8 * math.pi / 180,
+                  child: Transform.scale(scale: 1 + .018 * math.sin(motion.value * 2 * math.pi), child: child)))))),
+        Positioned.fill(child: ShaderMask(blendMode: BlendMode.dstIn,
+          shaderCallback: (rect) => const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
+            colors: [Colors.transparent, Colors.white, Colors.white, Colors.transparent], stops: [0, .16, .61, 1]).createShader(rect),
+          child: DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(
+            colors: [_forest, _forest.withValues(alpha: .75), Colors.transparent], stops: const [0, .43, .79]))))),
+        Positioned(right: 26, top: 1, child: _HeroSpark(motion: stars, size: 17)),
+        // Anchor to the actual text block, not a fixed y: XXS/200% cannot move this under the glass panel.
+        Positioned(right: 7, bottom: -20, child: _HeroSpark(motion: stars, size: 12, delay: .275)),
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          ConstrainedBox(constraints: BoxConstraints(maxWidth: large ? width - 37 : small ? 193 : compact ? 213 : 235),
+            child: Text.rich(const TextSpan(children: [TextSpan(text: '31 день\nмаленьких\n'),
+              TextSpan(text: 'чудес', style: TextStyle(color: _gold))]),
+              key: const ValueKey('hero-title'),
+              style: _serif.copyWith(color: const Color(0xfff8f2e8), fontSize: titleSize,
+                height: .99, letterSpacing: -.035 * titleSize))),
+          const SizedBox(height: 16),
+          ConstrainedBox(constraints: BoxConstraints(maxWidth: large ? width - 37 : small ? 178 : compact ? 195 : 218),
+            child: Text('События, тёплые мысли и немного волшебства — в каждом дне.',
+              key: const ValueKey('hero-description'),
+              style: TextStyle(color: const Color(0xffd1dccb), fontSize: compact ? 11 : 12, height: 1.58))),
+        ]),
+      ]));
+  }
 }
+
+class _HeroSpark extends StatelessWidget {
+  const _HeroSpark({required this.motion, required this.size, this.delay = 0});
+  final Animation<double> motion;
+  final double size, delay;
+  @override
+  Widget build(BuildContext context) => IgnorePointer(child: AnimatedBuilder(animation: motion,
+    builder: (_, __) {
+      final t = MediaQuery.disableAnimationsOf(context) ? .5 : (1 - math.cos((motion.value - delay) * 2 * math.pi)) / 2;
+      return Opacity(opacity: .7 * (.5 + .5 * t), child: Transform.scale(scale: .85 + .25 * t,
+        child: CustomPaint(size: Size.square(size), painter: const _SparkPainter(Color(0xfff1dbaf)))));
+    }));
+}
+
 
 List<Color> _colors(AdventDay day) {
   if (day.kind == DayKind.advice) {
@@ -188,16 +260,17 @@ ColorFilter _cardFilter(double saturation, double brightness) {
 
 class _Tile extends StatelessWidget {
   const _Tile({required this.day,required this.content,required this.date,
-    required this.available,required this.motion,required this.onTap,this.saved=false});
+    required this.available,required this.motion,required this.onTap,required this.viewportWidth,this.saved=false});
   final AdventDay day;
   final AdventContent content;
   final DateTime date;
   final bool available,saved;
+  final double viewportWidth;
   final Animation<double> motion;
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
-    final event=day.event, n=day.date.day, width=MediaQuery.sizeOf(context).width;
+    final event=day.event, n=day.date.day, width=viewportWidth;
     final small=width<=335, compact=width<=380, wide=day.columns==2;
     final today=civilDate(day.date)==date, past=civilDate(day.date).isBefore(date);
     final light=event==null && (n%4==1 || n%4==2), locked=!available;
@@ -224,13 +297,14 @@ class _Tile extends StatelessWidget {
     final saturation=past? .70:locked?(light? .87:.90):1.0;
     final brightness=past? .93:locked&&light? .96:1.0;
     if(day.revealOnDate&&!available)return KeyedSubtree(key:ValueKey('day-$n'),child:_SurpriseTile(day:day,onTap:onTap));
-    return Semantics(key:ValueKey('day-$n'),button:true,enabled:available,excludeSemantics:true,
+    return Semantics(key:ValueKey('day-$n'),button:true,enabled:true,onTap:onTap,excludeSemantics:true,
       label:'$n декабря, ${event!=null?'мероприятие: ${day.title}':available?'совет дня: ${day.title}${saved?', совет сохранён':''}':'закрыто, совет откроется $n декабря'}',
       child:RepaintBoundary(child:Opacity(opacity:opacity,child:ColorFiltered(colorFilter:_cardFilter(saturation,brightness),
         child:Material(color:Colors.transparent,borderRadius:BorderRadius.circular(radius),clipBehavior:Clip.antiAlias,
-          child:InkWell(onTap:available?onTap:null,child:Stack(children:[
+          child:InkWell(onTap:onTap,child:Stack(children:[
             Positioned.fill(child:DecoratedBox(decoration:BoxDecoration(gradient:LinearGradient(begin:Alignment.topLeft,end:Alignment.bottomRight,colors:_colors(day))))),
             if(event!=null)...[
+              Positioned.fill(child:IgnorePointer(child:CustomPaint(painter:_EventLightPainter(day)))),
               Positioned(right:artRight,top:artTop,child:Transform.rotate(angle:artAngle*math.pi/180,child:_art(content,day.art,size:artSize))),
               Positioned.fill(child:DecoratedBox(decoration:BoxDecoration(gradient:LinearGradient(begin:wide?Alignment.centerLeft:Alignment.bottomCenter,end:wide?Alignment.centerRight:Alignment.topCenter,
                 colors:wide?const [Color(0x4d101d1b),Colors.transparent]:const [Color(0x85111b1c),Colors.transparent],stops:wide?const [0,.75]:const [0,.65])))),
@@ -317,7 +391,17 @@ class _CardTexturePainter extends CustomPainter {
         for(var x=0.0;x<size.width;x+=8){final yy=y-x*.47;final weight=_edge(.58*x/size.width+.42*yy/size.height);
           canvas.drawLine(Offset(x,yy),Offset(x+8,yy-3.76),Paint()..strokeWidth=.6..color=const Color(0xffeefeff).withValues(alpha:.12*weight));}
       }canvas.restore();
-      canvas.drawRRect(RRect.fromRectAndRadius(rect.deflate(4),const Radius.circular(15)),Paint()..style=PaintingStyle.stroke..strokeWidth=8..color=const Color(0x34e0faff)..maskFilter=const MaskFilter.blur(BlurStyle.normal,7));
+      for (var i = 0; i < 20; i++) {
+        final inset = i + .5;
+        if (inset * 2 >= size.shortestSide) break;
+        canvas.drawRRect(RRect.fromRectAndRadius(rect.deflate(inset), Radius.circular(math.max(0, 15 - inset))),
+          Paint()..style = PaintingStyle.stroke..strokeWidth = 1
+            ..color = const Color(0xffd3f3ff).withValues(alpha: .18 * math.pow(1 - i / 20, 2)));
+      }
+      canvas.drawRRect(RRect.fromRectAndRadius(rect.deflate(.9), const Radius.circular(15)),
+        Paint()..style = PaintingStyle.stroke..strokeWidth = .85
+          ..shader = const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
+            colors: [Color(0xb9ffffff), Colors.transparent], stops: [0, .35]).createShader(rect));
     }else{
       final step=sheet?18.0:16.0;
       for(var x=step/2;x<size.width;x+=step){for(var y=step/2;y<size.height;y+=step){
@@ -487,14 +571,23 @@ Widget _detail(IconData icon,String label,String value,double width,{bool first=
 class _MedalPainter extends CustomPainter{
   const _MedalPainter();
   @override
-  void paint(Canvas canvas,Size size){canvas.save();canvas.translate(5,5);canvas.scale((size.width-10)/160);
+  void paint(Canvas canvas,Size size){canvas.save();canvas.translate((size.width-23)/2,(size.height-23)/2);canvas.scale(23/160);
     final path=Path()..moveTo(81,10)..cubicTo(85,54,108,75,151,80)..cubicTo(111,87,87,109,81,150)..cubicTo(74,108,50,87,10,80)..cubicTo(51,73,75,53,81,10)..close();
-    canvas.drawPath(path,Paint()..shader=const LinearGradient(colors:[Color(0xfffff2c0),Color(0xffbf914b)]).createShader(const Rect.fromLTWH(0,0,160,160)));canvas.restore();}
+    canvas.drawPath(path,Paint()..shader=const LinearGradient(colors:[Color(0xfffff2c0),Color(0xffbf914b)]).createShader(const Rect.fromLTWH(0,0,160,160)));
+    canvas.drawPath(path, Paint()..color=const Color(0xfffff4c8)..style=PaintingStyle.stroke..strokeWidth=1);
+    canvas.drawPath(Path()..moveTo(81,23)..lineTo(81,136)..moveTo(26,80)..lineTo(136,80),Paint()..color=const Color(0x59ffffff)..style=PaintingStyle.stroke..strokeWidth=3);
+    canvas.drawCircle(const Offset(124,28),5,Paint()..color=const Color(0xfffaf0c5));
+    canvas.drawCircle(const Offset(27,130),3,Paint()..color=const Color(0xfffaf0c5));canvas.restore();}
   @override
   bool shouldRepaint(_MedalPainter old)=>false;
 }
 
-Widget _featureTheme(BuildContext context,Widget child)=>Theme(data:Theme.of(context).copyWith(textTheme:Theme.of(context).textTheme.apply(fontFamily:'packages/advent_calendar/Roboto')),child:child);
+// Chrome does not shrink authored CSS text at Android XXS. Keep the same readable
+// minimum inside this feature, while preserving the host's enlarged/nonlinear scaler.
+Widget _featureTheme(BuildContext context, Widget child) => MediaQuery(
+  data: MediaQuery.of(context).copyWith(textScaler: MediaQuery.textScalerOf(context).clamp(minScaleFactor: 1)),
+  child: Theme(data: Theme.of(context).copyWith(textTheme: Theme.of(context).textTheme.apply(
+    fontFamily: 'packages/advent_calendar/Roboto')), child: child));
 
 class _BackdropPainter extends CustomPainter {
   const _BackdropPainter();
