@@ -1,5 +1,17 @@
 # Декабрь чудес · Advent Calendar
 
+<!-- android-preview:start -->
+## 📱 Android · сборка для проверки
+
+[![Скачать APK](https://img.shields.io/badge/Android-%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C%20APK-2E7D32?logo=android&logoColor=white)](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45211174588/advent-calendar-preview.apk)
+
+**[Скачать APK напрямую](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45211174588/advent-calendar-preview.apk)** · [Страница сборки](https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-45211174588)
+
+Проверенная Flutter-сборка из PR #6: `b01a141`, 23 ноября 2026 г. в 19:42 (Москва). Обычный APK, без ZIP и входа в Actions. Это demo для приёмки.
+
+Ссылка обновляется после успешных проверок новой сборки. При конфликте отладочной подписи потребуется переустановка demo с удалением локального прогресса.
+<!-- android-preview:end -->
+
 ## Четыре сюрприза — фон со Снегурочкой · 23 ноября 2026
 
 **Текущий HTML для UX-ревью:** до наступления даты 4, 9, 11 и 15 декабря вместо знака вопроса показывают [Снегурочку с подарком](assets/snow-maiden-surprise.webp) на **весь фон карточки** (`cover`); поверх **число в левом верхнем углу и маленькую полупрозрачную подпись «Сюрприз» внизу слева**. Подпись показывается только до даты раскрытия ([HTML-коммит `59d3eb1`](https://github.com/hoseantonio85-art/advent-calendar/commit/59d3eb10a629e25036f681612388f6d900dd4382)). Больше нет вопроса, снежинки, шарика, снежных частиц или дополнительного frost-слоя. Лёгкое затемнение верхней части обеспечивает читаемость даты. Все 4 карточки используют одну картинку; широкая и узкие кадрируют её по-разному.
