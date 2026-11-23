@@ -672,6 +672,36 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 }
 .sheet .sheet-head{padding-right:0}
 @media(max-width:360px){.sheet-scroll{padding-left:16px;padding-right:16px}}
+
+
+/* Saved wisdom: a quiet heart on the day, never a like count. */
+.day-card.wisdom .saved-heart{position:absolute;z-index:6;right:10px;top:10px;display:grid;place-items:center;width:26px;height:26px;border-radius:9px;color:#a64659;background:#fff9f2d9;border:1px solid #fff8ecaa;box-shadow:0 2px 11px #210e172a;pointer-events:none}
+.day-card.wisdom .saved-heart svg{display:block;width:15px;height:15px;fill:currentColor;stroke:currentColor;stroke-width:1.5}
+.day-card.wisdom.is-today .saved-heart{top:35px}
+.action-main.save-advice svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.75;flex:none}
+.action-main.save-advice.is-saved svg{fill:#eab0b4;stroke:#eab0b4}
+.history-saved-section{margin:1px 0 20px}
+.history-saved-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 11px}
+.history-saved-label{display:inline-flex;align-items:center;gap:8px;color:#263f32;font-size:14px;font-weight:800;letter-spacing:-.015em}
+.history-saved-label svg{width:16px;height:16px;fill:#c16b78;stroke:#c16b78}
+.history-saved-count{color:#718578;font-size:11px;font-weight:750;font-variant-numeric:tabular-nums}
+.history-saved-list{border:1px solid #dce4d7;border-radius:15px;background:#eff2e9;overflow:hidden}
+.history-saved-item{margin:0;border-top:1px solid #dce4d7}
+.history-saved-item:first-child{border-top:0}
+.history-saved-item[hidden]{display:none}
+.history-saved-item summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;min-height:56px;padding:11px 13px}
+.history-saved-item summary::-webkit-details-marker{display:none}
+.history-saved-item summary:focus-visible,.history-saved-more:focus-visible{outline:2px solid #43745c;outline-offset:-3px;border-radius:8px}
+.history-saved-item-title{display:block;font-size:13px;line-height:1.3;color:#2c4737;font-weight:700}
+.history-saved-item-date{display:block;margin-top:4px;font-size:10px;line-height:1.2;color:#718476}
+.history-saved-item-arrow{margin-left:auto;flex:none;width:14px;height:14px;fill:none;stroke:#78907c;stroke-width:1.9;transition:transform .18s ease}
+.history-saved-item[open] .history-saved-item-arrow{transform:rotate(180deg)}
+.history-saved-item-copy{padding:0 13px 14px;color:#52685a;font-size:12px;line-height:1.58}
+.history-saved-item-copy p{margin:0 0 8px}
+.history-saved-item-copy p:last-child{margin-bottom:0}
+.history-saved-more{width:100%;border:0;background:transparent;padding:13px;color:#406d56;font-size:12px;font-weight:760;text-align:center;cursor:pointer;border-top:1px solid #dce4d7}
+.history-saved-empty{margin:0;padding:15px 14px;background:#eff2e9;border:1px solid #dce4d7;border-radius:15px;color:#6d8073;font-size:12px;line-height:1.55}
+@media(prefers-reduced-motion:reduce){.history-saved-item-arrow{transition:none}}
 </style>
 </head>
 <body>
@@ -886,17 +916,49 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  const dateLabel=(d)=>`${d} декабря · ${weekNames[new Date(year,month-1,d).getDay()]}`;
  const cardTitleMarkup=(event,title)=>event?.cardLines?event.cardLines.map(line=>'<span class="card-line">'+escapeHtml(line)+'</span>').join(''):escapeHtml(event?.shortTitle||title);
  function isLockedAdvice(day){return !events[day]&&dayState(day)==='is-future'}
+ // Saved days share the same lightweight heart marker and never affect opened-day progress.
+function heartSvg(){
+ return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.8 8.4c0 4.1-5 7.9-8.8 11.1C8.2 16.3 3.2 12.5 3.2 8.4a4.6 4.6 0 0 1 8.8-1.7 4.6 4.6 0 0 1 8.8 1.7Z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+function savedHeartMarkup(){
+ return '<span class="saved-heart" aria-hidden="true">'+heartSvg()+'</span>';
+}
+function saveAdviceButtonContent(day){
+ return heartSvg()+'<span>'+(saved.has(day)?'Совет сохранён':'Сохранить совет')+'</span>';
+}
+function syncSavedCard(day){
+ const card=grid.querySelector('[data-day="'+day+'"]');
+ if(!card)return;
+ const isSaved=saved.has(day)&&!events[day]&&!isLockedAdvice(day);
+ const existing=card.querySelector('.saved-heart');
+ if(isSaved&&!existing)card.insertAdjacentHTML('beforeend',savedHeartMarkup());
+ else if(!isSaved&&existing)existing.remove();
+ const label=card.getAttribute('aria-label')||'';
+ card.setAttribute('aria-label',label.replace(/, совет сохранён$/,'')+(isSaved?', совет сохранён':''));
+}
+function historySavedMarkup(){
+ const days=[...saved].map(Number).filter(day=>Number.isInteger(day)&&day>=1&&day<=31&&!events[day]&&!isLockedAdvice(day)).sort((a,b)=>a-b);
+ const heading='<div class="history-saved-head"><span class="history-saved-label">'+heartSvg()+'Сохранённые советы</span><span class="history-saved-count">'+days.length+'</span></div>';
+ if(!days.length)return '<section class="history-saved-section" aria-label="Сохранённые советы">'+heading+'<p class="history-saved-empty">Пока нет сохранённых советов. Открой совет и нажми «Сохранить совет» — он появится здесь.</p></section>';
+ const items=days.map((day,i)=>{
+   const t=thoughts[day-1];
+   return '<details class="history-saved-item" '+(i>=3?'hidden data-saved-extra':'')+'><summary><span><span class="history-saved-item-title">'+escapeHtml(t[0])+'</span><span class="history-saved-item-date">'+day+' декабря</span></span><svg class="history-saved-item-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 9 7 7 7-7"/></svg></summary><div class="history-saved-item-copy"><p>«'+escapeHtml(t[1])+'»</p><p><strong>Попробуй сегодня:</strong> '+escapeHtml(t[2])+'</p></div></details>';
+ }).join('');
+ const more=days.length>3?'<button class="history-saved-more" id="showAllSaved" type="button" aria-expanded="false">Показать все '+days.length+'</button>':'';
+ return '<section class="history-saved-section" aria-label="Сохранённые советы">'+heading+'<div class="history-saved-list">'+items+more+'</div></section>';
+}
  function visibleVisitedCount(){return [...visited].filter(day=>Number.isInteger(day)&&day>=1&&day<=31&&!isLockedAdvice(day)).length}
  function renderGrid(){
    grid.innerHTML=Array.from({length:31},(_,i)=>{
     const day=i+1,event=events[day],w=wideDays.has(day),thought=thoughts[i],state=dayState(day),locked=isLockedAdvice(day);
     const theme=event?`theme-${event.theme}`:(i%3===0?'alt':'');
     const title=event?.title||thought[0];
-    return `<button class="day-card ${event?'event':'wisdom'} ${theme} ${w?'wide':''} ${state} ${locked?'is-locked':''}" data-day="${day}" aria-label="${day} декабря, ${event?'мероприятие: '+escapeHtml(title):locked?'закрыто, совет откроется '+day+' декабря':'совет дня: '+escapeHtml(title)}">
+    return `<button class="day-card ${event?'event':'wisdom'} ${theme} ${w?'wide':''} ${state} ${locked?'is-locked':''}" data-day="${day}" aria-label="${day} декабря, ${event?'мероприятие: '+escapeHtml(title):locked?'закрыто, совет откроется '+day+' декабря':'совет дня: '+escapeHtml(title)+(saved.has(day)&&!locked?', совет сохранён':'')}">
       <span class="card-top"><span class="card-date">${day}</span></span>
       ${event?'':'<span class="empty-date" aria-hidden="true">'+day+'</span>'}
       ${event?'':'<span class="ornament-mark" aria-hidden="true"><svg viewBox="0 0 100 124" focusable="false"><path d="M50 8c-5.2 0-9 3.9-9 9 0 5.2 3.8 9 9 9s9-3.8 9-9c0-5.1-3.8-9-9-9Z" fill="none" stroke="currentColor" stroke-width="4"/><rect x="38" y="26" width="24" height="11" rx="3" fill="currentColor"/><path d="M50 36c-23.8 0-41 18.1-41 42.4S26.9 120 50 120s41-17.3 41-41.6S73.8 36 50 36Z" fill="currentColor"/></svg></span>'}
       ${event?'':'<span class="winter-corner" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.75v18.5M2.75 12h18.5M5.45 5.45l13.1 13.1M18.55 5.45l-13.1 13.1"/><path d="m9.4 5.3 2.6 2.5 2.6-2.5M9.4 18.7l2.6-2.5 2.6 2.5M5.3 9.4 7.8 12l-2.5 2.6M18.7 9.4 16.2 12l2.5 2.6"/></svg></span>'}
+      ${!event&&!locked&&saved.has(day)?savedHeartMarkup():''}
       ${state==='is-today'?'<span class="today-ring" aria-hidden="true"></span><span class="today-star" aria-hidden="true">✦</span>':''}
       ${event?'':snowForDay(day)}
       ${event?`<span class="card-burst"></span>${icon(event.art,'illustration')}<span class="card-bottom"><span class="card-name">${cardTitleMarkup(event,title)}</span></span>`:''}
@@ -943,7 +1005,7 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
        <div class="sheet-event-actions">
          <button class="sheet-icon-action" id="secondaryAction" type="button">${detailIcon('share')}<span>Поделиться</span></button>
        </div>
-       `:tipMarkup(day,true)+`<button class="action-main" id="mainAction">${saved.has(day)?'✓ Совет сохранён':'♡ Сохранить совет'}</button><button class="action-secondary" id="secondaryAction">Поделиться советом</button>`}`;
+       `:tipMarkup(day,true)+`<button class="action-main save-advice ${saved.has(day)?'is-saved':''}" id="mainAction" type="button" aria-pressed="${saved.has(day)}">${saveAdviceButtonContent(day)}</button><button class="action-secondary" id="secondaryAction">Поделиться советом</button>`}`;
  }
 
  // Move the grabber and close button outside the scrolling content so both
@@ -980,7 +1042,11 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
        if(saved.has(day)){saved.delete(day);showToast('Совет убран из сохранённого')}
        else{saved.add(day);showToast('Совет сохранён')}
        try{localStorage.setItem('advent2026-saved',JSON.stringify([...saved]))}catch{}
-       sheet.querySelector('#mainAction').textContent=saved.has(day)?'✓ Совет сохранён':'♡ Сохранить совет';
+       const btn=sheet.querySelector('#mainAction'),selected=saved.has(day);
+       btn.classList.toggle('is-saved',selected);
+       btn.setAttribute('aria-pressed',String(selected));
+       btn.innerHTML=saveAdviceButtonContent(day);
+       syncSavedCard(day);
      }
    });
    sheet.querySelector('#secondaryAction')?.addEventListener('click',()=>shareDay(day));
@@ -1066,10 +1132,18 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  overlay.addEventListener('click',()=>closeSheet());
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeDay!==null)closeSheet();if(e.key==='Tab'&&activeDay!==null){const focusable=Array.from(sheet.querySelectorAll('button'));if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
  document.getElementById('aboutBtn').addEventListener('click',()=>{
-  lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Открыто <strong>${visibleVisitedCount()} из 31</strong> дней календаря</p>${historyCountdownMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>У каждого дня — своё время</blockquote><p>Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
+  lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Открыто <strong>${visibleVisitedCount()} из 31</strong> дней календаря</p>${historyCountdownMarkup()}${historySavedMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>У каждого дня — своё время</blockquote><p>Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
   prepareSheetShell();
   sheet.setAttribute('aria-hidden','false');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';requestAnimationFrame(()=>{overlay.classList.add('show');sheet.classList.add('show')});sheet.querySelector('.sheet-scroll').scrollTop=0;
-  sheet.querySelector('#closeSheet').onclick=()=>closeSheet();sheet.querySelector('#mainAction').onclick=()=>closeSheet();sheet.querySelector('#closeSheet').focus({preventScroll:true});refreshCountdown();
+  sheet.querySelector('#closeSheet').onclick=()=>closeSheet();sheet.querySelector('#mainAction').onclick=()=>closeSheet();
+  const showAll=sheet.querySelector('#showAllSaved');
+  showAll?.addEventListener('click',()=>{
+    const expanded=showAll.getAttribute('aria-expanded')==='true';
+    sheet.querySelectorAll('[data-saved-extra]').forEach(item=>{item.hidden=expanded;if(expanded)item.open=false;});
+    showAll.setAttribute('aria-expanded',String(!expanded));
+    showAll.textContent=expanded?'Показать все '+[...sheet.querySelectorAll('.history-saved-item')].length:'Свернуть';
+  });
+  sheet.querySelector('#closeSheet').focus({preventScroll:true});refreshCountdown();
  });
  const previewControl=document.getElementById('previewCycle');
  if(previewDay!==null){previewControl.hidden=false;previewControl.textContent='Просмотр: '+previewDay+' декабря · сменить';previewControl.addEventListener('click',()=>{previewDay=previewDay===1?15:previewDay===15?31:1;previewControl.textContent='Просмотр: '+previewDay+' декабря · сменить';renderGrid();updateProgress()})}
