@@ -51,9 +51,26 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     final chrome = find.byKey(const ValueKey('sheet-chrome'));
     final samples = <double>[];
+    final motionFrames = <Map<String, num>>[];
+    var sampling = true;
+    final watch = Stopwatch()..start();
+    void sample(Duration _) {
+      if (!sampling) return;
+      final elements = chrome.evaluate();
+      if (elements.isNotEmpty) {
+        final box = elements.first.findRenderObject();
+        if (box is RenderBox && box.hasSize && box.attached) {
+          final y = box.localToGlobal(Offset.zero).dy;
+          samples.add(y); motionFrames.add({'us': watch.elapsedMicroseconds, 'top': y});
+        }
+      }
+      SchedulerBinding.instance.addPostFrameCallback(sample);
+    }
+    SchedulerBinding.instance.addPostFrameCallback(sample);
     await tester.tap(find.byKey(const ValueKey('day-1'))); await tester.pump(); await tester.pump();
     expect(ModalRoute.of(tester.element(chrome))!.transitionDuration, const Duration(milliseconds: 420));
-    for (final ms in [70, 140, 250]) { await tester.pump(Duration(milliseconds: ms)); samples.add(tester.getTopLeft(chrome).dy); }
+    await tester.pump(const Duration(milliseconds: 650)); sampling = false; watch.stop();
+    expect(samples.length, greaterThan(1));
     expect(samples.first, greaterThan(samples.last));
     await tester.pump(const Duration(seconds: 2));
     await tester.timedDrag(chrome, const Offset(0, 700), const Duration(milliseconds: 400));
@@ -68,7 +85,7 @@ void main() {
     SchedulerBinding.instance.removeTimingsCallback(timings);
     binding.reportData = {
       'mode': 'debug; Android emulator; software GPU; diagnostics only, not device performance acceptance',
-      'sheetTopSamples': samples, 'frameCount': frames.length,
+      'sheetTopSamples': samples, 'sheetFrames': motionFrames, 'frameCount': frames.length,
       'buildUs': frames.map((f) => f.buildDuration.inMicroseconds).toList(),
       'rasterUs': frames.map((f) => f.rasterDuration.inMicroseconds).toList(),
       'verified': ['XXS minimum', 'locked advice/surprise', 'single safe top notice', 'no locked progress', '420ms motion', 'handle drag', 'Back', 'close', 'reduced motion'],
