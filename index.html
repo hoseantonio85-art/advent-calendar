@@ -707,12 +707,32 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .history-saved-empty{margin:0;padding:15px 14px;background:#eff2e9;border:1px solid #dce4d7;border-radius:15px;color:#6d8073;font-size:12px;line-height:1.55}
 @media(prefers-reduced-motion:reduce){.history-saved-item-arrow{transition:none}}
 
-/* Four surprise events: frosted and undisclosed until campaign midnight. */
-.day-card.surprise .ornament-mark{display:none}
-.day-card.surprise .surprise-mark{position:absolute;right:-8px;top:12px;z-index:3;pointer-events:none;user-select:none;font-family:"Yeseva One",Georgia,serif;font-size:116px;line-height:1;color:#e9d7b8;opacity:.25;text-shadow:0 3px 16px #243b3040;transform:rotate(9deg)}
-.day-card.surprise.wide .surprise-mark{right:15px;top:-4px;font-size:156px}
-.day-card.surprise:nth-child(4n+1) .surprise-mark,.day-card.surprise:nth-child(4n+2) .surprise-mark{color:#875c61;opacity:.21}
-.day-card.surprise.is-locked .surprise-mark{filter:drop-shadow(0 0 8px #f5faff40)}
+/* Four surprise events: the date follows ordinary event cards, while a frosted glass
+   question replaces the centered wisdom numeral. Keep the rest of the ice treatment. */
+.day-card.wisdom.surprise .card-top{display:flex;position:relative;z-index:5}
+.day-card.wisdom.surprise .card-date,
+.day-card.wisdom.surprise:nth-child(n) .card-date{font-size:28px;color:#f8f5e9;text-shadow:0 2px 9px #183a3a7a}
+.day-card.wisdom.surprise .empty-date,
+.day-card.wisdom.surprise .winter-corner,
+.day-card.wisdom.surprise .ornament-mark{display:none}
+.day-card.surprise .surprise-mark{
+ position:absolute;left:50%;top:54%;z-index:4;pointer-events:none;user-select:none;
+ width:max-content;line-height:1;font-family:"Yeseva One",Georgia,serif;font-weight:400;
+ font-size:clamp(78px,21vw,112px);letter-spacing:-.07em;
+ transform:translate(-50%,-50%) rotate(-7deg);
+ color:transparent;
+ background:linear-gradient(130deg,#faffff 1%,#c6edf3 19%,#7fb9cc 36%,#efffff 47%,#b4dce7 59%,#f5ffff 71%,#8fbccd 100%);
+ -webkit-background-clip:text;background-clip:text;
+ -webkit-text-stroke:.8px #eafaffca;
+ filter:drop-shadow(2px 5px 3px #123a475e) drop-shadow(-1px -1px 1px #ffffffb0);
+}
+.day-card.surprise .surprise-mark::after{
+ content:"?";position:absolute;inset:0;pointer-events:none;
+ color:transparent;background:linear-gradient(150deg,#ffffffdb 5%,#ffffff22 37%,transparent 60%);
+ -webkit-background-clip:text;background-clip:text;
+ -webkit-text-stroke:0;opacity:.54;transform:translate(-1px,-2px);
+}
+.day-card.surprise.wide .surprise-mark{font-size:clamp(120px,32vw,155px);top:53%}
 /* One-off celebration stays inside the existing event illustration, not a second modal. */
 .sheet-visual .surprise-confetti{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none}
 .sheet-visual .surprise-confetti i{position:absolute;left:50%;top:52%;width:5px;height:10px;border-radius:2px;background:var(--piece);box-shadow:0 0 5px #fff8;opacity:0;transform:translate(-50%,-50%) scale(.3);animation:surprise-confetti-pop 1.45s cubic-bezier(.20,.75,.30,1) var(--wait) both}
@@ -988,10 +1008,10 @@ function historySavedMarkup(){
     const title=event?.title||thought[0];
     return `<button class="day-card ${event?'event':'wisdom'} ${theme} ${w?'wide':''} ${state} ${locked?'is-locked':''} ${lockedSurprise?'surprise':''}" data-day="${day}" aria-label="${day} декабря, ${lockedSurprise?'сюрприз, откроется '+day+' декабря':event?'мероприятие: '+escapeHtml(title):locked?'закрыто, совет откроется '+day+' декабря':'совет дня: '+escapeHtml(title)+(saved.has(day)&&!locked?', совет сохранён':'')}">
       <span class="card-top"><span class="card-date">${day}</span></span>
-      ${event?'':'<span class="empty-date" aria-hidden="true">'+day+'</span>'}
+      ${event||lockedSurprise?'':'<span class="empty-date" aria-hidden="true">'+day+'</span>'}
       ${lockedSurprise?'<span class="surprise-mark" aria-hidden="true">?</span>':''}
-      ${event?'':'<span class="ornament-mark" aria-hidden="true"><svg viewBox="0 0 100 124" focusable="false"><path d="M50 8c-5.2 0-9 3.9-9 9 0 5.2 3.8 9 9 9s9-3.8 9-9c0-5.1-3.8-9-9-9Z" fill="none" stroke="currentColor" stroke-width="4"/><rect x="38" y="26" width="24" height="11" rx="3" fill="currentColor"/><path d="M50 36c-23.8 0-41 18.1-41 42.4S26.9 120 50 120s41-17.3 41-41.6S73.8 36 50 36Z" fill="currentColor"/></svg></span>'}
-      ${event?'':'<span class="winter-corner" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.75v18.5M2.75 12h18.5M5.45 5.45l13.1 13.1M18.55 5.45l-13.1 13.1"/><path d="m9.4 5.3 2.6 2.5 2.6-2.5M9.4 18.7l2.6-2.5 2.6 2.5M5.3 9.4 7.8 12l-2.5 2.6M18.7 9.4 16.2 12l2.5 2.6"/></svg></span>'}
+      ${event||lockedSurprise?'':'<span class="ornament-mark" aria-hidden="true"><svg viewBox="0 0 100 124" focusable="false"><path d="M50 8c-5.2 0-9 3.9-9 9 0 5.2 3.8 9 9 9s9-3.8 9-9c0-5.1-3.8-9-9-9Z" fill="none" stroke="currentColor" stroke-width="4"/><rect x="38" y="26" width="24" height="11" rx="3" fill="currentColor"/><path d="M50 36c-23.8 0-41 18.1-41 42.4S26.9 120 50 120s41-17.3 41-41.6S73.8 36 50 36Z" fill="currentColor"/></svg></span>'}
+      ${event||lockedSurprise?'':'<span class="winter-corner" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.75v18.5M2.75 12h18.5M5.45 5.45l13.1 13.1M18.55 5.45l-13.1 13.1"/><path d="m9.4 5.3 2.6 2.5 2.6-2.5M9.4 18.7l2.6-2.5 2.6 2.5M5.3 9.4 7.8 12l-2.5 2.6M18.7 9.4 16.2 12l2.5 2.6"/></svg></span>'}
       ${!event&&!locked&&saved.has(day)?savedHeartMarkup():''}
       ${state==='is-today'?'<span class="today-ring" aria-hidden="true"></span><span class="today-star" aria-hidden="true">✦</span>':''}
       ${event?'':snowForDay(day)}
