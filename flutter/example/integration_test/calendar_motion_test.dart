@@ -58,7 +58,7 @@ void main() {
     await tester.timedDrag(chrome, const Offset(0, 700), const Duration(milliseconds: 400));
     await tester.pump(const Duration(seconds: 1)); expect(chrome, findsNothing);
     await tester.tap(find.text('Твоя история декабря')); await tester.pump(const Duration(seconds: 2));
-    await tester.binding.handlePopRoute(); await tester.pump(const Duration(seconds: 1)); expect(chrome, findsNothing);
+    await tester.binding.handlePopRoute(); await tester.pump(); await tester.pump(const Duration(seconds: 1)); expect(chrome, findsNothing);
     reduced.value = true; await tester.pump(const Duration(milliseconds: 200));
     await tester.tap(find.byKey(const ValueKey('day-1'))); await tester.pump(); await tester.pump();
     expect(ModalRoute.of(tester.element(chrome))!.transitionDuration, Duration.zero);

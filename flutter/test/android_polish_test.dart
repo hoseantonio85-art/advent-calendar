@@ -81,9 +81,9 @@ void main() {
     await tester.timedDrag(chrome, const Offset(0, 750), const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 500));
     expect(chrome, findsNothing);
     await open(); await tester.pump(const Duration(milliseconds: 500));
-    await tester.binding.handlePopRoute(); await tester.pump(const Duration(milliseconds: 500)); expect(chrome, findsNothing);
+    await tester.binding.handlePopRoute(); await tester.pump(); await tester.pump(const Duration(milliseconds: 500)); expect(chrome, findsNothing);
     await open(); await tester.pump(const Duration(milliseconds: 500));
-    await tester.tap(find.byTooltip('Закрыть')); await tester.pump(const Duration(milliseconds: 500)); expect(chrome, findsNothing);
+    await tester.tap(find.byTooltip('Закрыть')); await tester.pump(); await tester.pump(const Duration(milliseconds: 500)); expect(chrome, findsNothing);
     expect(tester.takeException(), isNull); await tester.pumpWidget(const SizedBox());
   });
   testWidgets('reduced motion sheet skips the entrance animation', (tester) async {
@@ -91,7 +91,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('day-1'))); await tester.pump(); await tester.pump();
     final chrome = find.byKey(const ValueKey('sheet-chrome'));
     expect(ModalRoute.of(tester.element(chrome))!.transitionDuration, Duration.zero);
-    await tester.tap(find.byTooltip('Закрыть')); await tester.pump();
+    await tester.tap(find.byTooltip('Закрыть')); await tester.pump(); await tester.pump();
     await tester.pumpWidget(const SizedBox());
   });
 }
