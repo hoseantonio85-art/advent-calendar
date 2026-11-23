@@ -1,4 +1,4 @@
-import 'dart:ui' show FrameTiming;
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -55,7 +55,7 @@ void main() {
     for (final ms in [70, 140, 250]) { await tester.pump(Duration(milliseconds: ms)); samples.add(tester.getTopLeft(chrome).dy); }
     expect(samples.first, greaterThan(samples.last));
     await tester.pump(const Duration(seconds: 2));
-    await tester.drag(chrome, const Offset(0, 700), duration: const Duration(milliseconds: 400));
+    await tester.timedDrag(chrome, const Offset(0, 700), const Duration(milliseconds: 400));
     await tester.pump(const Duration(seconds: 1)); expect(chrome, findsNothing);
     await tester.tap(find.text('Твоя история декабря')); await tester.pump(const Duration(seconds: 2));
     await tester.binding.handlePopRoute(); await tester.pump(const Duration(seconds: 1)); expect(chrome, findsNothing);

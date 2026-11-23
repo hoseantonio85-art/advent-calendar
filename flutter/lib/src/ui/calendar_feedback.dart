@@ -29,7 +29,7 @@ class _ClosedDateNotice extends StatelessWidget {
                     const SizedBox(width: 10),
                     Flexible(child: Text(message, textScaler: MediaQuery.textScalerOf(context).clamp(minScaleFactor: 1), style: const TextStyle(fontFamily: 'packages/advent_calendar/Roboto',
                       fontSize: 13, height: 1.35, fontWeight: FontWeight.w600, color: Color(0xfffff2cf)))),
-                  ])))))))));
+                  ]))))))))));
 }
 
 class _ProgressPanel extends StatelessWidget {

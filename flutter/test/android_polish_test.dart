@@ -1,4 +1,3 @@
-import 'dart:ui' show SemanticsFlag;
 import 'dart:io';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
@@ -52,7 +51,7 @@ void main() {
     expect(find.text('Откроется 3 декабря'), findsOneWidget);
     expect(tester.getTopLeft(notice).dy, greaterThanOrEqualTo(36));
     expect(tester.getTopLeft(notice).dy, lessThan(150));
-    expect(tester.getSemantics(notice).getSemanticsData().hasFlag(SemanticsFlag.isLiveRegion), isTrue);
+    expect(tester.getSemantics(notice).getSemanticsData().flagsCollection.isLiveRegion, isTrue);
     await tester.pump(const Duration(seconds: 2));
     await tester.tap(find.byKey(const ValueKey('day-3'))); await tester.pump();
     expect(notice, findsOneWidget);
