@@ -707,8 +707,8 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .history-saved-empty{margin:0;padding:15px 14px;background:#eff2e9;border:1px solid #dce4d7;border-radius:15px;color:#6d8073;font-size:12px;line-height:1.55}
 @media(prefers-reduced-motion:reduce){.history-saved-item-arrow{transition:none}}
 
-/* Closed surprise event: normal event date in the corner and one 3D icy WebP
-   centered with comfortable insets, especially on wide December 4. */
+/* Closed surprise events share one 3D icy mark size, including wide December 4.
+   Centering allows breathing room below the tilted artwork, without clipping. */
 .day-card.wisdom.surprise .card-top{display:flex;position:relative;z-index:5}
 .day-card.wisdom.surprise .card-date,
 .day-card.wisdom.surprise:nth-child(n) .card-date{
@@ -718,15 +718,10 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
 .day-card.wisdom.surprise .winter-corner,
 .day-card.wisdom.surprise .ornament-mark{display:none}
 .day-card.surprise .surprise-mark{
- position:absolute;left:50%;top:57%;z-index:4;display:block;
- width:auto;height:118px;max-width:none;object-fit:contain;
+ position:absolute;left:50%;top:52%;z-index:4;display:block;
+ width:auto;height:105px;max-width:none;object-fit:contain;
  pointer-events:none;user-select:none;transform:translate(-50%,-50%) rotate(9deg);
  filter:drop-shadow(0 4px 6px #11364a38);
-}
-.day-card.surprise.wide .surprise-mark{height:143px;top:54%}
-@media(max-width:360px){
- .day-card.surprise:not(.wide) .surprise-mark{height:107px}
- .day-card.surprise.wide .surprise-mark{height:135px}
 }
 /* One-off celebration stays inside the existing event illustration, not a second modal. */
 .sheet-visual .surprise-confetti{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none}
