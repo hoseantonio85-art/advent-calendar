@@ -114,7 +114,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
       if (!mounted) return;
       setState(() => _opened = opened);
       await showModalBottomSheet<void>(context: context, isScrollControlled: true,
-        useSafeArea: true, sheetAnimationStyle: _calendarSheetMotion(context), showDragHandle: false, barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor: const Color(0xfffaf2e6),
+        useSafeArea: true, enableDrag: true, sheetAnimationStyle: _calendarSheetMotion(context), showDragHandle: false, barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor: const Color(0xfffaf2e6),
         builder: (_) => _DaySheet(day: day, content: widget.content, time: widget.time,
           actions: widget.actions, savedAdvice: widget.savedAdvice,celebrate:celebrate,onSaved:(){_refresh();}));
     } catch (_) {
@@ -145,7 +145,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
           ])),
           _Hero(content: widget.content, motion: _heroMotion, stars: _starMotion, width: width),
           _ProgressPanel(opened: _opened.length, onTap: () => showModalBottomSheet<void>(
-            context: context, isScrollControlled: true, useSafeArea: true, showDragHandle: false,
+            context: context, isScrollControlled: true, useSafeArea: true, enableDrag: true, showDragHandle: false,
             sheetAnimationStyle: _calendarSheetMotion(context), barrierColor: const Color(0xc202100c),
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(27))),
             backgroundColor: const Color(0xfffaf2e6),
@@ -444,11 +444,11 @@ class _DaySheet extends StatefulWidget {
 class _SheetChrome extends StatelessWidget {
   const _SheetChrome();
   @override
-  Widget build(BuildContext context)=>SizedBox(key:const ValueKey('sheet-chrome'),height:60,child:Stack(children:[
+  Widget build(BuildContext context)=>SizedBox(key:const ValueKey('sheet-chrome'),height:60,child:ColoredBox(color:Colors.transparent,child:Stack(children:[
     Align(alignment:Alignment.topCenter,child:Container(width:42,height:5,margin:const EdgeInsets.only(top:14),decoration:BoxDecoration(color:const Color(0xffc9cfc4),borderRadius:BorderRadius.circular(5)))),
     Positioned(right:14,top:14,child:SizedBox(width:38,height:38,child:IconButton(onPressed:()=>Navigator.pop(context),tooltip:'Закрыть',
       style:IconButton.styleFrom(backgroundColor:const Color(0xffeef0e9),side:const BorderSide(color:Color(0xffd6ded4))),icon:const Icon(Icons.close,size:18,color:Color(0xff395247)))))
-  ]));
+  ])));
 }
 
 class _SheetState extends State<_DaySheet> {

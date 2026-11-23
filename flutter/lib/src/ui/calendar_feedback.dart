@@ -13,8 +13,8 @@ class _ClosedDateNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Positioned(top: 0, left: 0, right: 0,
-    child: SafeArea(bottom: false, minimum: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Align(alignment: Alignment.topCenter,
+    child: SafeArea(bottom: false, minimum: const EdgeInsets.symmetric(horizontal: 16),
+      child: Padding(padding: const EdgeInsets.only(top: 12), child: Align(alignment: Alignment.topCenter,
         child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 418),
           child: IgnorePointer(child: FadeTransition(opacity: motion,
             child: SlideTransition(position: Tween(begin: const Offset(0, -.16), end: Offset.zero).animate(motion),
@@ -29,7 +29,7 @@ class _ClosedDateNotice extends StatelessWidget {
                     const SizedBox(width: 10),
                     Flexible(child: Text(message, textScaler: MediaQuery.textScalerOf(context).clamp(minScaleFactor: 1), style: const TextStyle(fontFamily: 'packages/advent_calendar/Roboto',
                       fontSize: 13, height: 1.35, fontWeight: FontWeight.w600, color: Color(0xfffff2cf)))),
-                  ]))))))))));
+                  ])))))))))));
 }
 
 class _ProgressPanel extends StatelessWidget {
