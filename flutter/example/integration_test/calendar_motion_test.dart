@@ -20,6 +20,7 @@ class Store implements ProgressRepository {
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   testWidgets('Android XXS, toast, sheet motion, dismissal and reduced motion', (tester) async {
     tzdata.initializeTimeZones();
     final content = await AdventContent.load(), store = Store();
@@ -43,7 +44,7 @@ void main() {
     expect(tester.getTopLeft(notice).dy, lessThan(150));
     await tester.tap(find.byKey(const ValueKey('day-3'))); await tester.pump(const Duration(seconds: 1));
     expect(notice, findsOneWidget);
-    await tester.pump(const Duration(seconds: 3)); expect(notice, findsNothing);
+    await tester.pump(const Duration(seconds: 3)); await tester.pump(const Duration(milliseconds: 250)); expect(notice, findsNothing);
     expect(store.ids.length, 7);
     await tester.tap(find.byKey(const ValueKey('day-4'))); await tester.pump(const Duration(seconds: 1));
     expect(find.text('Сюрприз откроется 4 декабря'), findsOneWidget);
