@@ -9,6 +9,7 @@ class AdventDay {
   String get id => data['id'] as String;
   DateTime get date => DateTime.parse(data['date'] as String);
   DayKind get kind => DayKind.values.byName(data['kind'] as String);
+  bool get revealOnDate => data['revealOnDate'] == true;
   String get title => data['title'] as String;
   String get art => data['art'] as String;
   int get columns => data['columns'] as int;
@@ -47,7 +48,7 @@ class AdventCalendar {
   }
   final List<AdventDay> days;
   bool isAvailable(AdventDay day, DateTime campaignDate) =>
-      day.kind == DayKind.event || !civilDate(day.date).isAfter(civilDate(campaignDate));
+      day.kind == DayKind.event && !day.revealOnDate || !civilDate(day.date).isAfter(civilDate(campaignDate));
   Set<String> eligibleProgress(Iterable<String> opened, DateTime campaignDate) =>
       UnmodifiableSetView(days.where((d) => opened.contains(d.id) && isAvailable(d, campaignDate)).map((d) => d.id).toSet());
   Set<String> open(String id, Iterable<String> opened, DateTime campaignDate) {

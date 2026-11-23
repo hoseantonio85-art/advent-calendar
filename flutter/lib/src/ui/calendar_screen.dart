@@ -29,7 +29,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
   late final AnimationController _motion;
   late final AnimationController _heroMotion;
   Timer? _midnight;
-  Set<String> _opened = {};
+  Set<String> _opened = {}, _savedIds = {};
   String? _error;
   bool _opening = false;
   @override
@@ -56,6 +56,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
     _midnight = Timer(next.difference(now), _refresh);
     try {
       final opened = await widget.progress.read();
+      _savedIds=await widget.savedAdvice?.readSaved(AdventProgress.campaignId)??{};
       if (mounted) setState(() { _opened = opened; _error = null; });
     } catch (_) { if (mounted) setState(() => _error = 'Не удалось загрузить прогресс. Повторить'); }
   }
@@ -65,17 +66,19 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
     _midnight?.cancel(); _motion.dispose(); _heroMotion.dispose(); super.dispose();
   }
   Future<void> _open(AdventDay day) async {
+    if(day.revealOnDate&&!widget.content.calendar.isAvailable(day,widget.time.today)){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('Сюрприз откроется ${day.date.day} декабря ✦')));return;}
     if (_opening || !widget.content.calendar.isAvailable(day, widget.time.today)) return;
     _opening = true;
     try {
       if (!await widget.progress.open(day.id) || !mounted) return;
+      final celebrate=day.revealOnDate?(await widget.progress.surprises?.claimSurprise(AdventProgress.campaignId,day.id)??false):false;
       final opened = await widget.progress.read();
       if (!mounted) return;
       setState(() => _opened = opened);
       await showModalBottomSheet<void>(context: context, isScrollControlled: true,
         useSafeArea: true, showDragHandle: false, barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor: const Color(0xfffaf2e6),
         builder: (_) => _DaySheet(day: day, content: widget.content, time: widget.time,
-          actions: widget.actions, savedAdvice: widget.savedAdvice));
+          actions: widget.actions, savedAdvice: widget.savedAdvice,celebrate:celebrate,onSaved:(){_refresh();}));
     } catch (_) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Не удалось открыть день. Попробуйте ещё раз.')));
     } finally { _opening = false; }
@@ -105,7 +108,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
           _Hero(content: widget.content, motion:_heroMotion),
           Semantics(button: true, label: 'Твоя история декабря. Открыто ${_opened.length} из 31',
             child: InkWell(onTap:()=>showModalBottomSheet<void>(context:context,isScrollControlled:true,useSafeArea:true,showDragHandle:false,barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor:const Color(0xfffaf2e6),
-              builder:(_)=>_HistorySheet(opened:_opened.length,content:widget.content,time:widget.time)),
+              builder:(_)=>_HistorySheet(opened:_opened.length,content:widget.content,time:widget.time,saved:_savedIds)),
               child: Container(padding: const EdgeInsets.symmetric(horizontal:13,vertical:12), margin: const EdgeInsets.only(bottom:24),
                 decoration: BoxDecoration(color: const Color(0x1fd9eec0), borderRadius: BorderRadius.circular(19), border: Border.all(color: const Color(0x30d9eec0))),
                 child: Row(children:[Container(width:36,height:36,decoration:BoxDecoration(color:const Color(0x16d9eec0),borderRadius:BorderRadius.circular(12),border:Border.all(color:const Color(0x22d9eec0))),
@@ -124,7 +127,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
                 height: tileHeight * math.max(1, MediaQuery.textScalerOf(context).scale(1)),
                 child: _Tile(day: row[i], content: widget.content, date: widget.time.today,
                   available: widget.content.calendar.isAvailable(row[i], widget.time.today),
-                  motion: _motion, onTap: () => _open(row[i])))
+                  motion: _motion, saved:_savedIds.contains(row[i].id), onTap: () => _open(row[i])))
             ]
           ])),
           const _MonthFooter(),
@@ -184,11 +187,11 @@ ColorFilter _cardFilter(double saturation, double brightness) {
 
 class _Tile extends StatelessWidget {
   const _Tile({required this.day,required this.content,required this.date,
-    required this.available,required this.motion,required this.onTap});
+    required this.available,required this.motion,required this.onTap,this.saved=false});
   final AdventDay day;
   final AdventContent content;
   final DateTime date;
-  final bool available;
+  final bool available,saved;
   final Animation<double> motion;
   final VoidCallback onTap;
   @override
@@ -219,8 +222,9 @@ class _Tile extends StatelessWidget {
     final opacity=past? .85:locked?(light? .82:.88):1.0;
     final saturation=past? .70:locked?(light? .87:.90):1.0;
     final brightness=past? .93:locked&&light? .96:1.0;
+    if(day.revealOnDate&&!available)return KeyedSubtree(key:ValueKey('day-$n'),child:_SurpriseTile(day:day,onTap:onTap));
     return Semantics(key:ValueKey('day-$n'),button:true,enabled:available,excludeSemantics:true,
-      label:'$n декабря, ${event!=null?'мероприятие: ${day.title}':available?'совет дня: ${day.title}':'закрыто, совет откроется $n декабря'}',
+      label:'$n декабря, ${event!=null?'мероприятие: ${day.title}':available?'совет дня: ${day.title}${saved?', совет сохранён':''}':'закрыто, совет откроется $n декабря'}',
       child:RepaintBoundary(child:Opacity(opacity:opacity,child:ColorFiltered(colorFilter:_cardFilter(saturation,brightness),
         child:Material(color:Colors.transparent,borderRadius:BorderRadius.circular(radius),clipBehavior:Clip.antiAlias,
           child:InkWell(onTap:available?onTap:null,child:Stack(children:[
@@ -246,6 +250,7 @@ class _Tile extends StatelessWidget {
                     shadows:const [Shadow(color:Color(0x99250c0b),offset:Offset(0,1),blurRadius:10)]))))),
             ],
             Positioned.fill(child:IgnorePointer(child:AnimatedBuilder(animation:motion,builder:(_,__)=>CustomPaint(painter:_WinterPainter(day:n,phase:motion.value,today:today,snow:event==null,locked:locked,radius:radius))))),
+            if(event==null&&available&&saved)Positioned(right:11,top:today?35:10,child:const _SavedHeart()),
             if(today)const Positioned(top:9,right:10,child:CustomPaint(size:Size.square(17),painter:_SparkPainter(_gold))),
           ])),
         )))));
@@ -344,7 +349,8 @@ class _WinterPainter extends CustomPainter {
 }
 
 class _DaySheet extends StatefulWidget {
-  const _DaySheet({required this.day, required this.content, required this.time, this.actions, this.savedAdvice});
+  const _DaySheet({required this.day, required this.content, required this.time, this.actions, this.savedAdvice,this.celebrate=false,this.onSaved});
+  final bool celebrate;final VoidCallback? onSaved;
   final AdventDay day; final AdventContent content; final CampaignTime time;
   final AdventSystemActions? actions; final SavedAdviceRepository? savedAdvice;
   @override
@@ -394,6 +400,7 @@ class _SheetState extends State<_DaySheet> {
               const CustomPaint(painter:_CardTexturePainter(day:0,advice:false,sheet:true)),
               const DecoratedBox(decoration:BoxDecoration(gradient:RadialGradient(colors:[Color(0x40eac690),Colors.transparent],radius:.8))),
               Center(child:OverflowBox(maxWidth:188,maxHeight:188,child:_art(widget.content,day.art,size:188))),
+              if(widget.celebrate&&!MediaQuery.disableAnimationsOf(context))const Positioned.fill(child:_SurpriseConfetti()),
             ]))),
             const SizedBox(height:17),
             if(MediaQuery.textScalerOf(context).scale(1)>1.4)...[
@@ -424,8 +431,8 @@ class _SheetState extends State<_DaySheet> {
               ])),const SizedBox(height:19),
             FilledButton.icon(style:_primaryButtonStyle,onPressed:widget.savedAdvice==null||!_loaded||_busy?null:()=>_action(()async{
               await widget.savedAdvice!.setSaved(AdventProgress.campaignId,day.id,!_saved);
-              if(mounted)setState(()=>_saved=!_saved);return SystemActionResult.completed;
-            }),icon:Icon(!_loaded?Icons.hourglass_empty:_saved?Icons.check:Icons.favorite_border,size:14),label:Text(!_loaded?'Загрузка…':_saved?'Совет сохранён':'Сохранить совет')),
+              if(mounted)setState(()=>_saved=!_saved);widget.onSaved?.call();return SystemActionResult.completed;
+            }),icon:Icon(!_loaded?Icons.hourglass_empty:_saved?Icons.favorite:Icons.favorite_border,size:14),label:Text(!_loaded?'Загрузка…':_saved?'Совет сохранён':'Сохранить совет')),
             TextButton(style:TextButton.styleFrom(minimumSize:Size.zero,tapTargetSize:MaterialTapTargetSize.shrinkWrap,padding:const EdgeInsets.fromLTRB(12,15,12,4),foregroundColor:const Color(0xff486457),textStyle:const TextStyle(fontFamily:'packages/advent_calendar/Roboto',fontSize:12,height:1.2,fontWeight:FontWeight.w700)),
               onPressed:widget.actions==null||_busy?null:()=>_action(()=>widget.actions!.share(day)),child:const Text('Поделиться советом')),
           ],
@@ -505,8 +512,8 @@ class _BackdropPainter extends CustomPainter {
 }
 
 class _HistorySheet extends StatefulWidget {
-  const _HistorySheet({required this.opened,required this.content,required this.time});
-  final int opened;final AdventContent content;final CampaignTime time;
+  const _HistorySheet({required this.opened,required this.content,required this.time,required this.saved});
+  final int opened;final AdventContent content;final CampaignTime time;final Set<String> saved;
   @override
   State<_HistorySheet> createState()=>_HistoryState();
 }
@@ -543,6 +550,7 @@ class _HistoryState extends State<_HistorySheet>{
                 }),const SizedBox(height:12),Text(s==0?'С Новым годом! Пусть сбудется всё самое светлое.':'До 1 января, 00:00 по московскому времени',textAlign:TextAlign.center,style:const TextStyle(fontSize:12,height:1.5,color:Color(0xffc2d3bf))),
               ]),
             ]))),const SizedBox(height:20),
+          _SavedAdviceList(days:widget.content.calendar.days.where((d)=>d.kind==DayKind.advice&&widget.saved.contains(d.id)&&widget.content.calendar.isAvailable(d,widget.time.today)).toList()),
           const Text('Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.',style:TextStyle(fontSize:13.5,height:1.68,color:Color(0xff526257))),const SizedBox(height:16),
           Container(padding:const EdgeInsets.symmetric(vertical:16,horizontal:17),decoration:BoxDecoration(gradient:const LinearGradient(colors:[Color(0xffeaf0dd),Color(0xffe7e8d6)]),border:Border.all(color:const Color(0xffdce4cf)),borderRadius:BorderRadius.circular(17)),
             child:const Column(crossAxisAlignment:CrossAxisAlignment.start,children:[_Kicker('О КАЛЕНДАРЕ'),SizedBox(height:9),Text('У каждого дня — своё время',style:TextStyle(fontSize:17,height:1.38,letterSpacing:-.425,fontWeight:FontWeight.w700,color:Color(0xff284936))),SizedBox(height:9),Text('Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже.',style:TextStyle(fontSize:12,height:1.45,color:Color(0xff758476)))])),
@@ -582,4 +590,90 @@ class _FooterStarPainter extends CustomPainter{
   void paint(Canvas canvas,Size size){final c=Offset(size.width/2,size.height/2),p=Paint()..color=const Color(0x38f9dba9)..strokeWidth=4;for(var i=0;i<8;i++){final angle=i*math.pi/4;canvas.drawLine(c,c+Offset(math.cos(angle)*26,math.sin(angle)*26),p);}}
   @override
   bool shouldRepaint(_FooterStarPainter old)=>false;
+}
+
+class _SavedHeart extends StatefulWidget {
+  const _SavedHeart();
+  @override
+  State<_SavedHeart> createState()=>_SavedHeartState();
+}
+class _SavedHeartState extends State<_SavedHeart> with SingleTickerProviderStateMixin {
+  late final AnimationController motion;
+  @override
+  void initState(){super.initState();motion=AnimationController(vsync:this,duration:const Duration(seconds:8));}
+  @override
+  void didChangeDependencies(){super.didChangeDependencies();if(MediaQuery.disableAnimationsOf(context)){motion.stop();motion.value=0;}else{motion.repeat();}}
+  @override
+  void dispose(){motion.dispose();super.dispose();}
+  @override
+  Widget build(BuildContext context)=>SizedBox(width:17,height:17,child:Center(child:AnimatedBuilder(animation:motion,builder:(_,__)=>CustomPaint(size:const Size.square(15),painter:_HeartPainter(motion.value)))));
+}
+class _HeartPainter extends CustomPainter {
+  const _HeartPainter(this.phase);final double phase;
+  @override
+  void paint(Canvas canvas,Size size){
+    canvas.save();canvas.scale(size.width/24,size.height/24);
+    final heart=Path()..moveTo(20.8,8.4)..cubicTo(20.8,12.5,15.8,16.3,12,19.5)..cubicTo(8.2,16.3,3.2,12.5,3.2,8.4)..cubicTo(3.2,3.8,10,2.1,12,6.7)..cubicTo(14,2.1,20.8,3.8,20.8,8.4)..close();
+    canvas.drawPath(heart,Paint()..color=const Color(0xffe04460));
+    if(phase>=.72&&phase<=.95){
+      final t=(phase-.72)/.23,opacity=math.sin(t*math.pi)*.8;
+      canvas.clipPath(heart);canvas.drawRect(const Rect.fromLTWH(0,0,24,24),Paint()..shader=LinearGradient(begin:Alignment(-3+6*t,-1),end:Alignment(-1+6*t,1),colors:[Colors.transparent,Colors.white.withValues(alpha:opacity),Colors.transparent],stops:const [0,.5,1]).createShader(const Rect.fromLTWH(0,0,24,24)));
+    }canvas.restore();
+  }
+  @override
+  bool shouldRepaint(_HeartPainter old)=>phase!=old.phase;
+}
+class _SavedAdviceList extends StatefulWidget {
+  const _SavedAdviceList({required this.days});final List<AdventDay> days;
+  @override
+  State<_SavedAdviceList> createState()=>_SavedListState();
+}
+class _SavedListState extends State<_SavedAdviceList>{
+  bool all=false;final expanded=<String>{};
+  @override
+  Widget build(BuildContext context){
+    final days=all?widget.days:widget.days.take(3).toList();
+    return Padding(padding:const EdgeInsets.symmetric(vertical:16),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+      Row(children:[const Expanded(child:Text('Сохранённые советы',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700,color:Color(0xff284936)))),Text('${widget.days.length}')]),const SizedBox(height:9),
+      if(widget.days.isEmpty)const Text('Пока нет сохранённых советов. Открой совет и нажми «Сохранить совет» — он появится здесь.',style:TextStyle(fontSize:12,color:Color(0xff758476))),
+      for(final day in days)Container(decoration:BoxDecoration(color:const Color(0xffeff2e9),border:Border.all(color:const Color(0xffdce4d7)),borderRadius:BorderRadius.circular(12)),child:Column(children:[
+        ListTile(dense:true,title:Text(day.title,style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),subtitle:Text('${day.date.day} декабря'),trailing:Icon(expanded.contains(day.id)?Icons.expand_less:Icons.expand_more),onTap:()=>setState((){if(!expanded.add(day.id))expanded.remove(day.id);})),
+        if(expanded.contains(day.id))Padding(padding:const EdgeInsets.fromLTRB(16,0,16,14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(day.advice['text'] as String),const SizedBox(height:8),Text('Попробуй сегодня: ${day.advice['action']}')]))
+      ])),
+      if(widget.days.length>3)TextButton(onPressed:()=>setState((){all=!all;if(!all)expanded.removeWhere((id)=>!widget.days.take(3).any((d)=>d.id==id));}),child:Text(all?'Свернуть':'Показать все ${widget.days.length}')),
+    ]));
+  }
+}
+class _SurpriseTile extends StatelessWidget {
+  const _SurpriseTile({required this.day,required this.onTap});final AdventDay day;final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context)=>Semantics(button:true,label:'${day.date.day} декабря, сюрприз, откроется ${day.date.day} декабря',child:Material(borderRadius:BorderRadius.circular(17),clipBehavior:Clip.antiAlias,color:Colors.transparent,
+    child:InkWell(onTap:onTap,child:Stack(fit:StackFit.expand,children:[
+      Image.asset('assets/advent/snow_maiden_surprise.webp',package:'advent_calendar',fit:BoxFit.cover,alignment:Alignment.center,excludeFromSemantics:true),
+      const DecoratedBox(decoration:BoxDecoration(gradient:LinearGradient(begin:Alignment.topCenter,end:Alignment.bottomCenter,colors:[Color(0x61081c38),Color(0x1f081c38),Colors.transparent],stops:[0,.26,.57]))),
+      Positioned(left:day.columns==2?15:12,top:12,child:Text('${day.date.day}',style:_serif.copyWith(color:const Color(0xfffff8e8),fontSize:28,height:1))),
+      Positioned(left:day.columns==2?20:12,bottom:day.columns==2?17:12,child:Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:4),decoration:BoxDecoration(color:const Color(0x5510253a),border:Border.all(color:const Color(0x44ffffff)),borderRadius:BorderRadius.circular(8)),child:const Text('Сюрприз',style:TextStyle(fontSize:11,color:Colors.white)))),
+    ]))));
+}
+class _SurpriseConfetti extends StatefulWidget {
+  const _SurpriseConfetti();
+  @override
+  State<_SurpriseConfetti> createState()=>_ConfettiState();
+}
+class _ConfettiState extends State<_SurpriseConfetti> with SingleTickerProviderStateMixin{
+  late final AnimationController motion;
+  @override
+  void initState(){super.initState();motion=AnimationController(vsync:this,duration:const Duration(milliseconds:1450))..forward();}
+  @override
+  void dispose(){motion.dispose();super.dispose();}
+  @override
+  Widget build(BuildContext context)=>IgnorePointer(child:AnimatedBuilder(animation:motion,builder:(_,__)=>CustomPaint(painter:_ConfettiPainter(motion.value))));
+}
+class _ConfettiPainter extends CustomPainter{
+  const _ConfettiPainter(this.t);final double t;
+  @override
+  void paint(Canvas canvas,Size size){if(t>=1)return;const colors=[Color(0xfff3d495),Color(0xffe04460),Color(0xffb7ead7),Color(0xffcbb9ed)];
+    for(var i=0;i<18;i++){final angle=i*2*math.pi/18;final p=Offset(size.width*.5+math.cos(angle)*size.width*.45*t,size.height*.52+math.sin(angle)*65*t+35*t*t);canvas.save();canvas.translate(p.dx,p.dy);canvas.rotate(t*(i%2==0?8:-8));canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-2.5,-5,5,10),const Radius.circular(2)),Paint()..color=colors[i%4].withValues(alpha:math.sin(math.pi*t)));canvas.restore();}}
+  @override
+  bool shouldRepaint(_ConfettiPainter old)=>t!=old.t;
 }

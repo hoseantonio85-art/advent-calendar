@@ -20,10 +20,22 @@ class PreferencesBoolStorage implements AdventBoolStorage {
 
 /// One persistent key per day: concurrent opens never overwrite another day.
 /// The host must use a stable, non-secret user id and replace this on logout.
-class LocalAdventRepository implements ProgressRepository, SavedAdviceRepository {
+class LocalAdventRepository implements ProgressRepository, SavedAdviceRepository, SurpriseRepository {
   LocalAdventRepository({required this.storage, required this.calendar, required String userId})
       : _scope = base64Url.encode(utf8.encode(userId)) {
     if (userId.isEmpty) throw ArgumentError.value(userId, 'userId');
+  }
+  static final _claims=<String,Future<void>>{};
+  @override
+  Future<Set<String>> readSurprises(String campaignId)=>_read(campaignId,'revealed',calendar.days.where((d)=>d.revealOnDate));
+  @override
+  Future<bool> claimSurprise(String campaignId,String dayId) async {
+    if(!_day(dayId).revealOnDate)throw ArgumentError('Not a surprise');
+    final key=_key(campaignId,'revealed',dayId),previous=_claims[_key(campaignId,'revealed',dayId)]??Future<void>.value();
+    var first=false;
+    final task=previous.catchError((_){}).then((_)async{if(await storage.read(key)!=true){await storage.write(key,true);first=true;}});
+    _claims[key]=task;
+    try{await task;return first;}finally{if(identical(_claims[key],task))_claims.remove(key);}
   }
   final AdventBoolStorage storage;
   final AdventCalendar calendar;

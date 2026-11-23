@@ -12,8 +12,12 @@ class VisualClock implements AdventClock {
   @override
   DateTime nowUtc()=>DateTime.utc(2026,12,15,9);
 }
-class VisualStore implements ProgressRepository,SavedAdviceRepository{
-  final ids=<String>{},saved=<String>{};
+class VisualStore implements ProgressRepository,SavedAdviceRepository,SurpriseRepository{
+  final ids=<String>{},saved=<String>{},revealed=<String>{};
+  @override
+  Future<Set<String>> readSurprises(String c)async=>revealed;
+  @override
+  Future<bool> claimSurprise(String c,String id)async=>revealed.add(id);
   @override
   Future<Set<String>> read(String c)async=>{...ids};
   @override
@@ -54,6 +58,7 @@ void main(){
       await tester.pumpWidget(const SizedBox());
       tester.view.physicalSize=Size(width,844);tester.view.devicePixelRatio=1;
       final store=VisualStore();
+      store.saved.addAll(content.calendar.days.where((d)=>d.kind==DayKind.advice).take(4).map((d)=>d.id));
       await tester.pumpWidget(RepaintBoundary(key:const ValueKey('capture'),child:DefaultAssetBundle(bundle:assets,child:MaterialApp(
         debugShowCheckedModeBanner:false,theme:ThemeData(fontFamily:'packages/advent_calendar/Roboto',colorSchemeSeed:const Color(0xff284936)),
         builder:(context,child)=>MediaQuery(data:MediaQueryData(size:Size(width,844),disableAnimations:true,textScaler:TextScaler.linear(scale)),child:child!),

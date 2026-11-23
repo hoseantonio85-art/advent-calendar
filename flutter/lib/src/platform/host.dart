@@ -43,7 +43,11 @@ class AdventProgress {
   final CampaignTime time;
   final ProgressRepository repository;
   static const campaignId = 'december-2026';
-  Future<Set<String>> read() async => calendar.eligibleProgress(await repository.read(campaignId), time.today);
+  SurpriseRepository? get surprises => repository is SurpriseRepository ? repository as SurpriseRepository : null;
+  Future<Set<String>> read() async {
+    final revealed=await surprises?.readSurprises(campaignId)??<String>{};
+    return calendar.eligibleProgress(await repository.read(campaignId),time.today).where((id)=>!calendar.days.firstWhere((d)=>d.id==id).revealOnDate||revealed.contains(id)).toSet();
+  }
   Future<bool> open(String id) async {
     final day = calendar.days.where((d) => d.id == id).firstOrNull;
     if (day == null || !calendar.isAvailable(day, time.today)) return false;
@@ -56,4 +60,9 @@ class AdventProgress {
 abstract interface class SavedAdviceRepository {
   Future<Set<String>> readSaved(String campaignId);
   Future<void> setSaved(String campaignId, String dayId, bool saved);
+}
+
+abstract interface class SurpriseRepository {
+  Future<Set<String>> readSurprises(String campaignId);
+  Future<bool> claimSurprise(String campaignId,String dayId);
 }

@@ -17,4 +17,4 @@ for(const [i,d] of data.days.entries()){
 const sourceAssets={};for(const m of html.matchAll(/(?:assets(?:\.(\w+)|\["(\w+)"\])\s*=|["']?(\w+)["']?\s*:)\s*["'](data:image\/[^"']+)["']/g))if(m[4].includes(';base64,'))sourceAssets[m[1]||m[2]||m[3]]=m[4];
 sourceAssets.hero_tree=html.match(/class="hero-art"[\s\S]*?<img[^>]+src="([^"]+)"/)[1];
 for(const [key,p] of Object.entries(data.assets))assert.deepEqual(fs.readFileSync(path.join(root,'flutter',p)),Buffer.from(sourceAssets[key].split(',')[1],'base64'),key);
-console.log('PASS: 31/14/17; every source field, advice, layout and 16 art files match HTML exactly');
+console.log('PASS: 31/14/17; every source field, advice, layout and 17 art files match HTML exactly');

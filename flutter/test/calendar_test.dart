@@ -45,7 +45,7 @@ void main() {
   });
   test('events available across years; advice uses full date', () {
     for(final day in calendar.days) {
-      expect(calendar.isAvailable(day, DateTime.utc(2025)), day.kind == DayKind.event);
+      expect(calendar.isAvailable(day, DateTime.utc(2025)), day.kind == DayKind.event && !day.revealOnDate);
       expect(calendar.isAvailable(day, day.date), isTrue);
       expect(calendar.isAvailable(day, DateTime.utc(2027)), isTrue);
       if(day.kind == DayKind.advice) expect(calendar.isAvailable(day, day.date.subtract(const Duration(days: 1))), isFalse);
