@@ -191,8 +191,13 @@ class _Hero extends StatelessWidget {
               colors: [Colors.white, Colors.white, Colors.transparent], stops: [0, .63, .93]).createShader(rect),
               child: AnimatedBuilder(animation: motion,
                 child: _art(content, 'hero_tree', size: small ? 310 : compact ? 325 : 356),
-                builder: (_, child) => Transform.rotate(angle: -8 * math.pi / 180,
-                  child: Transform.scale(scale: 1 + .018 * math.sin(motion.value * 2 * math.pi), child: child)))))),
+                builder: (_, child) {
+                  final reduced = MediaQuery.disableAnimationsOf(context);
+                  final t = reduced ? 0.0 : (1 - math.cos(motion.value * 2 * math.pi)) / 2;
+                  return Transform.translate(offset: Offset(-3 * t, 5 * t),
+                    child: Transform.rotate(angle: (-8 + t) * math.pi / 180, alignment: const Alignment(.16, .08),
+                      child: Transform.scale(scale: reduced ? 1 : 1.06 + .025 * t, alignment: const Alignment(.16, .08), child: child)));
+                })))),
         Positioned.fill(child: ShaderMask(blendMode: BlendMode.dstIn,
           shaderCallback: (rect) => const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
             colors: [Colors.transparent, Colors.white, Colors.white, Colors.transparent], stops: [0, .16, .61, 1]).createShader(rect),
@@ -225,8 +230,9 @@ class _HeroSpark extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IgnorePointer(child: AnimatedBuilder(animation: motion,
     builder: (_, __) {
-      final t = MediaQuery.disableAnimationsOf(context) ? .5 : (1 - math.cos((motion.value - delay) * 2 * math.pi)) / 2;
-      return Opacity(opacity: .7 * (.5 + .5 * t), child: Transform.scale(scale: .85 + .25 * t,
+      final reduced = MediaQuery.disableAnimationsOf(context);
+      final t = (1 - math.cos((motion.value - delay) * 2 * math.pi)) / 2;
+      return Opacity(opacity: reduced ? .7 : .5 + .5 * t, child: Transform.scale(scale: reduced ? 1 : .85 + .25 * t,
         child: CustomPaint(size: Size.square(size), painter: const _SparkPainter(Color(0xfff1dbaf)))));
     }));
 }
@@ -239,6 +245,7 @@ List<Color> _colors(AdventDay day) {
       _ => [const Color(0xffecddc7), const Color(0xfff9e9d1)] };
   }
   return switch(day.theme) {
+    'green' => [const Color(0xff2b7957), const Color(0xff0d4939)],
     'ruby' => [const Color(0xffa33345), const Color(0xff67223a)],
     'purple' => [const Color(0xff544c75), const Color(0xff2d3a65)],
     'sand' => [const Color(0xff915f5a), const Color(0xff6f354a)],

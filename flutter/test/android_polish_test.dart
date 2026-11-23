@@ -45,7 +45,8 @@ void main() {
   });
   testWidgets('locked advice and surprise share one safe top live notice, never progress/sheets', (tester) async {
     final store = await mount(tester);
-    final semantics = tester.ensureSemantics(); addTearDown(semantics.dispose);
+    final semantics = tester.ensureSemantics();
+    try {
     final notice = find.byKey(const ValueKey('closed-date-notice'));
     await tester.tap(find.byKey(const ValueKey('day-3'))); await tester.pump();
     expect(find.text('Откроется 3 декабря'), findsOneWidget);
@@ -62,6 +63,7 @@ void main() {
     expect(find.byTooltip('Закрыть'), findsNothing); expect(store.ids, isEmpty);
     await tester.pump(const Duration(milliseconds: 2800)); expect(notice, findsNothing);
     await tester.pumpWidget(const SizedBox());
+    } finally { semantics.dispose(); }
   });
   testWidgets('420 ms sheet moves progressively and remains dismissible by handle, Back, close', (tester) async {
     await mount(tester, reduced: false);
@@ -76,7 +78,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 140)); final middle = tester.getTopLeft(chrome).dy;
     await tester.pump(const Duration(milliseconds: 250)); final finalY = tester.getTopLeft(chrome).dy;
     expect(early, greaterThan(middle)); expect(middle, greaterThanOrEqualTo(finalY));
-    await tester.drag(chrome, const Offset(0, 750)); await tester.pump(const Duration(milliseconds: 500));
+    await tester.timedDrag(chrome, const Offset(0, 750), const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 500));
     expect(chrome, findsNothing);
     await open(); await tester.pump(const Duration(milliseconds: 500));
     await tester.binding.handlePopRoute(); await tester.pump(const Duration(milliseconds: 500)); expect(chrome, findsNothing);
