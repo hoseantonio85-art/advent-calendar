@@ -182,7 +182,7 @@ class _Hero extends StatelessWidget {
     final compact = width <= 380, small = width <= 335;
     final large = MediaQuery.textScalerOf(context).scale(1) > 1.4;
     final titleSize = small ? 36.0 : compact ? 39.0 : 43.0;
-    return Padding(padding: const EdgeInsets.fromLTRB(5, 39, 0, 29),
+    return Padding(padding: const EdgeInsets.fromLTRB(5, 39, 0, 32),
       child: Stack(clipBehavior: Clip.none, children: [
         Positioned(right: small ? -157 : compact ? -150 : -158, top: small ? -69 : compact ? -76 : -82,
           child: Opacity(opacity: large ? .32 : 1,
@@ -210,14 +210,14 @@ class _Hero extends StatelessWidget {
           ConstrainedBox(constraints: BoxConstraints(maxWidth: large ? width - 37 : small ? 193 : compact ? 213 : 235),
             child: Text.rich(const TextSpan(children: [TextSpan(text: '31 день\nмаленьких\n'),
               TextSpan(text: 'чудес', style: TextStyle(color: _gold))]),
-              key: const ValueKey('hero-title'),
+              key: const ValueKey('hero-title'), softWrap: large, overflow: TextOverflow.visible,
               style: _serif.copyWith(color: const Color(0xfff8f2e8), fontSize: titleSize,
                 height: .99, letterSpacing: -.035 * titleSize))),
-          const SizedBox(height: 16),
+          const SizedBox(height: 13),
           ConstrainedBox(constraints: BoxConstraints(maxWidth: large ? width - 37 : small ? 178 : compact ? 195 : 218),
             child: Text('События, тёплые мысли и немного волшебства — в каждом дне.',
               key: const ValueKey('hero-description'),
-              style: TextStyle(color: const Color(0xffd1dccb), fontSize: compact ? 11 : 12, height: 1.58))),
+              style: TextStyle(color: const Color(0xffd1dccb), fontSize: compact ? 11 : 12, letterSpacing: 0, height: 1.58))),
         ]),
       ]));
   }

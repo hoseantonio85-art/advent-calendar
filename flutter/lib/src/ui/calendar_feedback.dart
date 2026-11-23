@@ -19,7 +19,7 @@ class _ClosedDateNotice extends StatelessWidget {
           child: IgnorePointer(child: FadeTransition(opacity: motion,
             child: SlideTransition(position: Tween(begin: const Offset(0, -.16), end: Offset.zero).animate(motion),
               child: Semantics(key: const ValueKey('closed-date-notice'), container: true, liveRegion: true,
-                child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                child: Material(type: MaterialType.transparency, child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: const Color(0x80e6ca8b)),
                     gradient: const LinearGradient(colors: [Color(0xff214735), Color(0xff123426)]),
@@ -28,8 +28,8 @@ class _ClosedDateNotice extends StatelessWidget {
                     const ExcludeSemantics(child: CustomPaint(size: Size.square(15), painter: _SparkPainter(_gold))),
                     const SizedBox(width: 10),
                     Flexible(child: Text(message, textScaler: MediaQuery.textScalerOf(context).clamp(minScaleFactor: 1), style: const TextStyle(fontFamily: 'packages/advent_calendar/Roboto',
-                      fontSize: 13, height: 1.35, fontWeight: FontWeight.w600, color: Color(0xfffff2cf)))),
-                  ])))))))))));
+                      fontSize: 13, letterSpacing: 0, height: 1.35, fontWeight: FontWeight.w600, color: Color(0xfffff2cf)))),
+                  ]))))))))))));
 }
 
 class _ProgressPanel extends StatelessWidget {
@@ -40,8 +40,7 @@ class _ProgressPanel extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(button: true,
     label: 'Твоя история декабря. Открыто $opened из 31',
     child: Padding(padding: const EdgeInsets.only(bottom: 24),
-      child: DecoratedBox(decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(16)),
-        boxShadow: [BoxShadow(color: Color(0x3d06130f), blurRadius: 35, offset: Offset(0, 12))]),
+      child: CustomPaint(painter: const _PanelShadowPainter(),
         child: ClipRRect(borderRadius: BorderRadius.circular(16),
           child: BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
             child: Material(color: Colors.transparent,
@@ -61,7 +60,7 @@ class _ProgressPanel extends StatelessWidget {
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         const Expanded(child: Text('Твоя история декабря', style: TextStyle(color: Color(0xfff4f5e8),
-                          fontSize: 11, fontWeight: FontWeight.w700))),
+                          fontSize: 11, letterSpacing: 0, fontWeight: FontWeight.w700))),
                         const SizedBox(width: 8),
                         Text('$opened / 31', key: const ValueKey('progress-count'),
                           style: const TextStyle(color: Color(0xffcce9b9), fontSize: 11, fontWeight: FontWeight.w700)),
@@ -109,4 +108,22 @@ class _EventLightPainter extends CustomPainter {
   }
   @override
   bool shouldRepaint(_EventLightPainter old) => day.id != old.day.id;
+}
+
+// CSS outer shadows do not tint their own translucent background. Clip the
+// interior before painting, so BackdropFilter samples the tree, not its own shadow.
+class _PanelShadowPainter extends CustomPainter {
+  const _PanelShadowPainter();
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final clip = Path()..fillType = PathFillType.evenOdd
+      ..addRect(rect.inflate(80))..addRRect(RRect.fromRectAndRadius(rect, const Radius.circular(16)));
+    canvas.save(); canvas.clipPath(clip);
+    canvas.drawRRect(RRect.fromRectAndRadius(rect.shift(const Offset(0,12)), const Radius.circular(16)),
+      Paint()..color=const Color(0x3d06130f)..maskFilter=const MaskFilter.blur(BlurStyle.normal,17.5));
+    canvas.restore();
+  }
+  @override
+  bool shouldRepaint(_PanelShadowPainter old) => false;
 }
