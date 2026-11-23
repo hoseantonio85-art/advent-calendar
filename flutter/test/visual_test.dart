@@ -9,8 +9,10 @@ import 'package:advent_calendar/advent_calendar.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 
 class VisualClock implements AdventClock {
+  VisualClock([DateTime? date]):value=date??DateTime.utc(2026,12,15,9);
+  final DateTime value;
   @override
-  DateTime nowUtc()=>DateTime.utc(2026,12,15,9);
+  DateTime nowUtc()=>value;
 }
 class VisualStore implements ProgressRepository,SavedAdviceRepository,SurpriseRepository{
   final ids=<String>{},saved=<String>{},revealed=<String>{};
@@ -43,7 +45,7 @@ void main(){
       await (FontLoader('MaterialIcons')..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
     });
     final content=AdventContent.decode(File('assets/advent/calendar_2026.json').readAsStringSync());
-    final time=CampaignTime.moscow(clock:VisualClock()),assets=TestAssets();
+    final assets=TestAssets();
     addTearDown(tester.view.resetPhysicalSize);addTearDown(tester.view.resetDevicePixelRatio);
     Future<void> capture(String name)async{
       await tester.pumpAndSettle();expect(tester.takeException(),isNull,reason:name);
@@ -54,10 +56,10 @@ void main(){
         await File('${folder.path}/$name.png').writeAsBytes(bytes!.buffer.asUint8List());
       });
     }
-    Future<void> mount(double width,{double scale=1})async{
+    Future<void> mount(double width,{double scale=1,DateTime? date})async{
       await tester.pumpWidget(const SizedBox());
       tester.view.physicalSize=Size(width,844);tester.view.devicePixelRatio=1;
-      final store=VisualStore();
+      final time=CampaignTime.moscow(clock:VisualClock(date)),store=VisualStore();
       store.saved.addAll(content.calendar.days.where((d)=>d.kind==DayKind.advice).take(4).map((d)=>d.id));
       await tester.pumpWidget(RepaintBoundary(key:const ValueKey('capture'),child:DefaultAssetBundle(bundle:assets,child:MaterialApp(
         debugShowCheckedModeBanner:false,theme:ThemeData(fontFamily:'packages/advent_calendar/Roboto',colorSchemeSeed:const Color(0xff284936)),
@@ -86,9 +88,9 @@ void main(){
       if(width==390){
         await Scrollable.ensureVisible(tester.element(find.byKey(const ValueKey('day-15'))),alignment:.4);await capture('middle-390');
         await show(1);await capture('event-390');await close();
-        await show(3);await capture('advice-390');await close();
+        await show(3);await capture('advice-390');await tester.tap(find.text('Совет сохранён'));await tester.pumpAndSettle();expect(find.text('Сохранить совет'),findsOneWidget);await tester.tap(find.text('Сохранить совет'));await tester.pumpAndSettle();expect(find.text('Совет сохранён'),findsOneWidget);await close();
         tester.state<ScrollableState>(find.descendant(of:find.byKey(const ValueKey('calendar-scroll')),matching:find.byType(Scrollable)).first).position.jumpTo(0);await tester.pumpAndSettle();
-        await tester.tap(find.text('Твоя история декабря'));await capture('history-390');await close();
+        await tester.tap(find.text('Твоя история декабря'));await capture('history-390');await tester.ensureVisible(find.text('Показать все 4'));await tester.tap(find.text('Показать все 4'));await tester.pumpAndSettle();expect(find.text('Свернуть'),findsOneWidget);await tester.tap(find.text(content.calendar.days[2].title));await capture('history-expanded-390');await close();
       }
     }
     for(final scale in [1.0,2.0]){
@@ -100,6 +102,11 @@ void main(){
       expect(find.byTooltip('Закрыть').hitTestable(),findsOneWidget);
       expect(find.text('Поделиться').hitTestable(),findsOneWidget);
       await capture(scale==1?'long-event-bottom-320':'text200-long-event-bottom-320');await close();
+    }
+    for(final day in [3,4]){
+      await mount(390,date:DateTime.utc(2026,12,day,9));await capture('surprise-$day-390');
+      if(day==3){await tester.ensureVisible(find.byKey(const ValueKey('day-4')));await tester.tap(find.byKey(const ValueKey('day-4')));await tester.pumpAndSettle();expect(find.text('День какао'),findsNothing);expect(find.text('Сюрприз откроется 4 декабря ✦'),findsOneWidget);}
+      else{await show(4);await capture('surprise-revealed-sheet-390');await close();}
     }
     await tester.pumpWidget(const SizedBox());
   },timeout:const Timeout(Duration(minutes:2)),skip:!const bool.fromEnvironment('ADVENT_VISUALS'));

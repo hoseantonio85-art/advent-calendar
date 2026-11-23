@@ -6,7 +6,7 @@ const {chromium}=require('playwright');
  for(const width of [320,360,390,430]){
   const context=await browser.newContext({viewport:{width,height:844},deviceScaleFactor:1,reducedMotion:'reduce',timezoneId:'Europe/Moscow'});
   const page=await context.newPage();
-  await page.addInitScript(()=>{const Native=Date;window.Date=class extends Native{constructor(...args){super(...(args.length?args:['2026-12-15T09:00:00Z']));}static now(){return new Native('2026-12-15T09:00:00Z').getTime();}};window.ADVENT_CONFIG={timeZone:'Europe/Moscow'};});
+  await page.addInitScript(()=>{localStorage.setItem('advent2026-saved',JSON.stringify([3,5,6,7]));const Native=Date;window.Date=class extends Native{constructor(...args){super(...(args.length?args:['2026-12-15T09:00:00Z']));}static now(){return new Native('2026-12-15T09:00:00Z').getTime();}};window.ADVENT_CONFIG={timeZone:'Europe/Moscow'};});
   await page.route('https://fonts.googleapis.com/**',route=>route.fulfill({contentType:'text/css',body:
    `@font-face{font-family:'Roboto';font-weight:100 900;src:url(data:font/ttf;base64,${fs.readFileSync('flutter/assets/fonts/Roboto-Variable.ttf').toString('base64')});}@font-face{font-family:'Yeseva One';font-weight:400;src:url(data:font/ttf;base64,${fs.readFileSync('flutter/assets/fonts/YesevaOne-Regular.ttf').toString('base64')});}`}));
   await page.goto('file://'+path.resolve('index.html').split(path.sep).join('/'));await page.evaluate(()=>document.fonts.ready);

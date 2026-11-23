@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'dart:math' as math;
 // Compatibility with hosts using Flutter before the Material package split.
 // ignore: deprecated_member_use
@@ -637,7 +638,7 @@ class _SavedListState extends State<_SavedAdviceList>{
       Row(children:[const Expanded(child:Text('Сохранённые советы',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700,color:Color(0xff284936)))),Text('${widget.days.length}')]),const SizedBox(height:9),
       if(widget.days.isEmpty)const Text('Пока нет сохранённых советов. Открой совет и нажми «Сохранить совет» — он появится здесь.',style:TextStyle(fontSize:12,color:Color(0xff758476))),
       for(final day in days)Container(decoration:BoxDecoration(color:const Color(0xffeff2e9),border:Border.all(color:const Color(0xffdce4d7)),borderRadius:BorderRadius.circular(12)),child:Column(children:[
-        ListTile(dense:true,title:Text(day.title,style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),subtitle:Text('${day.date.day} декабря'),trailing:Icon(expanded.contains(day.id)?Icons.expand_less:Icons.expand_more),onTap:()=>setState((){if(!expanded.add(day.id))expanded.remove(day.id);})),
+        Material(color:Colors.transparent,child:ListTile(dense:true,title:Text(day.title,style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),subtitle:Text('${day.date.day} декабря'),trailing:Icon(expanded.contains(day.id)?Icons.expand_less:Icons.expand_more),onTap:()=>setState((){if(!expanded.add(day.id))expanded.remove(day.id);}))),
         if(expanded.contains(day.id))Padding(padding:const EdgeInsets.fromLTRB(16,0,16,14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(day.advice['text'] as String),const SizedBox(height:8),Text('Попробуй сегодня: ${day.advice['action']}')]))
       ])),
       if(widget.days.length>3)TextButton(onPressed:()=>setState((){all=!all;if(!all)expanded.removeWhere((id)=>!widget.days.take(3).any((d)=>d.id==id));}),child:Text(all?'Свернуть':'Показать все ${widget.days.length}')),
@@ -652,7 +653,7 @@ class _SurpriseTile extends StatelessWidget {
       Image.asset('assets/advent/snow_maiden_surprise.webp',package:'advent_calendar',fit:BoxFit.cover,alignment:Alignment.center,excludeFromSemantics:true),
       const DecoratedBox(decoration:BoxDecoration(gradient:LinearGradient(begin:Alignment.topCenter,end:Alignment.bottomCenter,colors:[Color(0x61081c38),Color(0x1f081c38),Colors.transparent],stops:[0,.26,.57]))),
       Positioned(left:day.columns==2?15:12,top:12,child:Text('${day.date.day}',style:_serif.copyWith(color:const Color(0xfffff8e8),fontSize:28,height:1))),
-      Positioned(left:day.columns==2?20:12,bottom:day.columns==2?17:12,child:Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:4),decoration:BoxDecoration(color:const Color(0x5510253a),border:Border.all(color:const Color(0x44ffffff)),borderRadius:BorderRadius.circular(8)),child:const Text('Сюрприз',style:TextStyle(fontSize:11,color:Colors.white)))),
+      Positioned(left:day.columns==2?20:12,bottom:day.columns==2?17:12,child:const _SurpriseBadge()),
     ]))));
 }
 class _SurpriseConfetti extends StatefulWidget {
@@ -676,4 +677,10 @@ class _ConfettiPainter extends CustomPainter{
     for(var i=0;i<18;i++){final angle=i*2*math.pi/18;final p=Offset(size.width*.5+math.cos(angle)*size.width*.45*t,size.height*.52+math.sin(angle)*65*t+35*t*t);canvas.save();canvas.translate(p.dx,p.dy);canvas.rotate(t*(i%2==0?8:-8));canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-2.5,-5,5,10),const Radius.circular(2)),Paint()..color=colors[i%4].withValues(alpha:math.sin(math.pi*t)));canvas.restore();}}
   @override
   bool shouldRepaint(_ConfettiPainter old)=>t!=old.t;
+}
+
+class _SurpriseBadge extends StatelessWidget {
+  const _SurpriseBadge();
+  @override
+  Widget build(BuildContext context)=>ClipRRect(borderRadius:BorderRadius.circular(8),child:BackdropFilter(filter:ui.ImageFilter.blur(sigmaX:7,sigmaY:7),child:Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:4),decoration:BoxDecoration(color:const Color(0x5510253a),border:Border.all(color:const Color(0x44ffffff)),borderRadius:BorderRadius.circular(8)),child:const Text('Сюрприз',style:TextStyle(fontSize:11,color:Colors.white)))));
 }
