@@ -625,26 +625,91 @@ class _HeartPainter extends CustomPainter {
   bool shouldRepaint(_HeartPainter old)=>phase!=old.phase;
 }
 class _SavedAdviceList extends StatefulWidget {
-  const _SavedAdviceList({required this.days});final List<AdventDay> days;
+  const _SavedAdviceList({required this.days});
+  final List<AdventDay> days;
   @override
-  State<_SavedAdviceList> createState()=>_SavedListState();
+  State<_SavedAdviceList> createState() => _SavedListState();
 }
-class _SavedListState extends State<_SavedAdviceList>{
-  bool all=false;final expanded=<String>{};
+
+class _SavedListState extends State<_SavedAdviceList> {
+  bool all = false;
+  final expanded = <String>{};
+  static const border = Color(0xffdce4d7);
+
+  Widget _item(AdventDay day, int index) {
+    final open = expanded.contains(day.id);
+    return DecoratedBox(
+      decoration: BoxDecoration(border: index == 0 ? null : const Border(top: BorderSide(color: border))),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Semantics(button: true, hint: open ? 'Свернуть совет' : 'Раскрыть совет',
+          child: InkWell(onTap: () => setState(() {
+            if (!expanded.add(day.id)) expanded.remove(day.id);
+          }), child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 56),
+            child: Padding(padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 13),
+              child: Row(children: [
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(day.title, style: const TextStyle(fontSize: 13, height: 1.3,
+                    color: Color(0xff2c4737), fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 4),
+                  Text('${day.date.day} декабря', style: const TextStyle(fontSize: 10,
+                    height: 1.2, color: Color(0xff718476))),
+                ])),
+                const SizedBox(width: 10),
+                Icon(open ? Icons.expand_less : Icons.expand_more, size: 14, color: const Color(0xff78907c)),
+              ]))))),
+        if (open) Padding(padding: const EdgeInsets.fromLTRB(13, 0, 13, 14),
+          child: DefaultTextStyle(style: const TextStyle(
+            fontFamily: 'packages/advent_calendar/Roboto', fontSize: 12, height: 1.58, color: Color(0xff52685a)),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Text('«${day.advice['text']}»'), const SizedBox(height: 8),
+              Text.rich(TextSpan(children: [
+                const TextSpan(text: 'Попробуй сегодня: ', style: TextStyle(fontWeight: FontWeight.w700)),
+                TextSpan(text: day.advice['action'] as String),
+              ])),
+            ]))),
+      ]),
+    );
+  }
+
   @override
-  Widget build(BuildContext context){
-    final days=all?widget.days:widget.days.take(3).toList();
-    return Padding(padding:const EdgeInsets.symmetric(vertical:16),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-      Row(children:[const Expanded(child:Text('Сохранённые советы',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700,color:Color(0xff284936)))),Text('${widget.days.length}')]),const SizedBox(height:9),
-      if(widget.days.isEmpty)Container(padding:const EdgeInsets.symmetric(vertical:15,horizontal:14),decoration:BoxDecoration(color:const Color(0xffeff2e9),border:Border.all(color:const Color(0xffdce4d7)),borderRadius:BorderRadius.circular(15)),child:const Text('Пока нет сохранённых советов. Открой совет и нажми «Сохранить совет» — он появится здесь.',style:TextStyle(fontSize:12,height:1.55,color:Color(0xff6d8073)))),
-      for(final day in days)Container(decoration:BoxDecoration(color:const Color(0xffeff2e9),border:Border.all(color:const Color(0xffdce4d7)),borderRadius:BorderRadius.circular(12)),child:Column(children:[
-        Material(color:Colors.transparent,child:ListTile(dense:true,title:Text(day.title,style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),subtitle:Text('${day.date.day} декабря'),trailing:Icon(expanded.contains(day.id)?Icons.expand_less:Icons.expand_more),onTap:()=>setState((){if(!expanded.add(day.id))expanded.remove(day.id);}))),
-        if(expanded.contains(day.id))Padding(padding:const EdgeInsets.fromLTRB(16,0,16,14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(day.advice['text'] as String),const SizedBox(height:8),Text('Попробуй сегодня: ${day.advice['action']}')]))
-      ])),
-      if(widget.days.length>3)TextButton(onPressed:()=>setState((){all=!all;if(!all)expanded.removeWhere((id)=>!widget.days.take(3).any((d)=>d.id==id));}),child:Text(all?'Свернуть':'Показать все ${widget.days.length}')),
-    ]));
+  Widget build(BuildContext context) {
+    final days = all ? widget.days : widget.days.take(3).toList();
+    return Padding(padding: const EdgeInsets.only(top: 1, bottom: 20),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          const Icon(Icons.favorite, size: 16, color: Color(0xffc16b78)),
+          const SizedBox(width: 8),
+          const Expanded(child: Text('Сохранённые советы', style: TextStyle(
+            fontSize: 14, height: 1.2, fontWeight: FontWeight.w800, letterSpacing: -.21, color: Color(0xff263f32)))),
+          Text('${widget.days.length}', style: const TextStyle(fontSize: 11,
+            fontWeight: FontWeight.w700, color: Color(0xff718578))),
+        ]),
+        const SizedBox(height: 11),
+        if (widget.days.isEmpty)
+          Container(padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 14),
+            decoration: BoxDecoration(color: const Color(0xffeff2e9), border: Border.all(color: border),
+              borderRadius: BorderRadius.circular(15)),
+            child: const Text('Пока нет сохранённых советов. Открой совет и нажми «Сохранить совет» — он появится здесь.',
+              style: TextStyle(fontSize: 12, height: 1.55, color: Color(0xff6d8073))))
+        else Container(clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(color: const Color(0xffeff2e9), border: Border.all(color: border),
+            borderRadius: BorderRadius.circular(15)),
+          child: Material(color: Colors.transparent,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              for (var i = 0; i < days.length; i++) _item(days[i], i),
+              if (widget.days.length > 3) DecoratedBox(
+                decoration: const BoxDecoration(border: Border(top: BorderSide(color: border))),
+                child: InkWell(onTap: () => setState(() {
+                  all = !all;
+                  if (!all) expanded.removeWhere((id) => !widget.days.take(3).any((day) => day.id == id));
+                }), child: Padding(padding: const EdgeInsets.all(13),
+                  child: Text(all ? 'Свернуть' : 'Показать все ${widget.days.length}', textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xff406d56)))))),
+            ]))),
+      ]));
   }
 }
+
 class _SurpriseTile extends StatelessWidget {
   const _SurpriseTile({required this.day,required this.onTap});final AdventDay day;final VoidCallback onTap;
   @override

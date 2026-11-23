@@ -56,11 +56,11 @@ void main(){
         await File('${folder.path}/$name.png').writeAsBytes(bytes!.buffer.asUint8List());
       });
     }
-    Future<void> mount(double width,{double scale=1,DateTime? date})async{
+    Future<void> mount(double width,{double scale=1,DateTime? date,int savedCount=4})async{
       await tester.pumpWidget(const SizedBox());
       tester.view.physicalSize=Size(width,844);tester.view.devicePixelRatio=1;
       final time=CampaignTime.moscow(clock:VisualClock(date)),store=VisualStore();
-      store.saved.addAll(content.calendar.days.where((d)=>d.kind==DayKind.advice).take(4).map((d)=>d.id));
+      store.saved.addAll(content.calendar.days.where((d)=>d.kind==DayKind.advice).take(savedCount).map((d)=>d.id));
       await tester.pumpWidget(RepaintBoundary(key:const ValueKey('capture'),child:DefaultAssetBundle(bundle:assets,child:MaterialApp(
         debugShowCheckedModeBanner:false,theme:ThemeData(fontFamily:'packages/advent_calendar/Roboto',colorSchemeSeed:const Color(0xff284936)),
         builder:(context,child)=>MediaQuery(data:MediaQueryData(size:Size(width,844),disableAnimations:true,textScaler:TextScaler.linear(scale)),child:child!),
@@ -102,6 +102,14 @@ void main(){
       expect(find.byTooltip('Закрыть').hitTestable(),findsOneWidget);
       expect(find.text('Поделиться').hitTestable(),findsOneWidget);
       await capture(scale==1?'long-event-bottom-320':'text200-long-event-bottom-320');await close();
+    }
+    for(final count in [0,1]){
+      await mount(390,savedCount:count);await tester.tap(find.text('Твоя история декабря'));
+      await capture('history-saved-$count-390');
+      expect(find.text('Показать все 4'),findsNothing);
+      if(count==0){expect(find.text('Пока нет сохранённых советов. Открой совет и нажми «Сохранить совет» — он появится здесь.'),findsOneWidget);}
+      else{expect(find.text(content.calendar.days[2].title),findsOneWidget);}
+      await close();
     }
     for(final day in [3,4]){
       await mount(390,date:DateTime.utc(2026,12,day,9));await capture('surprise-$day-390');

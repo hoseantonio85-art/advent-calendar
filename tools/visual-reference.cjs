@@ -21,7 +21,7 @@ const {chromium}=require('playwright');
    await page.locator('[data-day="15"]').evaluate(el=>window.scrollTo(0,el.getBoundingClientRect().top+window.scrollY-(window.innerHeight-el.offsetHeight)*.4));await capture(page,'middle-390');
    await show(1);await capture(page,'event-390');await close();
    await show(3);await capture(page,'advice-390');await close();
-   await page.locator('#aboutBtn').click();await page.waitForTimeout(50);await capture(page,'history-390');await close();
+   await page.locator('#aboutBtn').click();await page.waitForTimeout(50);await capture(page,'history-390');await page.locator('#showAllSaved').click();await page.locator('.history-saved-item summary').first().click();await capture(page,'history-expanded-390');await close();
   }
   if(width==320){await show(11);await capture(page,'long-event-320');await page.locator('.sheet-scroll').evaluate(el=>el.scrollTop=el.scrollHeight);await capture(page,'long-event-bottom-320');}
   await context.close();
