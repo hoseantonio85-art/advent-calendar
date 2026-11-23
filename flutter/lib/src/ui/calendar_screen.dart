@@ -636,7 +636,7 @@ class _SavedListState extends State<_SavedAdviceList>{
     final days=all?widget.days:widget.days.take(3).toList();
     return Padding(padding:const EdgeInsets.symmetric(vertical:16),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
       Row(children:[const Expanded(child:Text('Сохранённые советы',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700,color:Color(0xff284936)))),Text('${widget.days.length}')]),const SizedBox(height:9),
-      if(widget.days.isEmpty)const Text('Пока нет сохранённых советов. Открой совет и нажми «Сохранить совет» — он появится здесь.',style:TextStyle(fontSize:12,color:Color(0xff758476))),
+      if(widget.days.isEmpty)Container(padding:const EdgeInsets.symmetric(vertical:15,horizontal:14),decoration:BoxDecoration(color:const Color(0xffeff2e9),border:Border.all(color:const Color(0xffdce4d7)),borderRadius:BorderRadius.circular(15)),child:const Text('Пока нет сохранённых советов. Открой совет и нажми «Сохранить совет» — он появится здесь.',style:TextStyle(fontSize:12,height:1.55,color:Color(0xff6d8073)))),
       for(final day in days)Container(decoration:BoxDecoration(color:const Color(0xffeff2e9),border:Border.all(color:const Color(0xffdce4d7)),borderRadius:BorderRadius.circular(12)),child:Column(children:[
         Material(color:Colors.transparent,child:ListTile(dense:true,title:Text(day.title,style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),subtitle:Text('${day.date.day} декабря'),trailing:Icon(expanded.contains(day.id)?Icons.expand_less:Icons.expand_more),onTap:()=>setState((){if(!expanded.add(day.id))expanded.remove(day.id);}))),
         if(expanded.contains(day.id))Padding(padding:const EdgeInsets.fromLTRB(16,0,16,14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(day.advice['text'] as String),const SizedBox(height:8),Text('Попробуй сегодня: ${day.advice['action']}')]))
@@ -652,7 +652,7 @@ class _SurpriseTile extends StatelessWidget {
     child:InkWell(onTap:onTap,child:Stack(fit:StackFit.expand,children:[
       Image.asset('assets/advent/snow_maiden_surprise.webp',package:'advent_calendar',fit:BoxFit.cover,alignment:Alignment.center,excludeFromSemantics:true),
       const DecoratedBox(decoration:BoxDecoration(gradient:LinearGradient(begin:Alignment.topCenter,end:Alignment.bottomCenter,colors:[Color(0x61081c38),Color(0x1f081c38),Colors.transparent],stops:[0,.26,.57]))),
-      Positioned(left:day.columns==2?15:12,top:12,child:Text('${day.date.day}',style:_serif.copyWith(color:const Color(0xfffff8e8),fontSize:28,height:1))),
+      Positioned(left:day.columns==2?15:12,top:12,child:Text('${day.date.day}',style:_serif.copyWith(color:const Color(0xfffff8e8),fontSize:MediaQuery.sizeOf(context).width<=335?23:MediaQuery.sizeOf(context).width<=380?25:28,height:1))),
       Positioned(left:day.columns==2?20:12,bottom:day.columns==2?17:12,child:const _SurpriseBadge()),
     ]))));
 }

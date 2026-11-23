@@ -7,7 +7,9 @@ const art=Function('return '+html.match(/const artForAdvice=(\[[^;]+\])/)[1])();
 const data=JSON.parse(fs.readFileSync(path.join(root,'flutter/assets/advent/calendar_2026.json'),'utf8'));
 assert.equal(data.days.length,31);assert.equal(new Set(data.days.map(d=>d.id)).size,31);
 assert.equal(data.days.filter(d=>d.kind==='event').length,14);assert.equal(data.days.filter(d=>d.kind==='advice').length,17);
+const surprises=JSON.parse(html.match(/const surpriseDays=new Set\((\[[^\]]+\])/)[1]);
 for(const [i,d] of data.days.entries()){
+ assert.equal(d.revealOnDate??false,surprises.includes(i+1));
  const day=i+1,e=events[day];assert.equal(d.date,'2026-12-'+String(day).padStart(2,'0'));
  assert.equal(d.columns,wide.includes(day)?2:1);assert.equal(d.theme,e?.theme||(i%3===0?'alt':''));
  assert.equal(d.title,e?.title||thoughts[i][0]);assert.equal(d.art,e?.art||art[i%art.length]);

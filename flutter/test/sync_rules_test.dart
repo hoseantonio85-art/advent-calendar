@@ -9,6 +9,7 @@ void main(){
  final calendar=AdventContent.decode(File('assets/advent/calendar_2026.json').readAsStringSync()).calendar;
  setUpAll(data.initializeTimeZones);
  test('four surprises unlock at Moscow midnight, independently of device/year',(){
+   expect(calendar.days.where((d)=>d.revealOnDate).map((d)=>d.date.day).toList(),[4,9,11,15]);
    for(final d in calendar.days){
      expect(calendar.isAvailable(d,DateTime.utc(2025)),d.kind==DayKind.event&&!d.revealOnDate);
      if(d.revealOnDate){expect([4,9,11,15],contains(d.date.day));expect(calendar.isAvailable(d,d.date.subtract(const Duration(days:1))),isFalse);expect(calendar.isAvailable(d,d.date),isTrue);expect(d.event!['startTime'],isNull);}
