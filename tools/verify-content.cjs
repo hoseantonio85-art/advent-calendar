@@ -6,7 +6,7 @@ const wide=JSON.parse(html.match(/const wideDays=new Set\((\[[^\]]+\])/)[1]);
 const art=Function('return '+html.match(/const artForAdvice=(\[[^;]+\])/)[1])();
 const data=JSON.parse(fs.readFileSync(path.join(root,'flutter/assets/advent/calendar_2026.json'),'utf8'));
 assert.equal(data.days.length,31);assert.equal(new Set(data.days.map(d=>d.id)).size,31);
-assert.equal(data.days.filter(d=>d.kind==='event').length,13);assert.equal(data.days.filter(d=>d.kind==='advice').length,18);
+assert.equal(data.days.filter(d=>d.kind==='event').length,14);assert.equal(data.days.filter(d=>d.kind==='advice').length,17);
 for(const [i,d] of data.days.entries()){
  const day=i+1,e=events[day];assert.equal(d.date,'2026-12-'+String(day).padStart(2,'0'));
  assert.equal(d.columns,wide.includes(day)?2:1);assert.equal(d.theme,e?.theme||(i%3===0?'alt':''));
@@ -17,4 +17,4 @@ for(const [i,d] of data.days.entries()){
 const sourceAssets={};for(const m of html.matchAll(/(?:assets(?:\.(\w+)|\["(\w+)"\])\s*=|["']?(\w+)["']?\s*:)\s*["'](data:image\/[^"']+)["']/g))if(m[4].includes(';base64,'))sourceAssets[m[1]||m[2]||m[3]]=m[4];
 sourceAssets.hero_tree=html.match(/class="hero-art"[\s\S]*?<img[^>]+src="([^"]+)"/)[1];
 for(const [key,p] of Object.entries(data.assets))assert.deepEqual(fs.readFileSync(path.join(root,'flutter',p)),Buffer.from(sourceAssets[key].split(',')[1],'base64'),key);
-console.log('PASS: 31/13/18; every source field, advice, layout and 16 art files match HTML exactly');
+console.log('PASS: 31/14/17; every source field, advice, layout and 16 art files match HTML exactly');
