@@ -22,10 +22,10 @@ void main() {
   final source = File('assets/advent/calendar_2026.json').readAsStringSync();
   final content = AdventContent.decode(source), calendar = content.calendar;
   setUpAll(tzdata.initializeTimeZones);
-  test('31 unique days, 13 events, 18 advice, immutable source', () {
+  test('31 unique days, 14 events, 17 advice, immutable source', () {
     expect(calendar.days.length, 31);
-    expect(calendar.days.where((d) => d.kind == DayKind.event).length, 13);
-    expect(calendar.days.where((d) => d.kind == DayKind.advice).length, 18);
+    expect(calendar.days.where((d) => d.kind == DayKind.event).length, 14);
+    expect(calendar.days.where((d) => d.kind == DayKind.advice).length, 17);
     expect(() => calendar.days.first.event!['title'] = 'changed', throwsUnsupportedError);
     expect(calendar.days[10].title, calendar.days[14].title);
     expect(calendar.days[10].id, isNot(calendar.days[14].id));
