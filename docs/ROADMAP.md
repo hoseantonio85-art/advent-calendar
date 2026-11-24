@@ -9,7 +9,7 @@
 | Прогресс А | HTML и Flutter: уникальный raw просмотр засчитывается с полной московской даты; ранние события сохраняются |
 | Независимый package и local/platform adapters | Реализованы и проверены; host-интеграция пока не выполнялась |
 | Автономная техническая стабилизация | Завершена: тестовый release/profile ARM64, аудит размера/manifest, 67 tests, native restart/stress; [отчёт](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/TECHNICAL-STABILIZATION-2026-11-24.md) |
-| Дополнение: demo signing/update | Код подготовлен; environment secret и финальный signed-upgrade PASS ожидаются; [правила](ANDROID-DEMO-UPDATES.md) |
+| Дополнение: demo signing/update | Ключ в main-only CI настроен, signed-probe 12302 → 12303 PASS; проверяются последовательные публикации; [правила](ANDROID-DEMO-UPDATES.md) |
 | Физическая QA | Не пройдена: device performance/memory, screen reader и реальные OS-интенты; [процедура](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/PHYSICAL-ANDROID-QA.md) |
 | PR #5/#6 | Открыты, не слиты; перед merge нужны разрешение doc-конфликтов и CI обновлённой базы; [Git-аудит и порядок](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/PR-MERGE-READINESS.md) |
 
