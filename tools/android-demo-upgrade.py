@@ -145,7 +145,7 @@ try:
     raw_after=facts();assert raw_before==raw_after,'Stored facts changed during update'
     launch();click('Открой свой декабрь');wait_for('Засчитано 2 из 31');screenshot('candidate-calendar')
     click('Твоя история декабря');wait_for(new_advice,scroll='up');screenshot('candidate-favorites')
-    result={'result':'PASS','operation':'adb install -r; no uninstall/clear/reset','baseline':before,'candidate':after,'unchangedUid':old_uid,'rawFactsBefore':raw_before,'rawFactsAfter':raw_after,'visibleProgress':'2 / 31','savedAdviceTitle':new_advice,'device':'API 35 x86_64 emulator; ordinary ARM64+x86_64 release APKs; not a physical phone','fixtureClock':'2026-12-15, isolated emulator only','applicationEntrypoint':'lib/main.dart, no integration_test/QA entrypoint'}
+    result={'result':'PASS','operation':'adb install -r; no uninstall/clear/reset','baseline':before,'candidate':after,'unchangedUid':old_uid,'rawFactsBefore':raw_before,'rawFactsAfter':raw_after,'visibleProgress':'2 / 31','savedAdviceTitle':new_advice,'device':'API '+adb('shell','getprop','ro.build.version.sdk').strip()+' x86_64 emulator; ordinary ARM64+x86_64 release APKs; not a physical phone','fixtureClock':'2026-12-15, isolated emulator only','applicationEntrypoint':'lib/main.dart, no integration_test/QA entrypoint'}
     (out/'upgrade-report.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print('PASS: two consecutive release APKs updated in place; UID, raw opened/saved, visible progress and favorite retained')
 except Exception:
