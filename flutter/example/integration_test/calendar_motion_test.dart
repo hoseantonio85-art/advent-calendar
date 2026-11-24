@@ -117,20 +117,28 @@ void main() {
     // checks, so conversion to an image surface cannot alter their measurements.
     await binding.convertFlutterSurfaceToImage();
     for (final scale in [1.0, 2.0]) {
-      await tester.pumpWidget(MaterialApp(debugShowCheckedModeBanner: false,
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(MaterialApp(key: ValueKey('history-native-$scale'), debugShowCheckedModeBanner: false,
         theme: ThemeData(fontFamily: 'packages/advent_calendar/Roboto'),
         builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(
           disableAnimations: true, textScaler: TextScaler.linear(scale)), child: child!),
         home: AdventCalendarScreen(content: content, time: time,
           progress: AdventProgress(calendar: content.calendar, time: time, repository: store))));
       await tester.pump(const Duration(seconds: 2));
-      await tester.tap(find.text('Твоя история декабря'));
+      final progressButton = find.text('Твоя история декабря');
+      await Scrollable.ensureVisible(tester.element(progressButton), alignment: .4);
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(progressButton.hitTestable(), findsOneWidget, reason: 'history button at text $scale');
+      await tester.tap(progressButton);
       await tester.pump(const Duration(seconds: 1));
       final counter = find.byKey(const ValueKey('history-countdown'));
-      await tester.ensureVisible(counter);
+      expect(counter, findsOneWidget, reason: 'opened history at text $scale');
+      await Scrollable.ensureVisible(tester.element(counter),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.descendant(of: counter, matching: find.byType(BackdropFilter)), findsNWidgets(4));
       expect(find.text('Засчитано 2 из 31 дней календаря'), findsOneWidget);
+      debugPrint('HISTORY_ANDROID_SCREENSHOT: text $scale');
       await binding.takeScreenshot('history-countdown-android-text'+(scale*100).toInt().toString());
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
