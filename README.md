@@ -14,6 +14,40 @@
 Ссылки обновляются после всех проверок. При конфликте тестовой подписи переустановка demo удалит его локальный прогресс.
 <!-- android-preview:end -->
 
+## Визуальная приёмка и техническая передача · 24 ноября 2026
+
+Автор завершил визуальную приёмку Advent Calendar: входная карточка v9, нативный
+Bento-календарь, мероприятия/советы/замороженные даты, сюрпризы и анимации, шторки,
+история декабря, избранное и хвойный новогодний отсчёт приняты. Перенос согласованного
+дизайна во Flutter завершён. Текущий дизайн финален для MVP; HTML остаётся эталоном
+календаря, входная v9 — отдельным эталоном. [Решение автора](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/ACCEPTED-MVP-2026-11-24.md).
+
+24 ноября начат технический этап; его автономная часть завершена. Вариант А
+прогресса реализован в **HTML и Flutter**: ранний просмотр мероприятия сохраняется
+и начисляется с наступлением московской даты. Текущий контент — **31/14/17**.
+Публичный index.html сохранён. Flutter-код пока в [PR #6](https://github.com/hoseantonio85-art/advent-calendar/pull/6), не в main.
+
+**[Тестовый release APK · ARM64 · 17,22 MiB](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45382287564/advent-calendar-test-release-arm64.apk)**. Debug — 153,57 MiB,
+Debug ARM64 — 85,12 MiB; profile ARM64 — 26,54 MiB. Графика не пересжималась.
+Проверенный код [13ec616](https://github.com/hoseantonio85-art/advent-calendar/commit/13ec6164ea9196a716627d7c52388e7e61f12c1e),
+[CI #122](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45382287564): 67 tests, отдельные 29 visual,
+оба analyze, web/Android, реальный Android process restart и 24 цикла шторок.
+Исправлена гонка загрузки прогресса с сохранением избранного. Это тестовая подпись,
+**не production**; физическая скорость/память телефона ещё не приняты.
+
+[Измерения, файлы, коммиты, ограничения](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/TECHNICAL-STABILIZATION-2026-11-24.md) ·
+[Подключение к хосту](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/HOST-INTEGRATION.md) ·
+[Процедура физической QA](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/PHYSICAL-ANDROID-QA.md) ·
+[Аудит PR и безопасный порядок](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/PR-MERGE-READINESS.md).
+PR #5/#6 открыты и не слиты: перед слиянием разрешить doc-конфликты и проверить
+обновлённую базу. Issues #1/#2/#3/#4/#7 остаются открытыми в части QA/следующих работ.
+
+До «ВторогоКрыла»: физическая QA → единый источник контента #7 → подтверждение
+релизных данных/прав → исходники и ограничения хоста → интеграция → финальная
+проверка/production-выпуск. Backend не создавался. [Текущая дорожная карта](docs/ROADMAP.md).
+Старые записи ниже сохраняют историю; прежние 13/18 и статусы «ещё впереди» не являются текущими.
+
+
 ## Четыре сюрприза — фон со Снегурочкой · 23 ноября 2026
 
 **Текущий HTML для UX-ревью:** до наступления даты 4, 9, 11 и 15 декабря вместо знака вопроса показывают [Снегурочку с подарком](assets/snow-maiden-surprise.webp) на **весь фон карточки** (`cover`); поверх **число в левом верхнем углу и маленькую полупрозрачную подпись «Сюрприз» внизу слева**. Подпись показывается только до даты раскрытия ([HTML-коммит `59d3eb1`](https://github.com/hoseantonio85-art/advent-calendar/commit/59d3eb10a629e25036f681612388f6d900dd4382)). Больше нет вопроса, снежинки, шарика, снежных частиц или дополнительного frost-слоя. Лёгкое затемнение верхней части обеспечивает читаемость даты. Все 4 карточки используют одну картинку; широкая и узкие кадрируют её по-разному.
