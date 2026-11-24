@@ -50,7 +50,11 @@ def wait_for(label,scroll=None):
 def click(label,scroll=None):
     x,y=wait_for(label,scroll);adb('shell','input','tap',str(x),str(y));time.sleep(1.5)
 def uid():
-    s=adb('shell','dumpsys','package',app);return re.search(r'\buserId=(\d+)',s).group(1)
+    s=adb('shell','cmd','package','list','packages','-U',app)
+    (out/'package-uid.txt').write_text(s)
+    m=re.search(r'\buid:(\d+)',s)
+    if not m:raise AssertionError('Installed package UID unavailable')
+    return m.group(1)
 def launch():
     adb('shell','am','start','-W','-n',app+'/.MainActivity');time.sleep(4)
 def varint(data,pos):
