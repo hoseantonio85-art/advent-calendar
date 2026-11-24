@@ -110,12 +110,11 @@ void main() {
       'sheetTopSamples': samples, 'sheetFrames': motionFrames, 'frameCount': frames.length,
       'buildUs': frames.map((f) => f.buildDuration.inMicroseconds).toList(),
       'rasterUs': frames.map((f) => f.rasterDuration.inMicroseconds).toList(),
-      'verified': ['entry glass/countdown/festive/text200/tap', 'XXS minimum', 'locked advice/surprise', 'single safe top notice', 'no locked progress', '420ms motion', 'handle drag', 'Back', 'close', 'reduced motion'],
+      'verified': ['entry glass/countdown/festive/text200/tap', 'history countdown glass/text100/text200/system screenshots', 'XXS minimum', 'locked advice/surprise', 'single safe top notice', 'no locked progress', '420ms motion', 'handle drag', 'Back', 'close', 'reduced motion'],
     };
     expect(tester.takeException(), isNull);
-    // Capture the updated block in the actual Android renderer after the motion
-    // checks, so conversion to an image surface cannot alter their measurements.
-    await binding.convertFlutterSurfaceToImage();
+    // Capture actual Android windows after the motion checks. The adb helper
+    // watches these readiness markers; no Flutter surface conversion is needed.
     for (final scale in [1.0, 2.0]) {
       await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(MaterialApp(key: ValueKey('history-native-$scale'), debugShowCheckedModeBanner: false,
@@ -138,8 +137,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.descendant(of: counter, matching: find.byType(BackdropFilter)), findsNWidgets(4));
       expect(find.text('Засчитано 2 из 31 дней календаря'), findsOneWidget);
-      debugPrint('HISTORY_ANDROID_SCREENSHOT: text $scale');
-      await binding.takeScreenshot('history-countdown-android-text'+(scale*100).toInt().toString());
+      debugPrint('HISTORY_CAPTURE_READY:${(scale*100).toInt()}');
+      await tester.pump(const Duration(seconds: 8));
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     }

@@ -11,7 +11,7 @@
 
 - `flutter/lib/src/ui/history_countdown.dart` — отдельный part с новым оформлением; `calendar_screen.dart` только подключает его вместо прежнего встроенного блока и переносит туда секундный таймер.
 - `flutter/test/history_countdown_test.dart` — реальные шрифты, 320/360/390/430 dp, text 100/200%, 4/2 колонки, границы чисел, четыре clipped blur без текста, точные значения, переход 20:59:59 → 21:00:00 UTC (московская полночь Нового года) и отсутствие повторной отрисовки фотографии при тике.
-- Android integration/driver сохраняют PNG с настоящего Android-renderer при 100/200% после прежних motion-проверок, не влияя преобразованием поверхности на их измерения. Отдельные headless-снимки восьми состояний — artifact `advent-history-countdown-review`; Android PNG — `advent-android-motion`.
+- Android integration и tools/android-motion.sh сохраняют системные PNG Android при 100/200% после прежних motion-проверок. Тест прокручивает к кнопке истории и затем к счётчику, сообщает готовность через logcat и удерживает кадр 8 секунд. Параллельный adb-helper снимает экран через screencap; оба PNG обязательны для успешного job. Преобразование Flutter-поверхности не используется. Отдельные headless-снимки восьми состояний — artifact `advent-history-countdown-review`; Android PNG — `advent-android-motion`.
 - README и ROADMAP фиксируют последний визуальный шаг. Прогресс, saved advice, остальные блоки истории, жесты, данные 31/14/17, HTML и backend не менялись.
 
 ## Результат
