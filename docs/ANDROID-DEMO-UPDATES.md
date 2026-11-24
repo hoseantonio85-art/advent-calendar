@@ -1,5 +1,25 @@
 # Android demo: постоянная подпись и обновления
 
+> **Этап 1/2 · 24.11.2026:** main edf180b синхронизирован с #6; подготовленная
+> main-source схема и main-only signing policy сохранены. Только быстрые проверки;
+> новая подпись, APK build, signed upgrade и публикация не запускались.
+> Существующий Release 0.1.132.1/code13203 остаётся действующим.
+> [Объём подготовки и этап 2](PR6-STAGE1-SYNC-2026-11-24.md).
+
+> **Подготовка PR #6 · 24.11.2026:** #5 слит автором; #6 теперь направлен на main.
+> После merge #6 publisher принимает также успешный push main того же Flutter
+> workflow ID 427003215. Все четыре CI jobs обязательны и выполняются на main.
+> Policy отвергает fork/иной workflow/неподходящий event+branch/неполные gates;
+> main SHA дополнительно проверяется на принадлежность истории main.
+> Publisher/helper checkout фиксируется на доверенном main commit, environment
+> по-прежнему только refs/heads/main, PR не получает ключ. Merge-аудит использует
+> точный sourceSha, не зависит от сохранения слитых feature-веток и требует exit 0.
+> Нумерация workflow, ключ, appId, fingerprint, checksum и signed install-r gate
+> сохранены. Main-source обновляет README/metadata только main, без зависимости
+> от native-ветки. [Финальная готовность/CI и новый update proof](PR6-MERGE-READINESS-2026-11-24.md).
+> Реальный первый main-source run возможен после отдельного разрешения merge #6;
+> до него обновлённый package проверяется и подписывается через существующий PR path.
+
 Дополнение к технической стабилизации от **24 ноября 2026**. Визуальный MVP и Flutter-package не меняются. Production-подпись «ВторогоКрыла» не используется, магазина нет.
 
 ## Исходное состояние и текущий статус
@@ -94,3 +114,23 @@ Android не позволяет заменить старую подпись н�
 ## Тег тестовой публикации и исходники APK
 
 Для least-privilege GITHUB_TOKEN тег android-preview-* указывает на доверенный publisher commit main. GitHub запрещает такому токену создавать некоторые теги на стороннем PR commit с изменёнными workflow; дополнительный PAT в CI не вводится. **Исходники APK — sourceSha**, явно указанный в Release/README и docs/android-preview.json; publisherCommit указывает отдельно на конфигурацию публикации. Автоматический Source code ZIP этого тестового тега не является исходником Flutter APK. Для воспроизведения использовать sourceSha, для интеграции — согласованный ref package после review. Checksums и signed-upgrade доказательства относятся к выданным APK, не к ZIP исходников тега.
+
+## Повторная проверка после обновления #6 на main
+
+24.11.2026: [CI #131](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45448214632) и [trusted publisher](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45451293476) success.
+Реальная публичная версия 0.1.125.1/code12503 обновлена до 0.1.131.1/code13103:
+тот же certificate/UID, opened/saved/2 из 31/избранный совет сохранены, install -r
+без удаления/очистки. [JSON-доказательство](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45448214632/upgrade-report.json). Main-only policy ключа
+проверена: единственная deployment branch main; secret не читался/не менялся.
+Main-source path подготовлен в #6, его первый реальный запуск — после отдельного
+одобрения merge. [Готовность и Git audit](PR6-MERGE-READINESS-2026-11-24.md).
+
+## Этап 2/2 · 24 ноября 2026: новое подписанное обновление
+
+[CI #133](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45462441956) и [trusted publisher](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45465732090) success. Реальная предыдущая
+публичная APK 0.1.132.1/code13203 заменена 0.1.133.1/code13303 через adb install -r:
+тот же appId/cert/UID, raw opened/saved, 2 из 31 и избранный совет сохранены.
+[JSON proof](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45462441956/upgrade-report.json) · [новый ARM64 release](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45462441956/advent-calendar-test-release-arm64.apk).
+Main-only signing policy сохранена; ключи не копировались/не менялись.
+Первый реальный main-source run проверить после отдельно одобренного merge,
+без обхода provenance/gates/environment. [Готовность и ограничения](PR6-STAGE2-READINESS-2026-11-24.md).

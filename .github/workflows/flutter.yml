@@ -1,23 +1,252 @@
 name: Flutter foundation
 on:
   push:
+    branches: [main]
   pull_request:
+concurrency:
+  group: flutter-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node tools/check-demo-signing-source.cjs
+      - run: node --test tools/demo-android-version.test.cjs
+      - run: node --test tools/demo-publication-policy.test.cjs
+      - run: node tools/demo-android-version.cjs
       - run: node tools/verify-content.cjs
+      - run: node tools/verify-progress-parity.cjs
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.50.1'
           cache: true
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
         working-directory: flutter
       - run: flutter analyze
         working-directory: flutter
       - run: flutter test
         working-directory: flutter
+      - name: Prepare system emoji font for headless visual tests
+        run: sudo apt-get update && sudo apt-get install -y fonts-noto-color-emoji
+      - run: flutter test --dart-define=ADVENT_VISUALS=true test/visual_test.dart test/entry_card_test.dart test/history_countdown_test.dart
+        working-directory: flutter
+      - name: Assemble entry card before/after review
+        run: |
+          python -m pip install pillow
+          python tools/entry-card-report.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-entry-v9-review
+          path: build/entry-card-review/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-history-countdown-review
+          path: flutter/build/history-countdown-qa/
+      - name: Capture approved HTML reference
+        run: |
+          npm install --prefix /tmp/advent-visual playwright
+          /tmp/advent-visual/node_modules/.bin/playwright install --with-deps chromium
+          NODE_PATH=/tmp/advent-visual/node_modules node tools/visual-reference.cjs
+      - name: Assemble lossless visual comparison
+        run: |
+          python -m pip install pillow
+          python tools/visual-report.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-visual-review
+          path: build/visual-review/
+      - run: flutter pub get --enforce-lockfile
+        working-directory: flutter/example
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-resolved-locks
+          path: |
+            flutter/pubspec.lock
+            flutter/example/pubspec.lock
+      - run: flutter analyze
+        working-directory: flutter/example
+      - run: flutter create --platforms=web,android --project-name advent_demo .
+        working-directory: flutter/example
+      - run: flutter build web
+        working-directory: flutter/example
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: node ../../tools/configure-demo-android.cjs
+        working-directory: flutter/example
+      - run: flutter build apk --debug --build-name "$DEMO_VERSION_NAME" --build-number "$DEMO_VERSION_CODE"
+        working-directory: flutter/example
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-demo-debug-apk
+          path: flutter/example/build/app/outputs/flutter-apk/app-debug.apk
+
+  android-motion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.50.1'
+          cache: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Prepare Android integration host
+        working-directory: flutter/example
+        run: |
+          flutter pub get --enforce-lockfile
+          flutter create --platforms=android --project-name advent_demo .
+          flutter build apk --debug --target=integration_test/calendar_motion_test.dart
+          cd android
+          ./gradlew --stop
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise real Android runtime and record movement
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: false
+          emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -feature -Vulkan -memory 2048 -cores 2 -noaudio -no-boot-anim -camera-back none
+          script: bash tools/android-motion.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: advent-android-motion
+          path: flutter/example/build/android-motion/
+
+  android-release:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.50.1'
+          cache: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: node tools/demo-android-version.cjs
+      - uses: actions/download-artifact@v4
+        with:
+          name: advent-demo-debug-apk
+          path: build/debug-universal
+      - name: Build ABI-controlled debug and optimized test variants
+        working-directory: flutter/example
+        run: |
+          mkdir -p ../../build/android-variants ../../build/android-audit ../../build/android-upgrade
+          flutter --version --machine > ../../build/android-audit/flutter-sdk.json
+          flutter pub get --enforce-lockfile
+          cp pubspec.lock ../../build/android-audit/example-dev.pubspec.lock
+          flutter create --platforms=android --project-name advent_demo .
+          node ../../tools/configure-demo-android.cjs arm64-v8a
+          flutter build apk --debug --target-platform android-arm64 --build-name "$DEMO_VERSION_NAME" --build-number "$DEMO_VERSION_CODE"
+          cp build/app/outputs/flutter-apk/app-debug.apk ../../build/android-variants/advent-calendar-debug-arm64.apk
+          # The standalone test release must not register the native integration
+          # test plugin. This only removes an SDK dev dependency in this CI host.
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('pubspec.yaml'); s=p.read_text()
+          block='  integration_test:\n    sdk: flutter\n'
+          assert block in s
+          p.write_text(s.replace(block,''))
+          PY
+          flutter pub get
+          cp pubspec.lock ../../build/android-audit/example-release.pubspec.lock
+          flutter pub deps --json > ../../build/android-audit/pub-deps.json
+          flutter build apk --release --target-platform android-arm64 --analyze-size --build-name "$DEMO_VERSION_NAME" --build-number "$DEMO_VERSION_CODE"
+          cp build/app/outputs/flutter-apk/app-release.apk ../../build/android-variants/advent-calendar-test-release-arm64.apk
+          find build -name '*code-size-analysis*.json' -exec cp '{}' ../../build/android-audit/ \;
+          find "$HOME/.flutter-devtools" -name '*code-size-analysis*.json' -exec cp '{}' ../../build/android-audit/ \;
+          flutter build apk --profile --target-platform android-arm64 --build-name "$DEMO_VERSION_NAME" --build-number "$DEMO_VERSION_CODE"
+          cp build/app/outputs/flutter-apk/app-profile.apk ../../build/android-variants/advent-calendar-profile-arm64.apk
+          # Ordinary main.dart APKs, both runnable on ARM64 and CI x86_64.
+          node ../../tools/configure-demo-android.cjs arm64-v8a,x86_64
+          flutter build apk --release --target-platform android-arm64,android-x64 --build-name "$DEMO_VERSION_NAME" --build-number "$DEMO_BASELINE_CODE"
+          cp build/app/outputs/flutter-apk/app-release.apk ../../build/android-upgrade/advent-calendar-upgrade-baseline.apk
+          flutter build apk --release --target-platform android-arm64,android-x64 --build-name "$DEMO_VERSION_NAME" --build-number "$DEMO_VERSION_CODE"
+          cp build/app/outputs/flutter-apk/app-release.apk ../../build/android-upgrade/advent-calendar-upgrade-candidate.apk
+      - name: Measure APK composition, resources, manifest and signing
+        run: |
+          python tools/android-apk-audit.py --debug build/debug-universal/app-debug.apk --debug-arm64 build/android-variants/advent-calendar-debug-arm64.apk --release build/android-variants/advent-calendar-test-release-arm64.apk --profile build/android-variants/advent-calendar-profile-arm64.apk --out build/android-audit
+          analyzer=$(find "$ANDROID_HOME/cmdline-tools" -path '*/bin/apkanalyzer' -type f | sort -V | tail -n 1)
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          "$analyzer" manifest print build/android-variants/advent-calendar-test-release-arm64.apk > build/android-audit/release-manifest.xml
+          "$analyzer" manifest debuggable build/android-variants/advent-calendar-test-release-arm64.apk > build/android-audit/release-debuggable.txt
+          grep -Fx false build/android-audit/release-debuggable.txt
+          "$analyzer" dex packages --defined-only build/android-variants/advent-calendar-test-release-arm64.apk > build/android-audit/release-dex-packages.txt
+          if grep -F 'dev.flutter.plugins.integration_test' build/android-audit/release-dex-packages.txt; then exit 1; fi
+          "$signer" verify --print-certs build/android-variants/advent-calendar-test-release-arm64.apk > build/android-audit/release-signing.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-demo-release-arm64
+          path: build/android-variants/advent-calendar-test-release-arm64.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-demo-profile-arm64
+          path: build/android-variants/advent-calendar-profile-arm64.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-apk-size-report
+          path: build/android-audit/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-demo-debug-arm64
+          path: build/android-variants/advent-calendar-debug-arm64.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: advent-demo-upgrade-pair
+          path: build/android-upgrade/*.apk
+
+  android-upgrade:
+    needs: android-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@v4
+        with:
+          name: advent-demo-upgrade-pair
+          path: build/android-upgrade
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Replace real release APK and verify persistent user data
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_2
+          emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -feature -Vulkan -memory 2048 -cores 2 -noaudio -no-boot-anim -camera-back none
+          script: python tools/android-demo-upgrade.py --baseline build/android-upgrade/advent-calendar-upgrade-baseline.apk --candidate build/android-upgrade/advent-calendar-upgrade-candidate.apk --out build/android-upgrade-proof
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: advent-demo-upgrade-smoke
+          path: build/android-upgrade-proof/

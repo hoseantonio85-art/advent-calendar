@@ -8,10 +8,21 @@ dependencies:
   flutter:
     sdk: flutter
   timezone: ^0.10.1
+  shared_preferences: ^2.5.3
+  share_plus: ^12.0.1
+  add_2_calendar: ^3.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
 flutter:
+  uses-material-design: true
   assets:
     - assets/advent/
     - assets/advent/art/
+  fonts:
+    - family: Yeseva One
+      fonts:
+        - asset: assets/fonts/YesevaOne-Regular.ttf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Variable.ttf

@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: [Flutter foundation]
     types: [completed]
-    branches: [feature/issue-2-native-calendar]
+    branches: [main, feature/issue-2-native-calendar]
   workflow_dispatch:
     inputs:
       source_run_id:
@@ -23,15 +23,25 @@ jobs:
   publish:
     if: >-
       github.repository == 'hoseantonio85-art/advent-calendar' &&
+      github.ref == 'refs/heads/main' &&
       (github.event_name != 'workflow_run' ||
        (github.event.workflow_run.conclusion == 'success' &&
-        github.event.workflow_run.event == 'pull_request' &&
+        ((github.event.workflow_run.event == 'pull_request' &&
+          github.event.workflow_run.head_branch == 'feature/issue-2-native-calendar') ||
+         (github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main')) &&
         github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-latest
     environment: advent-demo-signing
     timeout-minutes: 30
     steps:
-      - name: Select a verified build from our own feature branch
+      - name: Check out only the trusted main publisher commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          path: merge-audit-source
+      - name: Select a fully verified main or calendar PR build
         id: source
         uses: actions/github-script@v7
         with:
@@ -40,14 +50,14 @@ jobs:
             const id = Number(context.payload.workflow_run?.id || context.payload.inputs?.source_run_id);
             if (!Number.isSafeInteger(id) || id <= 0) throw Error('Invalid source run');
             const {data: run} = await github.rest.actions.getWorkflowRun({...repo, run_id: id});
-            if (run.workflow_id !== 427003215 || run.status !== 'completed' || run.conclusion !== 'success' ||
-                run.event !== 'pull_request' || run.head_repository?.full_name !== 'hoseantonio85-art/advent-calendar' ||
-                run.head_branch !== 'feature/issue-2-native-calendar' || !/^[a-f0-9]{40}$/.test(run.head_sha)) {
-              throw Error('Only successful, trusted Flutter PR builds may be published');
-            }
-            const {data: jobs} = await github.rest.actions.listJobsForWorkflowRun({...repo, run_id: id});
-            if (!['verify','android-motion','android-release','android-upgrade'].every(name => jobs.jobs.some(j => j.name === name && j.conclusion === 'success'))) {
-              throw Error('Verification, Android motion and release audit must pass');
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {...repo, run_id: id, filter: 'latest', per_page: 100});
+            const {validateSource} = require(`${process.env.GITHUB_WORKSPACE}/merge-audit-source/tools/demo-publication-policy.cjs`);
+            const {source} = validateSource(run, jobs);
+            if (source === 'main') {
+              const {data: comparison} = await github.rest.repos.compareCommitsWithBasehead({...repo, basehead: `${run.head_sha}...main`});
+              if (!['ahead','identical'].includes(comparison.status) || comparison.merge_base_commit.sha !== run.head_sha) {
+                throw Error('Source is not in the trusted main history');
+              }
             }
             let current = {};
             try {
@@ -61,6 +71,7 @@ jobs:
             core.setOutput('sha', run.head_sha);
             core.setOutput('number', String(run.run_number));
             core.setOutput('attempt', String(run.run_attempt));
+            core.setOutput('source', source);
             core.info(old ? 'This build is already published or superseded' : `Publishing verified run ${id}`);
 
       - name: Download the existing tested APK without rebuilding it
@@ -113,34 +124,23 @@ jobs:
           repository: hoseantonio85-art/advent-calendar
           run-id: ${{ steps.source.outputs.run_id }}
           github-token: ${{ github.token }}
-      - uses: actions/checkout@v4
-        if: steps.source.outputs.skip != 'true'
-        with:
-          ref: main
-          fetch-depth: 0
-          path: merge-audit-source
       - name: Probe full Git merges without moving any branch
         if: steps.source.outputs.skip != 'true'
         run: |
           repo=merge-audit-source
           report=android-size/pr-merge-audit.txt
-          git -C "$repo" fetch --no-tags origin main feature/issue-3-advent-foundation feature/issue-2-native-calendar
+          git -C "$repo" fetch --no-tags origin main "$SOURCE_SHA"
           git -C "$repo" --version > "$report"
-          for ref in main feature/issue-3-advent-foundation feature/issue-2-native-calendar; do
-            printf '%s ' "$ref" >> "$report"
-            git -C "$repo" rev-parse "origin/$ref" >> "$report"
-          done
-          probe() {
-            printf '\nPAIR: %s + %s\n' "$1" "$2" >> "$report"
-            set +e
-            git -C "$repo" merge-tree --write-tree --messages "$1" "$2" >> "$report" 2>&1
-            merge_status=$?
-            set -e
-            printf 'merge-tree exit: %s (0 clean, 1 conflicts, other indeterminate)\n' "$merge_status" >> "$report"
-          }
-          probe origin/main origin/feature/issue-3-advent-foundation
-          probe origin/main origin/feature/issue-2-native-calendar
+          printf 'main: %s\nsource: %s\n' "$(git -C "$repo" rev-parse origin/main)" "$SOURCE_SHA" >> "$report"
+          set +e
+          git -C "$repo" merge-tree --write-tree --messages origin/main "$SOURCE_SHA" >> "$report" 2>&1
+          merge_status=$?
+          set -e
+          printf 'merge-tree exit: %s (0 clean, 1 conflicts, other indeterminate)\n' "$merge_status" >> "$report"
           cat "$report"
+          test "$merge_status" -eq 0
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
       - uses: actions/upload-artifact@v4
         if: steps.source.outputs.skip != 'true'
         with:
@@ -212,6 +212,7 @@ jobs:
           SOURCE_SHA: ${{ steps.source.outputs.sha }}
           SOURCE_NUMBER: ${{ steps.source.outputs.number }}
           SOURCE_ATTEMPT: ${{ steps.source.outputs.attempt }}
+          SOURCE_KIND: ${{ steps.source.outputs.source }}
         with:
           script: |
             // Inserted into the trusted default-branch publication workflow.
@@ -271,7 +272,7 @@ jobs:
               file.url=asset.browser_download_url;
             }
             const url=kind=>files.find(f=>f.kind===kind).url;
-            const metadata={sourceSha:sha,sourceRun:runId,runNumber,attempt,checksum:primary.checksum,
+            const metadata={sourceSha:sha,sourceKind:process.env.SOURCE_KIND,sourceRun:runId,runNumber,attempt,checksum:primary.checksum,
               apk:url('release'),debugApk:url('debug'),profileApk:url('profile'),sizeReport:url('reportMd'),mergeAudit:url('mergeAudit'),
               buildMode:'test-release',abi:'arm64-v8a',signing:'Advent Demo (test only)',
               signingScheme:signing.scheme,signingCertificateSha256:signing.certificateSha256,versionCode:signing.versionCode,baselineVersionCode:signing.baselineVersionCode,versionName:signing.versionName,
@@ -284,7 +285,7 @@ jobs:
               `[![Скачать APK](${badge})](${metadata.apk})\n\n`+
               `**[Скачать тестовый release APK · ARM64](${metadata.apk})** · [Release](${metadata.release})\n\n`+
               `[Debug · универсальный](${metadata.debugApk}) · [Profile · ARM64, для замеров](${metadata.profileApk}) · [Размер и состав APK](${metadata.sizeReport})\n\n`+
-              `Проверенный код PR #6: \`${sha.slice(0,7)}\`, ${date} (Москва). Release: ${(primary.bytes/1048576).toFixed(2)} MiB. `+
+              `Проверенный Flutter-код: \`${sha.slice(0,7)}\`, ${date} (Москва). Release: ${(primary.bytes/1048576).toFixed(2)} MiB. `+
               `Постоянная тестовая подпись Advent Demo, версия \`${signing.versionName}\` / code ${signing.versionCode}; автономное demo; **не production-релиз**. Нативная графика сохранена.\n\n`+
               `Ссылки обновляются после проверки обновления APK. Переход со старой debug-подписи — один раз с ручной переустановкой и потерей прежних локальных данных; следующие demo-сборки сохраняют данные. [Правила обновления](docs/ANDROID-DEMO-UPDATES.md).\n${end}`;
             function insert(text){const a=text.indexOf(start),b=text.indexOf(end);
@@ -308,6 +309,10 @@ jobs:
                 catch(error){if(![409,422].includes(error.status)||retry===2)throw error;}
               }
             }
-            await update('main',true);await update('feature/issue-2-native-calendar',false);
+            await update('main',true);
+            if (process.env.SOURCE_KIND === 'pull_request') {
+              try { await update('feature/issue-2-native-calendar',false); }
+              catch (error) { if (error.status !== 404) throw error; }
+            }
             await core.summary.addHeading('Android test release ARM64').addLink('Release APK',metadata.apk)
               .addLink('Size report',metadata.sizeReport).write();

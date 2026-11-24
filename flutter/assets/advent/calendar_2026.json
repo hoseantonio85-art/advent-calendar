@@ -19,7 +19,8 @@
     "champagne": "assets/advent/art/champagne.webp",
     "citrus": "assets/advent/art/citrus.webp",
     "moneybag": "assets/advent/art/moneybag.webp",
-    "hero_tree": "assets/advent/art/hero_tree.webp"
+    "hero_tree": "assets/advent/art/hero_tree.webp",
+    "snowMaiden": "assets/advent/snow_maiden_surprise.webp"
   },
   "days": [
     {
@@ -130,7 +131,8 @@
         ],
         "startTime": null,
         "verification": "requiresConfirmation"
-      }
+      },
+      "revealOnDate": true
     },
     {
       "id": "december-2026-05",
@@ -243,7 +245,8 @@
         ],
         "startTime": null,
         "verification": "requiresConfirmation"
-      }
+      },
+      "revealOnDate": true
     },
     {
       "id": "december-2026-10",
@@ -289,7 +292,8 @@
         ],
         "startTime": null,
         "verification": "requiresConfirmation"
-      }
+      },
+      "revealOnDate": true
     },
     {
       "id": "december-2026-12",
@@ -383,7 +387,8 @@
         ],
         "startTime": null,
         "verification": "requiresConfirmation"
-      }
+      },
+      "revealOnDate": true
     },
     {
       "id": "december-2026-16",

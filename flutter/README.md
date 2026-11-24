@@ -1,3 +1,6 @@
+> Обновление Issue #2: нативный AdventCalendarScreen и demo уже реализованы.
+> Статус: [NATIVE-CALENDAR.md](../docs/NATIVE-CALENDAR.md).
+
 # Advent Calendar · независимый Flutter feature
 
 Пакет, не приложение. Полный экран и demo — следующий Issue #2.
