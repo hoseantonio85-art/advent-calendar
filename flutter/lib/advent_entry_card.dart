@@ -104,10 +104,13 @@ class _CountdownCalendar extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
-            child: DecoratedBox(
+            // Separate paint layers: a gradient in BoxDecoration replaces
+            // its colour fill. Keep the green tint beneath the glass highlight.
+            child: ColoredBox(
+              color: const Color(0x59102E25),
+              child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                color: const Color(0x59102E25),
                 border: Border.all(color: const Color(0x38F5F5DE), width: 1),
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft, end: Alignment.bottomRight,
@@ -115,6 +118,7 @@ class _CountdownCalendar extends StatelessWidget {
                 ),
               ),
               child: const SizedBox.expand(),
+              ),
             ),
           ),
         )),
