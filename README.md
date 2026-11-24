@@ -1,13 +1,15 @@
 <!-- android-preview:start -->
-## 📱 Android · сборка для проверки
+## 📱 Android · тестовая release-сборка ARM64
 
-[![Скачать APK](https://img.shields.io/badge/Android-%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C%20APK-2E7D32?logo=android&logoColor=white)](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45365899931/advent-calendar-preview.apk)
+[![Скачать APK](https://img.shields.io/badge/Android-%D0%A2%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20release%20ARM64-2E7D32?logo=android&logoColor=white)](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45382287564/advent-calendar-test-release-arm64.apk)
 
-**[Скачать APK напрямую](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45365899931/advent-calendar-preview.apk)** · [Страница сборки](https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-45365899931)
+**[Скачать тестовый release APK · ARM64](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45382287564/advent-calendar-test-release-arm64.apk)** · [Release](https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-45382287564)
 
-Проверенная Flutter-сборка из PR #6: `a6ce095`, 24 ноября 2026 г. в 12:39 (Москва). Обычный APK, без ZIP и входа в Actions. Это demo для приёмки.
+[Debug · универсальный](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45382287564/advent-calendar-preview.apk) · [Profile · ARM64, для замеров](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45382287564/advent-calendar-profile-arm64.apk) · [Размер и состав APK](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45382287564/apk-size-report.md)
 
-Ссылка обновляется после успешных проверок новой сборки. При конфликте отладочной подписи потребуется переустановка demo с удалением локального прогресса.
+Проверенный код PR #6: `13ec616`, 24 ноября 2026 г. в 14:26 (Москва). Release: 17.22 MiB. Тестовая подпись Android Debug, автономное demo; **не production-релиз**. Нативная графика сохранена.
+
+Ссылки обновляются после всех проверок. При конфликте тестовой подписи переустановка demo удалит его локальный прогресс.
 <!-- android-preview:end -->
 
 ## Авторская приёмка MVP и начало технической стабилизации · 24 ноября 2026
