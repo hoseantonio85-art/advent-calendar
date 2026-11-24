@@ -161,6 +161,29 @@ jobs:
       - name: Refresh exact size audit after signing
         if: steps.source.outputs.skip != 'true'
         run: python merge-audit-source/tools/android-apk-audit.py --debug android-apk/app-debug.apk --debug-arm64 android-debug-arm64/advent-calendar-debug-arm64.apk --release android-release/advent-calendar-test-release-arm64.apk --profile android-profile/advent-calendar-profile-arm64.apk --inventory-from android-size/apk-size-report.json --signing-report android-size/demo-signing.json --out android-size
+      - name: Use the actual previous published demo as upgrade baseline
+        if: steps.source.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs=require('node:fs'),crypto=require('node:crypto');
+            const {data:file}=await github.rest.repos.getContent({...context.repo,path:'docs/android-preview.json',ref:'main'});
+            const previous=JSON.parse(Buffer.from(file.content,'base64').toString('utf8'));
+            if(previous.signingScheme!=='persistent-demo-v1'){core.info('First persistent-key release: testing the generated consecutive pair');return;}
+            const signing=JSON.parse(fs.readFileSync('android-size/demo-signing.json','utf8'));
+            if(previous.signingCertificateSha256!==signing.certificateSha256||previous.versionCode>=signing.versionCode)throw Error('Signing identity changed or versionCode did not increase');
+            const url=new URL(previous.candidateApk);
+            if(url.protocol!=='https:'||url.hostname!=='github.com'||!url.pathname.startsWith('/hoseantonio85-art/advent-calendar/releases/download/')||!/^[a-f0-9]{64}$/.test(previous.candidateChecksum??''))throw Error('Invalid previous-release APK reference');
+            const response=await fetch(url);if(!response.ok)throw Error('Previous release download failed');
+            const data=Buffer.from(await response.arrayBuffer());
+            if(crypto.createHash('sha256').update(data).digest('hex')!==previous.candidateChecksum)throw Error('Previous release checksum mismatch');
+            fs.writeFileSync('android-upgrade/advent-calendar-upgrade-baseline.apk',data);
+            signing.baselineVersionCode=previous.versionCode;
+            signing.apks.baseline={versionCode:previous.versionCode,versionName:previous.versionName,bytes:data.length,certificateSha256:previous.signingCertificateSha256,previousPublishedApk:previous.candidateApk};
+            fs.writeFileSync('android-size/demo-signing.json',JSON.stringify(signing,null,2)+'\n');
+            const audit=JSON.parse(fs.readFileSync('android-size/apk-size-report.json','utf8'));audit.signing=signing;
+            fs.writeFileSync('android-size/apk-size-report.json',JSON.stringify(audit,null,2)+'\n');
+            core.info('Testing the actual previous published APK -> new candidate');
       - name: Enable KVM
         if: steps.source.outputs.skip != 'true'
         run: |
@@ -251,7 +274,7 @@ jobs:
               apk:url('release'),debugApk:url('debug'),profileApk:url('profile'),sizeReport:url('reportMd'),mergeAudit:url('mergeAudit'),
               buildMode:'test-release',abi:'arm64-v8a',signing:'Advent Demo (test only)',
               signingScheme:signing.scheme,signingCertificateSha256:signing.certificateSha256,versionCode:signing.versionCode,baselineVersionCode:signing.baselineVersionCode,versionName:signing.versionName,
-              baselineApk:url('baseline'),candidateApk:url('candidate'),signingReport:url('signing'),upgradeEvidence:url('upgrade'),
+              baselineApk:url('baseline'),candidateApk:url('candidate'),candidateChecksum:files.find(f=>f.kind==='candidate').checksum,signingReport:url('signing'),upgradeEvidence:url('upgrade'),
               bytes:primary.bytes,sizes:Object.fromEntries(Object.entries(sizes.apks).map(([k,v])=>[k,v.bytes])),
               release:release.html_url,publishedAt:new Date().toISOString(),publicationRun:context.runId};
             const start='<!-- android-preview:start -->',end='<!-- android-preview:end -->';

@@ -93,13 +93,16 @@ def facts():
     return result
 try:
     before=metadata(args.baseline);after=metadata(args.candidate)
-    assert after['versionCode']==before['versionCode']+1,'APK versions must be consecutive'
+    assert after['versionCode']>before['versionCode'],'APK versionCode must increase'
     assert before['certificateSha256']==after['certificateSha256'],'Signing certificate changed'
     with zipfile.ZipFile(args.baseline) as z:
         name=next(n for n in z.namelist() if n.endswith('/assets/advent/calendar_2026.json'))
         content=json.loads(z.read(name));advice=content['days'][2]['title']
-        contract=hashlib.sha256(z.read(name)).hexdigest()
-    with zipfile.ZipFile(args.candidate) as z:assert hashlib.sha256(z.read(name)).hexdigest()==contract
+    with zipfile.ZipFile(args.candidate) as z:new_content=json.loads(z.read(name))
+    assert content['campaignId']==new_content['campaignId'],'Campaign migration requires an explicit update fixture'
+    for i in [0,2]:assert content['days'][i]['id']==new_content['days'][i]['id'],'Persistent day ids changed'
+    assert content['days'][2]['kind']==new_content['days'][2]['kind']=='advice','Saved-advice fixture requires migration review'
+    new_advice=new_content['days'][2]['title']
     assert not adb('shell','pm','list','packages',app).strip(),'Fresh isolated emulator required; never uninstall to hide a failed update'
     adb('root');adb('wait-for-device')
     adb('shell','settings','put','global','auto_time','0');adb('shell','settings','put','global','auto_time_zone','0')
@@ -118,8 +121,8 @@ try:
     assert uid()==old_uid,'UID changed: this was not an in-place update'
     raw_after=facts();assert raw_before==raw_after,'Stored facts changed during update'
     launch();click('Открой свой декабрь');wait_for('Засчитано 2 из 31');screenshot('candidate-calendar')
-    click('Твоя история декабря');wait_for(advice,scroll='up');screenshot('candidate-favorites')
-    result={'result':'PASS','operation':'adb install -r; no uninstall/clear/reset','baseline':before,'candidate':after,'unchangedUid':old_uid,'rawFactsBefore':raw_before,'rawFactsAfter':raw_after,'visibleProgress':'2 / 31','savedAdviceTitle':advice,'device':'API 35 x86_64 emulator; ordinary ARM64+x86_64 release APKs; not a physical phone','fixtureClock':'2026-12-15, isolated emulator only','applicationEntrypoint':'lib/main.dart, no integration_test/QA entrypoint'}
+    click('Твоя история декабря');wait_for(new_advice,scroll='up');screenshot('candidate-favorites')
+    result={'result':'PASS','operation':'adb install -r; no uninstall/clear/reset','baseline':before,'candidate':after,'unchangedUid':old_uid,'rawFactsBefore':raw_before,'rawFactsAfter':raw_after,'visibleProgress':'2 / 31','savedAdviceTitle':new_advice,'device':'API 35 x86_64 emulator; ordinary ARM64+x86_64 release APKs; not a physical phone','fixtureClock':'2026-12-15, isolated emulator only','applicationEntrypoint':'lib/main.dart, no integration_test/QA entrypoint'}
     (out/'upgrade-report.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print('PASS: two consecutive release APKs updated in place; UID, raw opened/saved, visible progress and favorite retained')
 except Exception:
