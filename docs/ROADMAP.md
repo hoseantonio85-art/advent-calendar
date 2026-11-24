@@ -11,11 +11,11 @@
 | Автономная техническая стабилизация | Завершена: тестовый release/profile ARM64, аудит размера/manifest, 67 tests, native restart/stress; [отчёт](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/TECHNICAL-STABILIZATION-2026-11-24.md) |
 | Дополнение: demo signing/update | Постоянный main-only ключ; реальные независимые публикации 12403 → 12503, install -r и сохранение данных PASS; [правила](ANDROID-DEMO-UPDATES.md) |
 | Физическая QA | Не пройдена: device performance/memory, screen reader и реальные OS-интенты; [процедура](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/PHYSICAL-ANDROID-QA.md) |
-| PR #5/#6 | Открыты, не слиты; перед merge нужны разрешение doc-конфликтов и CI обновлённой базы; [Git-аудит и порядок](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/PR-MERGE-READINESS.md) |
+| PR #5/#6 | #5: main синхронизирован, конфликты разрешены, CI успешен, ожидает отдельного одобрения; #6: после merge #5 обновить базу, разрешить docs и выполнить полный CI; [текущий отчёт](PR5-MERGE-READINESS-2026-11-24.md) |
 
 ## Подготовка последовательного merge #5 → #6
 
-PR #5 синхронизируется с main: конфликтуют только документы; CI проверяется на новом merge-коммите. Подписанная публикация 12503 и main-only secrets сохраняются. #5 — foundation, финальный native модуль/вариант А находится в #6. Сначала отдельное одобрение и merge #5, затем retarget/обновление #6, полные тесты и отдельное одобрение его merge. [Отчёт](PR5-MERGE-READINESS-2026-11-24.md).
+PR #5 синхронизирован с main: конфликты документов разрешены, CI #126/#127 прошёл, analyze без замечаний, 7 tests. Актуальные head checks перед одобрением — в PR #5. Подписанная публикация 12503 и main-only secrets сохраняются. #5 — foundation, финальный native модуль/вариант А находится в #6. Сначала отдельное одобрение и merge #5, затем retarget/обновление #6, полные тесты и отдельное одобрение его merge. [Отчёт](PR5-MERGE-READINESS-2026-11-24.md).
 
 ## Дальнейшая последовательность
 
