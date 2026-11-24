@@ -77,6 +77,7 @@ void main() {
           final painted = MatrixUtils.transformRect(number.getTransformTo(null), Offset.zero & number.size);
           expect(tiles[i].inflate(1).contains(painted.topLeft), isTrue);
           expect(tiles[i].inflate(1).contains(painted.bottomRight), isTrue);
+          expect(painted.center.dx, closeTo(tiles[i].center.dx, .5));
         }
         expect(tiles[0].top, tiles[1].top);
         if (scale == 1) {
@@ -101,11 +102,12 @@ void main() {
     await mount(tester, 390, 1, clock);
     expect(List.generate(4, (i) => value(tester, i)), ['16', '11', '54', '53']);
     final bg = tester.renderObject<RenderRepaintBoundary>(find.byKey(const ValueKey('history-countdown-background')));
-    final paints = bg.debugSymmetricPaintCount + bg.debugAsymmetricPaintCount;
+    final backgroundPicture = bg.debugLayer!.firstChild;
+    expect(backgroundPicture, isNotNull);
     clock.value = clock.value.add(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1)); await tester.pump();
     expect(List.generate(4, (i) => value(tester, i)), ['16', '11', '54', '52']);
-    expect(bg.debugSymmetricPaintCount + bg.debugAsymmetricPaintCount, paints,
+    expect(identical(bg.debugLayer!.firstChild, backgroundPicture), isTrue,
       reason: 'The photograph must not be repainted when only the clock ticks.');
     // A changed holiday message may legitimately change the block's height;
     // check its arithmetic separately from the ordinary-tick paint assertion.

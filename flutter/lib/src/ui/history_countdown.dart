@@ -99,7 +99,7 @@ class _HistoryTimeTile extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Stack(key: ValueKey('countdown-tile-$index'), children: [
+  Widget build(BuildContext context) => Stack(key: ValueKey('countdown-tile-$index'), fit: StackFit.passthrough, children: [
     const Positioned.fill(child: _HistoryCountdownGlass()),
     RepaintBoundary(child: Padding(padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
       child: Column(children: [
