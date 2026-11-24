@@ -1,5 +1,19 @@
 # Android demo: постоянная подпись и обновления
 
+> **Подготовка PR #6 · 24.11.2026:** #5 слит автором; #6 теперь направлен на main.
+> После merge #6 publisher принимает также успешный push main того же Flutter
+> workflow ID 427003215. Все четыре CI jobs обязательны и выполняются на main.
+> Policy отвергает fork/иной workflow/неподходящий event+branch/неполные gates;
+> main SHA дополнительно проверяется на принадлежность истории main.
+> Publisher/helper checkout фиксируется на доверенном main commit, environment
+> по-прежнему только refs/heads/main, PR не получает ключ. Merge-аудит использует
+> точный sourceSha, не зависит от сохранения слитых feature-веток и требует exit 0.
+> Нумерация workflow, ключ, appId, fingerprint, checksum и signed install-r gate
+> сохранены. Main-source обновляет README/metadata только main, без зависимости
+> от native-ветки. [Финальная готовность/CI и новый update proof](PR6-MERGE-READINESS-2026-11-24.md).
+> Реальный первый main-source run возможен после отдельного разрешения merge #6;
+> до него обновлённый package проверяется и подписывается через существующий PR path.
+
 Дополнение к технической стабилизации от **24 ноября 2026**. Визуальный MVP и Flutter-package не меняются. Production-подпись «ВторогоКрыла» не используется, магазина нет.
 
 ## Исходное состояние и текущий статус

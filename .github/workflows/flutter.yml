@@ -17,6 +17,7 @@ jobs:
           node-version: '22'
       - run: node tools/check-demo-signing-source.cjs
       - run: node --test tools/demo-android-version.test.cjs
+      - run: node --test tools/demo-publication-policy.test.cjs
       - run: node tools/demo-android-version.cjs
       - run: node tools/verify-content.cjs
       - run: node tools/verify-progress-parity.cjs
@@ -88,7 +89,6 @@ jobs:
           path: flutter/example/build/app/outputs/flutter-apk/app-debug.apk
 
   android-motion:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -220,7 +220,6 @@ jobs:
 
   android-upgrade:
     needs: android-release
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
