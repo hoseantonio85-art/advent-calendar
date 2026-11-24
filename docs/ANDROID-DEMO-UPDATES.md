@@ -10,7 +10,28 @@
 
 **Первый реальный signed-upgrade PASS:** [защищённый CI probe](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45395638381), обычные release APK **12302 → 12303**, один applicationId/cert, UID 10148, raw opened 1/3 и saved 3, видимые 2/31 и совет «Оставь место чуду» сохранены. Установка `adb install -r`, без uninstall/clear/reset. Это API35 x86_64 эмулятор, не физический телефон.
 
-Полный [CI #124](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45394222577) прошёл; первая постоянная публикация и проверка следующего независимого CI-выпуска выполняются. Итоговая приёмка публикаций будет добавлена отдельной датированной записью.
+**Критерий готовности подтверждён 24 ноября 2026 реальным обновлением двух независимых CI-публикаций: 12403 → 12503.** Вторая проверка скачала именно предыдущую опубликованную APK и проверила её SHA-256, создала данные через обычный UI, затем выполнила adb install -r. Удаления/очистки/повторного копирования данных не было.
+
+| Поле | Первая опубликованная версия | Следующая версия |
+|---|---|---|
+| applicationId | com.example.advent_demo | com.example.advent_demo |
+| versionName | 0.1.124.1 | 0.1.125.1 |
+| versionCode | 12403 | 12503 |
+| подпись | постоянная Advent Demo | тот же сертификат |
+| исходник APK | a70dde50db2d132eb3105b8b846dfd4ad3104879 | a704dbaaa86c5d027796403a9be713ac80bcc3e8 |
+| ARM64 APK | 17.26 MiB | 17.26 MiB |
+
+**Результат после обновления:** UID 10067 не изменился; исходные bool-факты opened дней 1/3 и saved дня 3 совпали до/после; в новом процессе UI показал **2 / 31** и избранный совет **«Оставь место чуду»**. [Публичный JSON-тест](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/upgrade-report.json) · [подписанные версии/fingerprint](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/demo-signing.json). SHA-256 прежней APK в доказательстве совпал с candidateChecksum предыдущего Release, новой — с candidateChecksum текущего Release.
+
+**[Скачать актуальный ARM64 APK](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/advent-calendar-test-release-arm64.apk)** · [предыдущая APK проверенной пары](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/advent-calendar-upgrade-baseline.apk) · [новая APK проверенной пары](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/advent-calendar-upgrade-candidate.apk). Пара содержит ARM64+x86_64; основной компактный APK — только ARM64 с тем же applicationId/candidate code/сертификатом.
+
+Проверка между публикациями выполнена на **Android API28 x86_64 эмуляторе** с обычными release APK из lib/main.dart. Первичная signed-пара 12302 → 12303 также прошла [API35 probe](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45395638381). На физическом ARM64 телефоне тест не выполнялся; это не оценка производительности телефона. Дата 15 декабря задана только тестовому устройству; APK не содержит переключателя даты/QA entrypoint. Для CI software GPU используется существующий renderer override, настройки телефона/продуктовый дизайн не менялись.
+
+[Полный CI #124](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45394222577) и [#125](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45397779151) успешны: 2 теста нумерации, проверка отсутствия приватного signing-материала в tracked files, 67 unit/widget (3 visual включены отдельным прогоном), 29 visual, flutter analyze пакета/demo, web, native Android, release/profile и update smoke. [Публикация первой версии](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45417058596) и [следующей](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45420936409) отдельно проверили подпись и install-r перед выдачей ссылок.
+
+Исправления этого этапа затронули сборочную инфраструктуру: постоянную подпись, версии, UID parser/ADB readiness/clock совместимость тестового Android и CI preview-теги с ограниченным GITHUB_TOKEN. Новая матрица использует стабильный поддерживаемый runtime для install-теста, отдельный native CI сохраняет API35. Flutter lib/дизайн/контент/пользовательские storage-ключи не менялись. Версия/подпись реального «ВторогоКрыла» по-прежнему принадлежат хосту; production/store-выпуска и merge PR не было.
+
+Основные файлы: .github/workflows/flutter.yml, android-preview.yml и android-upgrade-probe.yml; tools/demo-android-version.cjs и его тест; configure-demo-android.cjs, provision-demo-signing.cjs, sign-demo-apks.cjs, android-demo-upgrade.py, check-demo-signing-source.cjs; example pubspec, APK audit, .gitignore, HOST-INTEGRATION/PHYSICAL-ANDROID-QA и летопись. Приватные ключи/пароли не включены ни в один из этих файлов или артефактов.
 
 ## Постоянная demo-идентичность
 
