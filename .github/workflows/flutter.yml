@@ -22,7 +22,7 @@ jobs:
           channel: stable
           flutter-version: '3.50.1'
           cache: true
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
         working-directory: flutter
       - run: flutter analyze
         working-directory: flutter
@@ -57,7 +57,7 @@ jobs:
         with:
           name: advent-visual-review
           path: build/visual-review/
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
         working-directory: flutter/example
       - uses: actions/upload-artifact@v4
         with:
@@ -100,7 +100,7 @@ jobs:
       - name: Prepare Android integration host
         working-directory: flutter/example
         run: |
-          flutter pub get
+          flutter pub get --enforce-lockfile
           flutter create --platforms=android --project-name advent_demo .
           flutter build apk --debug --target=integration_test/calendar_motion_test.dart
           cd android
@@ -149,7 +149,7 @@ jobs:
         run: |
           mkdir -p ../../build/android-variants ../../build/android-audit
           flutter --version --machine > ../../build/android-audit/flutter-sdk.json
-          flutter pub get
+          flutter pub get --enforce-lockfile
           cp pubspec.lock ../../build/android-audit/example-dev.pubspec.lock
           flutter create --platforms=android --project-name advent_demo .
           flutter build apk --debug --target-platform android-arm64
