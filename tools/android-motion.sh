@@ -34,7 +34,8 @@ capture_pid=$!
 adb shell screenrecord --size 720x1280 --bit-rate 1000000 --time-limit 150 /sdcard/advent-motion.mp4 > build/android-motion/recorder.log 2>&1 &
 recorder_pid=$!
 status=0
-flutter drive --no-enable-impeller --driver=test_driver/integration_test.dart --target=integration_test/calendar_motion_test.dart --use-application-binary=build/app/outputs/flutter-apk/app-debug.apk > build/android-motion/driver.log 2>&1 || status=$?
+# Keep the installation/data: the default drive cleanup uninstalls this APK.
+flutter drive --keep-app-running --no-enable-impeller --driver=test_driver/integration_test.dart --target=integration_test/calendar_motion_test.dart --use-application-binary=build/app/outputs/flutter-apk/app-debug.apk > build/android-motion/driver.log 2>&1 || status=$?
 if [[ "$status" == 0 ]]; then
   wait "$capture_pid" || status=$?
 else
