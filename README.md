@@ -14,6 +14,22 @@
 Ссылки обновляются после проверки обновления APK. Переход со старой debug-подписи — один раз с ручной переустановкой и потерей прежних локальных данных; следующие demo-сборки сохраняют данные. [Правила обновления](docs/ANDROID-DEMO-UPDATES.md).
 <!-- android-preview:end -->
 
+## PR #6 · этап 2/2 завершён · 24 ноября 2026
+
+[Полный CI #133](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45462441956) на a803adf успешно завершён: analyze package/demo без
+замечаний, 67 unit/widget и отдельно 29 visual, content/progress parity 31/14/17,
+native Android/restart/24 цикла шторок, web и Android debug/release/profile/audit.
+65 PNG текущего прогона совпали с принятыми предыдущими изображениями байт в байт.
+[Подписанный APK 0.1.133.1](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45462441956/advent-calendar-test-release-arm64.apk) · [Release](https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-45462441956) ·
+[установка обновления](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45462441956/upgrade-report.json): **13203 → 13303**, тот же appId,
+сертификат и UID, просмотры/2 из 31/избранное сохранены без удаления приложения.
+Дизайн, HTML, данные и Flutter-код не менялись; ключ доступен только trusted main.
+История #5 и этапа 1 сохранена ниже. [Отчёт этапа 2](docs/PR6-STAGE2-READINESS-2026-11-24.md).
+Остаются физическая QA, Issue #7, согласование релизного контента/прав и интеграция
+во «ВтороеКрыло» после получения исходников. Первый main-source выпуск проверить
+после отдельно разрешённого merge. **PR готов к одобрению автора, но не слит.**
+
+
 ## PR #6 · этап 1/2: синхронизация с main · 24 ноября 2026
 
 По отдельному запросу автора выполнена только подготовка с экономией лимита.

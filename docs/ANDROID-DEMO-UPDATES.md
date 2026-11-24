@@ -124,3 +124,13 @@ Android не позволяет заменить старую подпись н�
 проверена: единственная deployment branch main; secret не читался/не менялся.
 Main-source path подготовлен в #6, его первый реальный запуск — после отдельного
 одобрения merge. [Готовность и Git audit](PR6-MERGE-READINESS-2026-11-24.md).
+
+## Этап 2/2 · 24 ноября 2026: новое подписанное обновление
+
+[CI #133](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45462441956) и [trusted publisher](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45465732090) success. Реальная предыдущая
+публичная APK 0.1.132.1/code13203 заменена 0.1.133.1/code13303 через adb install -r:
+тот же appId/cert/UID, raw opened/saved, 2 из 31 и избранный совет сохранены.
+[JSON proof](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45462441956/upgrade-report.json) · [новый ARM64 release](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45462441956/advent-calendar-test-release-arm64.apk).
+Main-only signing policy сохранена; ключи не копировались/не менялись.
+Первый реальный main-source run проверить после отдельно одобренного merge,
+без обхода provenance/gates/environment. [Готовность и ограничения](PR6-STAGE2-READINESS-2026-11-24.md).
