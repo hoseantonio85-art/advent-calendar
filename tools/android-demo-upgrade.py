@@ -56,7 +56,13 @@ def uid():
     if not m:raise AssertionError('Installed package UID unavailable')
     return m.group(1)
 def launch():
-    adb('shell','am','start','-W','-n',app+'/.MainActivity');time.sleep(4)
+    # Match the existing native CI renderer override on software GPU only.
+    # The ordinary release APK and its physical-device defaults are unchanged.
+    command=['adb','shell','am','start','-W','-n',app+'/.MainActivity','--ez','enable-impeller','false']
+    started=subprocess.run(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=60)
+    (out/'launch-status.txt').write_bytes(started.stdout+started.stderr)
+    if started.returncode:raise RuntimeError('Android launch failed: '+(started.stdout+started.stderr).decode(errors='replace')[-1000:])
+    time.sleep(4)
 def varint(data,pos):
     n=shift=0
     while True:
@@ -127,5 +133,7 @@ try:
     print('PASS: two consecutive release APKs updated in place; UID, raw opened/saved, visible progress and favorite retained')
 except Exception:
     try:screenshot('failure')
+    except Exception:pass
+    try:(out/'failure-logcat.txt').write_text(adb('logcat','-d',timeout=10))
     except Exception:pass
     raise
