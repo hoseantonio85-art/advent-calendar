@@ -45,6 +45,25 @@ adb shell pkill -INT screenrecord || true
 wait "$recorder_pid" || true
 adb pull /sdcard/advent-motion.mp4 build/android-motion/android-motion.mp4 || true
 adb logcat -d > build/android-motion/android-logcat.txt 2>&1 || true
+if [[ "$status" == 0 ]]; then
+  cp build/android-motion/android-logcat.txt build/android-motion/android-logcat-first-process.txt
+  adb shell am force-stop com.example.advent_demo
+  adb logcat -c
+  adb shell am start -W -n com.example.advent_demo/.MainActivity > build/android-motion/process-restart.log 2>&1
+  restored=false
+  for ((attempt=0; attempt<120; attempt++)); do
+    if adb logcat -d -v raw -s flutter:I 2>/dev/null | grep -F 'REAL_RESTART_STORAGE_RESTORED' >/dev/null; then
+      restored=true
+      echo 'PASS: raw opened/saved and derived progress restored after Android process restart' >> build/android-motion/process-restart.log
+      break
+    fi
+    sleep 0.5
+  done
+  if [[ "$restored" != true ]]; then status=1; echo 'FAIL: process restore marker not received' >> build/android-motion/process-restart.log; fi
+  adb logcat -d > build/android-motion/android-logcat.txt 2>&1 || true
+  adb shell am force-stop com.example.advent_demo
+  cat build/android-motion/process-restart.log
+fi
 cat build/android-motion/driver.log
 cat build/android-motion/history-capture.log
 exit "$status"

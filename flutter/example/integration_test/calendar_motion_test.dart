@@ -47,6 +47,23 @@ void main() {
     final content = await AdventContent.load(), store = Store();
     store.ids.addAll(content.calendar.days.where((d) => d.kind == DayKind.event && !d.revealOnDate).take(7).map((d) => d.id));
     final time = CampaignTime.moscow(clock: Clock()), reduced = ValueNotifier(false);
+    // Real DataStore/shared_preferences path, in an isolated test account.
+    // The shell relaunches this APK once and requires the restore marker.
+    final disk = LocalAdventRepository(storage: PreferencesBoolStorage(), calendar: content.calendar,
+      userId: 'ci-process-restart-contract');
+    final previous = await disk.read(AdventProgress.campaignId);
+    final previousSaved = await disk.readSaved(AdventProgress.campaignId);
+    if(previous.contains(content.calendar.days[0].id) && previousSaved.contains(content.calendar.days[2].id)) {
+      final restored=await AdventProgress(calendar:content.calendar,time:time,repository:disk).read();
+      expect(restored, contains(content.calendar.days[0].id));
+      debugPrint('REAL_RESTART_STORAGE_RESTORED');
+    }
+    await disk.recordOpened(AdventProgress.campaignId,content.calendar.days[0].id);
+    await disk.setSaved(AdventProgress.campaignId,content.calendar.days[2].id,true);
+    final recreated=LocalAdventRepository(storage:PreferencesBoolStorage(),calendar:content.calendar,
+      userId:'ci-process-restart-contract');
+    expect(await recreated.read(AdventProgress.campaignId),contains(content.calendar.days[0].id));
+    expect(await recreated.readSaved(AdventProgress.campaignId),contains(content.calendar.days[2].id));
     final frames = <FrameTiming>[];
     void timings(List<FrameTiming> batch) => frames.addAll(batch);
     SchedulerBinding.instance.addTimingsCallback(timings);
