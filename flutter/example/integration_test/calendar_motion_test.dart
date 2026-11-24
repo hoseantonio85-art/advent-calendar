@@ -22,6 +22,26 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   testWidgets('Android XXS, toast, sheet motion, dismissal and reduced motion', (tester) async {
+    // Entry-only native smoke test before the existing calendar checks.
+    // The Android job uses the real package assets and XXS system setting.
+    var entryOpens = 0;
+    for (final scale in [1.0, 2.0]) {
+      for (final days in [38, 0]) {
+        await tester.pumpWidget(MaterialApp(debugShowCheckedModeBanner: false,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)), child: child!),
+          home: Scaffold(backgroundColor: const Color(0xff0a2a20),
+            body: Center(child: Padding(padding: const EdgeInsets.all(16),
+              child: AdventEntryCard(daysUntilNewYear: days, onOpen: () => entryOpens++))))));
+        await tester.pump(const Duration(seconds: 1));
+        expect(find.byType(BackdropFilter), findsOneWidget);
+        await tester.tap(find.byType(AdventEntryCard));
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(tester.takeException(), isNull);
+      }
+    }
+    expect(entryOpens, 4);
+    await tester.pumpWidget(const SizedBox());
     tzdata.initializeTimeZones();
     final content = await AdventContent.load(), store = Store();
     store.ids.addAll(content.calendar.days.where((d) => d.kind == DayKind.event && !d.revealOnDate).take(7).map((d) => d.id));
@@ -90,7 +110,7 @@ void main() {
       'sheetTopSamples': samples, 'sheetFrames': motionFrames, 'frameCount': frames.length,
       'buildUs': frames.map((f) => f.buildDuration.inMicroseconds).toList(),
       'rasterUs': frames.map((f) => f.rasterDuration.inMicroseconds).toList(),
-      'verified': ['XXS minimum', 'locked advice/surprise', 'single safe top notice', 'no locked progress', '420ms motion', 'handle drag', 'Back', 'close', 'reduced motion'],
+      'verified': ['entry glass/countdown/festive/text200/tap', 'XXS minimum', 'locked advice/surprise', 'single safe top notice', 'no locked progress', '420ms motion', 'handle drag', 'Back', 'close', 'reduced motion'],
     };
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox()); reduced.dispose();

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 // Retain compatibility with pre-3.47 hosts until their SDK is known.
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
@@ -62,15 +63,17 @@ class AdventEntryCard extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(children: [
-                      Expanded(child: Text(
+                      Expanded(child: FittedBox(
+                        fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
+                        child: Text(
                         'Открой свой\nдекабрь',
-                        maxLines: 2,
+                        maxLines: 2, softWrap: false,
                         style: TextStyle(
                           fontFamily: 'packages/advent_calendar/Yeseva One', fontFamilyFallback: const ['Georgia'],
-                          fontSize: compact ? 23 : 26, height: 1.13, letterSpacing: -1.0,
+                          fontSize: compact ? 25 : 28, height: 1.13, letterSpacing: -1.0,
                           color: const Color(0xFFFFF8E8),
                         ),
-                      )),
+                      ))),
                       SizedBox(width: compact ? 9 : 10),
                       _CountdownCalendar(days: days, compact: compact),
                     ]),
@@ -95,19 +98,34 @@ class _CountdownCalendar extends StatelessWidget {
     return SizedBox(
       width: compact ? 82 : 88, height: compact ? 82 : 88,
       child: Stack(children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft, end: Alignment.bottomRight,
-              colors: [Color(0x17FFFFFF), Color(0x0DE0EDCF)],
+        // Clip only the background filter. Foreground type stays sharp and
+        // the single 88/82 dp blur never paints outside its rounded bounds.
+        Positioned.fill(child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: const Color(0x59102E25),
+                border: Border.all(color: const Color(0x38F5F5DE), width: 1),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft, end: Alignment.bottomRight,
+                  colors: [Color(0x18FFFFFF), Color(0x06E0EDCF)],
+                ),
+              ),
+              child: const SizedBox.expand(),
             ),
           ),
-          child: const SizedBox.expand(),
-        ),
+        )),
         const Positioned(top: 9, left: 12, child: _CalendarHole()),
         const Positioned(top: 9, right: 12, child: _CalendarHole()),
-        Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Center(child: SizedBox(
+          height: compact ? 60 : 64,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: FittedBox(fit: BoxFit.scaleDown,
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
           if (days > 0) ...[
             const SizedBox(height: 4),
             Text('$days', maxLines: 1, style: TextStyle(
@@ -117,7 +135,7 @@ class _CountdownCalendar extends StatelessWidget {
             )),
             const SizedBox(height: 6),
             Text(AdventEntryCard._dayWord(days) + ' до 2027',
-              maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis,
+              maxLines: 1, softWrap: false,
               style: TextStyle(fontFamily: 'packages/advent_calendar/Roboto',
                 fontSize: compact ? 9 : 9.5, fontWeight: FontWeight.w600,
                 color: const Color(0xFFF1E2C5)),
@@ -126,10 +144,12 @@ class _CountdownCalendar extends StatelessWidget {
             const Icon(Icons.auto_awesome_rounded, size: 25, color: Color(0xFFFFE0A3)),
             const SizedBox(height: 6),
             const Text('С Новым годом!', maxLines: 1,
-              style: TextStyle(fontFamily:'Roboto',fontSize:9,
+              style: TextStyle(fontFamily:'packages/advent_calendar/Roboto',fontSize:9,
                 color:Color(0xFFF1E2C5),fontWeight:FontWeight.w600)),
           ],
         ])),
+          ),
+        )),
       ]),
     );
   }
