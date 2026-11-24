@@ -1,3 +1,4 @@
+import 'dart:io' show ProcessInfo;
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -142,6 +143,25 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     }
-    reduced.dispose();
+    // Stability/RSS diagnostics, not a physical-device performance claim.
+    await tester.pumpWidget(MaterialApp(key: const ValueKey('stress-native'),
+      builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(
+        disableAnimations: true, textScaler: const TextScaler.linear(1)), child: child!),
+      home: AdventCalendarScreen(content: content, time: time,
+        progress: AdventProgress(calendar: content.calendar, time: time, repository: store))));
+    await tester.pump(const Duration(seconds: 2));
+    final rss = <int>[ProcessInfo.currentRss];
+    for(var i=0;i<24;i++) {
+      final target=i.isEven?find.byKey(const ValueKey('day-1')):find.text('Твоя история декабря');
+      await Scrollable.ensureVisible(tester.element(target), alignment:.4);
+      await tester.pump(const Duration(milliseconds: 100)); await tester.tap(target);
+      await tester.pump(const Duration(milliseconds: 350)); expect(chrome, findsOneWidget);
+      await tester.tap(find.byTooltip('Закрыть')); await tester.pump(const Duration(milliseconds: 350));
+      expect(chrome, findsNothing); if(i%4==3)rss.add(ProcessInfo.currentRss);
+    }
+    binding.reportData!['stress']={'cycles':24,'rssBytes':rss,'maxRssBytes':ProcessInfo.maxRss,
+      'note':'debug emulator RSS includes engine/image caches; not a GC leak test or device benchmark'};
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox()); reduced.dispose();
   });
 }

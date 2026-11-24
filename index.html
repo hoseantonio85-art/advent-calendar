@@ -941,6 +941,9 @@ body{font-family:"Roboto",Inter,Arial,sans-serif}
  const weekNames=['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
  const readStore=(key)=>{try{return new Set(JSON.parse(localStorage.getItem(key)||'[]'))}catch{return new Set()}};
  const visited=readStore('advent2026-visited'),saved=readStore('advent2026-saved');
+ // Preview visits are in-memory QA data, never persisted as real user progress.
+ const previewVisited=new Set();
+ const progressVisited=()=>previewDay===null?visited:previewVisited;
  // This is deliberately separate from 'visited': old pre-release visits must not count as revealed surprises.
  const revealedSurprises=readStore('advent2026-surprise-opened'),qaRevealedSurprises=new Set();
  const hasOpenedSurprise=day=>(previewDay===null?revealedSurprises:qaRevealedSurprises).has(day);
@@ -1011,7 +1014,12 @@ function historySavedMarkup(){
  const more=days.length>3?'<button class="history-saved-more" id="showAllSaved" type="button" aria-expanded="false">Показать все '+days.length+'</button>':'';
  return '<section class="history-saved-section" aria-label="Сохранённые советы">'+heading+'<div class="history-saved-list">'+items+more+'</div></section>';
 }
- function visibleVisitedCount(){return [...visited].filter(day=>Number.isInteger(day)&&day>=1&&day<=31&&!isLockedAdvice(day)&&!isLockedSurprise(day)&&(!surpriseDays.has(day)||hasOpenedSurprise(day))).length}
+ // Unique raw views count only after their calendar date has arrived in Moscow.
+ // Early event views remain stored and are credited without another tap.
+ function visibleVisitedCount(){
+   const today=displayToday(),todayKey=today.y*10000+today.m*100+today.d;
+   return [...progressVisited()].filter(day=>Number.isInteger(day)&&day>=1&&day<=31&&20261200+day<=todayKey).length;
+ }
  function renderGrid(){
    grid.innerHTML=Array.from({length:31},(_,i)=>{
     const day=i+1,lockedSurprise=isLockedSurprise(day),event=lockedSurprise?null:events[day],w=wideDays.has(day),thought=thoughts[i],state=dayState(day),locked=isLockedAdvice(day)||lockedSurprise;
@@ -1035,6 +1043,9 @@ function historySavedMarkup(){
    const count=visibleVisitedCount();
    document.getElementById('progressCount').textContent=`${count} / 31`;
    document.getElementById('progressFill').style.width=`${count/31*100}%`;
+   // The same projection drives the panel and an already opened history sheet.
+   const historyCount=sheet.querySelector('.history-progress strong');
+   if(historyCount)historyCount.textContent=`${count} из 31`;
  }
  function tipMarkup(day,only=false){
   const t=thoughts[day-1];
@@ -1098,8 +1109,8 @@ function historySavedMarkup(){
      (previewDay===null?revealedSurprises:qaRevealedSurprises).add(day);
      if(previewDay===null)try{localStorage.setItem('advent2026-surprise-opened',JSON.stringify([...revealedSurprises]))}catch{}
    }
-   activeDay=day;lastFocus=document.activeElement;visited.add(day);
-   try{localStorage.setItem('advent2026-visited',JSON.stringify([...visited]))}catch{}
+   activeDay=day;lastFocus=document.activeElement;progressVisited().add(day);
+   if(previewDay===null)try{localStorage.setItem('advent2026-visited',JSON.stringify([...visited]))}catch{}
    updateProgress();
    sheet.innerHTML=renderSheet(day,celebrate);
    prepareSheetShell();
@@ -1203,7 +1214,7 @@ function historySavedMarkup(){
  overlay.addEventListener('click',()=>closeSheet());
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeDay!==null)closeSheet();if(e.key==='Tab'&&activeDay!==null){const focusable=Array.from(sheet.querySelectorAll('button'));if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
  document.getElementById('aboutBtn').addEventListener('click',()=>{
-  lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Открыто <strong>${visibleVisitedCount()} из 31</strong> дней календаря</p>${historyCountdownMarkup()}${historySavedMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>У каждого дня — своё время</blockquote><p>Просмотр доступных дней отмечается в прогрессе. Большинство событий видно заранее; четыре сюрприза открываются в свои даты, а советы доступны со своего дня.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
+  lastFocus=document.activeElement;activeDay=-1;sheet.innerHTML=`<div class="sheet-grabber"></div><header class="sheet-head"><div><p class="sheet-eyebrow">твой декабрь</p><h2 class="sheet-title" id="sheetTitle">Твоя история декабря</h2></div><button class="close-btn" id="closeSheet" aria-label="Закрыть">×</button></header><p class="history-progress">Засчитано <strong>${visibleVisitedCount()} из 31</strong> дней календаря</p>${historyCountdownMarkup()}${historySavedMarkup()}<p class="body-copy">Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.</p><div class="wisdom-box"><div class="wisdom-box-kicker">✦ &nbsp; о календаре</div><blockquote>У каждого дня — своё время</blockquote><p>Просмотренный день засчитывается, когда наступает его дата по Москве. Мероприятия можно посмотреть заранее — они добавятся в историю автоматически в нужный день. Пропущенные дни можно открыть позже.</p></div><button class="action-main" id="mainAction">Понятно!</button>`;
   prepareSheetShell();
   sheet.setAttribute('aria-hidden','false');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';requestAnimationFrame(()=>{overlay.classList.add('show');sheet.classList.add('show')});sheet.querySelector('.sheet-scroll').scrollTop=0;
   sheet.querySelector('#closeSheet').onclick=()=>closeSheet();sheet.querySelector('#mainAction').onclick=()=>closeSheet();

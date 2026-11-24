@@ -42,6 +42,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
   Set<String> _savedIds = {};
   String? _error;
   bool _opening = false;
+  int _refreshRevision = 0;
   @override
   void initState() {
     super.initState();
@@ -62,15 +63,18 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
     if (state == AppLifecycleState.resumed) _refresh();
   }
   Future<void> _refresh() async {
+    if (!mounted) return;
+    final revision = ++_refreshRevision;
+    final progress = widget.progress, savedAdvice = widget.savedAdvice;
     _midnight?.cancel();
     final now = tz.TZDateTime.from(widget.time.clock.nowUtc(), widget.time.location);
     final next = tz.TZDateTime(widget.time.location, now.year, now.month, now.day + 1);
     _midnight = Timer(next.difference(now), _refresh);
     try {
-      final opened = await widget.progress.read();
-      _savedIds=await widget.savedAdvice?.readSaved(AdventProgress.campaignId)??{};
-      if (mounted) setState(() { _creditedDays.value = opened; _error = null; });
-    } catch (_) { if (mounted) setState(() => _error = 'Не удалось загрузить прогресс. Повторить'); }
+      final opened = await progress.read();
+      final savedIds = await savedAdvice?.readSaved(AdventProgress.campaignId) ?? <String>{};
+      if (mounted && revision == _refreshRevision) setState(() { _creditedDays.value = opened; _savedIds = savedIds; _error = null; });
+    } catch (_) { if (mounted && revision == _refreshRevision) setState(() => _error = 'Не удалось загрузить прогресс. Повторить'); }
   }
   @override
   void dispose() {
@@ -114,6 +118,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
       final celebrate=day.revealOnDate?(await widget.progress.surprises?.claimSurprise(AdventProgress.campaignId,day.id)??false):false;
       final opened = await widget.progress.read();
       if (!mounted) return;
+      ++_refreshRevision; // Invalidate earlier storage snapshots after a new view.
       setState(() => _creditedDays.value = opened);
       await showModalBottomSheet<void>(context: context, isScrollControlled: true,
         useSafeArea: true, enableDrag: true, sheetAnimationStyle: _calendarSheetMotion(context), showDragHandle: false, barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor: const Color(0xfffaf2e6),
