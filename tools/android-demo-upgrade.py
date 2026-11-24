@@ -110,7 +110,24 @@ try:
     assert content['days'][2]['kind']==new_content['days'][2]['kind']=='advice','Saved-advice fixture requires migration review'
     new_advice=new_content['days'][2]['title']
     assert not adb('shell','pm','list','packages',app).strip(),'Fresh isolated emulator required; never uninstall to hide a failed update'
-    adb('root');adb('wait-for-device')
+    # adb root restarts the device-side daemon. "closed" can mean it is
+    # restarting successfully, so wait for root and both Android services.
+    ready=False
+    for attempt in range(3):
+        root=subprocess.run(['adb','root'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=25)
+        root_log=(root.stdout+root.stderr).decode(errors='replace')
+        (out/'adb-root-status.txt').write_text(root_log)
+        if root.returncode and not any(t in root_log.lower() for t in ['closed','restarting','offline']):raise RuntimeError('Root unavailable on test emulator: '+root_log)
+        adb('wait-for-device',timeout=45)
+        for check in range(30):
+            try:
+                ready=adb('shell','id','-u').strip()=='0' and adb('shell','getprop','sys.boot_completed').strip()=='1' and adb('shell','am','get-current-user').strip()=='0'
+            except (RuntimeError,subprocess.TimeoutExpired):ready=False
+            if ready:break
+            time.sleep(1)
+        if ready:break
+    assert ready,'Emulator transport/services did not recover after adb root'
+    time.sleep(2)
     adb('shell','settings','put','global','auto_time','0');adb('shell','settings','put','global','auto_time_zone','0')
     adb('shell',"date -s '2026-12-15 12:00:00'")
     for setting in ['window_animation_scale','transition_animation_scale','animator_duration_scale']:adb('shell','settings','put','global',setting,'0')
