@@ -1,11 +1,11 @@
 {
-  "sourceSha": "b01a141686cc75b2e64c4ab31ff9ee7d36662bd1",
-  "sourceRun": 45211174588,
-  "runNumber": 100,
+  "sourceSha": "ef6449c9ee9cfb571a5e7bb4866c8223be44b85c",
+  "sourceRun": 45327831247,
+  "runNumber": 102,
   "attempt": 1,
-  "checksum": "e51b7f438351410e59c72cd8d6ec8cf07fb955e100d8bae3410b36fde144059b",
-  "apk": "https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45211174588/advent-calendar-preview.apk",
-  "release": "https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-45211174588",
-  "publishedAt": "2026-11-23T16:42:31.463Z",
-  "publicationRun": 45219463773
+  "checksum": "d2f422ec3f5cda479da94642b7694e7298645a41a530e5553e8c7bb5acf42a6f",
+  "apk": "https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45327831247/advent-calendar-preview.apk",
+  "release": "https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-45327831247",
+  "publishedAt": "2026-11-24T04:46:53.684Z",
+  "publicationRun": 45328715993
 }
