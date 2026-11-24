@@ -14,7 +14,16 @@ if(!environments.environments.some(e=>e.name===environment)){
   run('gh',['api','--method','PUT',endpoint,'--input','-'],{input:JSON.stringify({deployment_branch_policy:{protected_branches:false,custom_branch_policies:true}})});
   run('gh',['api','--method','POST',endpoint+'/deployment-branch-policies','--input','-'],{input:JSON.stringify({name:'main',type:'branch'})});
 }
-const configuration=JSON.parse(run('gh',['api',endpoint]));
+let configuration=JSON.parse(run('gh',['api',endpoint]));
+// A workflow can auto-create an empty environment before provisioning.
+// Secure that empty dedicated environment; never relax an existing secret's policy.
+if(!configuration.deployment_branch_policy){
+  const existingSecrets=JSON.parse(run('gh',['secret','list','--repo',repo,'--env',environment,'--json','name']));
+  if(existingSecrets.length)throw Error('Unprotected environment already contains secrets; administrator review required');
+  run('gh',['api','--method','PUT',endpoint,'--input','-'],{input:JSON.stringify({deployment_branch_policy:{protected_branches:false,custom_branch_policies:true}})});
+  run('gh',['api','--method','POST',endpoint+'/deployment-branch-policies','--input','-'],{input:JSON.stringify({name:'main',type:'branch'})});
+  configuration=JSON.parse(run('gh',['api',endpoint]));
+}
 const policies=JSON.parse(run('gh',['api',endpoint+'/deployment-branch-policies']));
 if(configuration.deployment_branch_policy?.protected_branches!==false||configuration.deployment_branch_policy?.custom_branch_policies!==true||policies.branch_policies.length!==1||policies.branch_policies[0].name!=='main'||policies.branch_policies[0].type!=='branch')throw Error('Signing environment must allow only main, not pull requests. Review its branch policy before provisioning.');
 const names=JSON.parse(run('gh',['secret','list','--repo',repo,'--env',environment,'--json','name']));
