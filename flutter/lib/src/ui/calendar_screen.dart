@@ -10,6 +10,7 @@ import '../domain/calendar.dart';
 import '../platform/host.dart';
 
 part 'calendar_feedback.dart';
+part 'history_countdown.dart';
 
 const _forest = Color(0xff0a2a20), _gold = Color(0xfff3d495);
 const _serif = TextStyle(fontFamily: 'packages/advent_calendar/Yeseva One', fontWeight: FontWeight.w400);
@@ -620,38 +621,16 @@ class _HistorySheet extends StatefulWidget {
   State<_HistorySheet> createState()=>_HistoryState();
 }
 class _HistoryState extends State<_HistorySheet>{
-  Timer? _timer;
-  @override
-  void initState(){super.initState();_timer=Timer.periodic(const Duration(seconds:1),(_){if(mounted)setState((){});});}
-  @override
-  void dispose(){_timer?.cancel();super.dispose();}
   @override
   Widget build(BuildContext context){
     final width=MediaQuery.sizeOf(context).width,titleSize=(width*.074).clamp(28.0,36.0).toDouble();
-    final seconds=tz.TZDateTime(widget.time.location,2027).difference(widget.time.clock.nowUtc()).inSeconds;
-    final s=math.max(0,seconds);
-    final values=[s~/86400,s%86400~/3600,s%3600~/60,s%60],labels=['дней','часов','минут','секунд'];
-    final large=MediaQuery.textScalerOf(context).scale(1)>1.4;
     return _featureTheme(context,ConstrainedBox(constraints:BoxConstraints(maxHeight:MediaQuery.sizeOf(context).height*.91),child:SafeArea(top:false,child:Column(mainAxisSize:MainAxisSize.min,children:[
       const _SheetChrome(),Flexible(child:SingleChildScrollView(key:const ValueKey('history-sheet-scroll'),padding:EdgeInsets.fromLTRB(width<=360?16:21,2,width<=360?16:21,20),
         child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
           const Padding(padding:EdgeInsets.only(top:3,bottom:6),child:Text('ТВОЙ ДЕКАБРЬ',style:TextStyle(color:Color(0xff688576),fontSize:10,fontWeight:FontWeight.w800,letterSpacing:1.3))),
           Text('Твоя история декабря',style:_serif.copyWith(fontSize:titleSize,height:1.04,letterSpacing:-.025*titleSize,color:const Color(0xff21372b))),
           ValueListenableBuilder<Set<String>>(valueListenable:widget.creditedDays,builder:(_,days,__)=>Padding(padding:const EdgeInsets.only(top:9,bottom:16),child:Text.rich(TextSpan(children:[const TextSpan(text:'Засчитано '),TextSpan(text:'${days.length} из 31',style:const TextStyle(fontWeight:FontWeight.w700)),const TextSpan(text:' дней календаря')]),key:const ValueKey('history-progress'),style:const TextStyle(fontSize:13,color:Color(0xff686b66))))),
-          ClipRRect(borderRadius:BorderRadius.circular(18),child:Container(padding:const EdgeInsets.fromLTRB(12,16,12,12),decoration:BoxDecoration(border:Border.all(color:const Color(0x369fc69d)),gradient:const LinearGradient(colors:[Color(0xff174638),Color(0xff10382c),Color(0xff0a291f)],stops:[0,.53,1])),
-            child:Stack(children:[
-              Positioned(right:-54,top:-56,child:Opacity(opacity:.28,child:Transform.rotate(angle:-9*math.pi/180,child:_art(widget.content,'hero_tree',size:192)))),
-              Column(children:[const Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[Row(mainAxisSize:MainAxisSize.min,children:[CustomPaint(size:Size.square(10),painter:_SparkPainter(Color(0xfff6efdb))),SizedBox(width:4),Text('До Нового года',style:TextStyle(color:Color(0xfff6efdb),fontSize:12,fontWeight:FontWeight.w700))]),Text('2027',style:TextStyle(color:_gold,fontSize:11))]),
-                const SizedBox(height:12),LayoutBuilder(builder:(context,box){
-                  final columns=large?2:4,gap=7.0;
-                  return Wrap(spacing:gap,runSpacing:gap,children:[for(var i=0;i<4;i++)SizedBox(width:(box.maxWidth-gap*(columns-1))/columns,
-                    child:Container(padding:const EdgeInsets.symmetric(vertical:14,horizontal:4),decoration:BoxDecoration(color:const Color(0x10f3ffe5),border:Border.all(color:const Color(0x2ee7f3ce)),borderRadius:BorderRadius.circular(17)),child:Column(children:[
-                      FittedBox(fit:BoxFit.scaleDown,child:Text(values[i].toString().padLeft(2,'0'),style:_serif.copyWith(fontSize:36,height:1,color:const Color(0xffffdfa0)))),
-                      const SizedBox(height:3),Text(labels[i],style:const TextStyle(fontSize:10,color:Color(0xffd0ddca))),
-                    ]))) ]);
-                }),const SizedBox(height:12),Text(s==0?'С Новым годом! Пусть сбудется всё самое светлое.':'До 1 января, 00:00 по московскому времени',textAlign:TextAlign.center,style:const TextStyle(fontSize:12,height:1.5,color:Color(0xffc2d3bf))),
-              ]),
-            ]))),const SizedBox(height:20),
+          _HistoryCountdown(time:widget.time),const SizedBox(height:20),
           _SavedAdviceList(days:widget.content.calendar.days.where((d)=>d.kind==DayKind.advice&&widget.saved.contains(d.id)&&widget.content.calendar.isAvailable(d,widget.time.today)).toList()),
           const Text('Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.',style:TextStyle(fontSize:13.5,height:1.68,color:Color(0xff526257))),const SizedBox(height:16),
           Container(padding:const EdgeInsets.symmetric(vertical:16,horizontal:17),decoration:BoxDecoration(gradient:const LinearGradient(colors:[Color(0xffeaf0dd),Color(0xffe7e8d6)]),border:Border.all(color:const Color(0xffdce4cf)),borderRadius:BorderRadius.circular(17)),

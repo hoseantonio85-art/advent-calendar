@@ -113,6 +113,28 @@ void main() {
       'verified': ['entry glass/countdown/festive/text200/tap', 'XXS minimum', 'locked advice/surprise', 'single safe top notice', 'no locked progress', '420ms motion', 'handle drag', 'Back', 'close', 'reduced motion'],
     };
     expect(tester.takeException(), isNull);
-    await tester.pumpWidget(const SizedBox()); reduced.dispose();
+    // Capture the updated block in the actual Android renderer after the motion
+    // checks, so conversion to an image surface cannot alter their measurements.
+    await binding.convertFlutterSurfaceToImage();
+    for (final scale in [1.0, 2.0]) {
+      await tester.pumpWidget(MaterialApp(debugShowCheckedModeBanner: false,
+        theme: ThemeData(fontFamily: 'packages/advent_calendar/Roboto'),
+        builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(
+          disableAnimations: true, textScaler: TextScaler.linear(scale)), child: child!),
+        home: AdventCalendarScreen(content: content, time: time,
+          progress: AdventProgress(calendar: content.calendar, time: time, repository: store))));
+      await tester.pump(const Duration(seconds: 2));
+      await tester.tap(find.text('Твоя история декабря'));
+      await tester.pump(const Duration(seconds: 1));
+      final counter = find.byKey(const ValueKey('history-countdown'));
+      await tester.ensureVisible(counter);
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.descendant(of: counter, matching: find.byType(BackdropFilter)), findsNWidgets(4));
+      expect(find.text('Засчитано 2 из 31 дней календаря'), findsOneWidget);
+      await binding.takeScreenshot('history-countdown-android-text'+(scale*100).toInt().toString());
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    }
+    reduced.dispose();
   });
 }
