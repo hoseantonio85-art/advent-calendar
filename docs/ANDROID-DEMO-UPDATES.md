@@ -69,3 +69,7 @@ Android не позволяет заменить старую подпись н�
 ## Интеграция в «ВтороеКрыло»
 
 Подпись, applicationId, versionName/versionCode и выпуск принадлежат **хост-приложению**. Advent подключается как Flutter-package; demo Gradle/signing helpers, CI secrets, идентификатор standalone-demo и номера demo в хост не переносятся. Сценарий обновления пакета и сохранения пользовательских ключей — [HOST-INTEGRATION.md](HOST-INTEGRATION.md).
+
+## Тег тестовой публикации и исходники APK
+
+Для least-privilege GITHUB_TOKEN тег android-preview-* указывает на доверенный publisher commit main. GitHub запрещает такому токену создавать некоторые теги на стороннем PR commit с изменёнными workflow; дополнительный PAT в CI не вводится. **Исходники APK — sourceSha**, явно указанный в Release/README и docs/android-preview.json; publisherCommit указывает отдельно на конфигурацию публикации. Автоматический Source code ZIP этого тестового тега не является исходником Flutter APK. Для воспроизведения использовать sourceSha, для интеграции — согласованный ref package после review. Checksums и signed-upgrade доказательства относятся к выданным APK, не к ZIP исходников тега.

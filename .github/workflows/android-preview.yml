@@ -251,6 +251,7 @@ jobs:
               `Debug — универсальный диагностический APK; Profile ARM64 — только для замеров. Все выдаваемые APK переподписаны постоянным demo-ключом в защищённом CI environment, только из main.\n\n`+
               `Версия \`${signing.versionName}\`, versionCode ${signing.versionCode}, baseline ${signing.baselineVersionCode}. Публичный SHA-256 сертификата: \`${signing.certificateSha256}\`. Обновление двух обычных release APK проверено adb install -r с сохранением просмотров/избранного.\n\n`+
               `Код [${sha.slice(0,7)}](${base}/commit/${sha}); [полный CI](${base}/actions/runs/${runId}), включая native Android и аудит APK.\n\n`+
+              `Тег этой тестовой публикации фиксирует доверенный CI в main; исходники APK — ссылка на код выше, поле sourceSha в metadata.\n\n`+
               files.map(f=>`${f.name}: ${f.bytes} bytes; SHA-256 \`${f.checksum}\``).join('\n\n')+
               `\n\nСравнение ABI/режимов и состав приложения: apk-size-report.md / .json. Графика не пересжималась.\n\n`+
               `Одноразовый переход со старой случайной debug-подписи требует ручной переустановки и стирает старые локальные данные. Автоматического удаления нет. После перехода последующие demo-версии с постоянным ключом обновляются поверх установленной.\n\n${date} (Москва).`;
@@ -258,7 +259,7 @@ jobs:
             try { ({data:release}=await github.rest.repos.getReleaseByTag({...repo,tag}));
               ({data:release}=await github.rest.repos.updateRelease({...repo,release_id:release.id,body,draft:false,prerelease:true}));
             } catch(error) { if(error.status!==404)throw error;
-              ({data:release}=await github.rest.repos.createRelease({...repo,tag_name:tag,target_commitish:sha,
+              ({data:release}=await github.rest.repos.createRelease({...repo,tag_name:tag,target_commitish:context.sha,
                 name:`Android test release ARM64 · ${sha.slice(0,7)} · #${runNumber}`,body,draft:false,prerelease:true,make_latest:'false'}));
             }
             const {data:assets}=await github.rest.repos.listReleaseAssets({...repo,release_id:release.id});
@@ -276,7 +277,7 @@ jobs:
               signingScheme:signing.scheme,signingCertificateSha256:signing.certificateSha256,versionCode:signing.versionCode,baselineVersionCode:signing.baselineVersionCode,versionName:signing.versionName,
               baselineApk:url('baseline'),candidateApk:url('candidate'),candidateChecksum:files.find(f=>f.kind==='candidate').checksum,signingReport:url('signing'),upgradeEvidence:url('upgrade'),
               bytes:primary.bytes,sizes:Object.fromEntries(Object.entries(sizes.apks).map(([k,v])=>[k,v.bytes])),
-              release:release.html_url,publishedAt:new Date().toISOString(),publicationRun:context.runId};
+              release:release.html_url,publisherCommit:context.sha,publishedAt:new Date().toISOString(),publicationRun:context.runId};
             const start='<!-- android-preview:start -->',end='<!-- android-preview:end -->';
             const badge='https://img.shields.io/badge/Android-'+encodeURIComponent('Тестовый release ARM64')+'-2E7D32?logo=android&logoColor=white';
             const block=`${start}\n## 📱 Android · тестовая release-сборка ARM64\n\n`+
