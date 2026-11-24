@@ -129,7 +129,8 @@ try:
     assert ready,'Emulator transport/services did not recover after adb root'
     time.sleep(2)
     adb('shell','settings','put','global','auto_time','0');adb('shell','settings','put','global','auto_time_zone','0')
-    adb('shell',"date -s '2026-12-15 12:00:00'")
+    adb('shell','date','-u','121512002026.00')
+    assert adb('shell','date','-u','+%Y-%m-%d').strip()=='2026-12-15','Fixture date not set'
     for setting in ['window_animation_scale','transition_animation_scale','animator_duration_scale']:adb('shell','settings','put','global',setting,'0')
     adb('shell','wm','size','720x1280');adb('shell','wm','density','320');adb('shell','settings','put','system','font_scale','1.0')
     assert 'Success' in adb('install',args.baseline,timeout=90)
