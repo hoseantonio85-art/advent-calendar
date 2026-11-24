@@ -11,6 +11,7 @@ permissions:
 jobs:
   upgrade-probe:
     runs-on: ubuntu-latest
+    environment: advent-demo-signing
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -33,13 +34,21 @@ jobs:
             const {data:jobs}=await github.rest.actions.listJobsForWorkflowRun({...context.repo,run_id:id});
             if(run.workflow_id!==427003215||run.head_repository.full_name!=='hoseantonio85-art/advent-calendar'||run.head_branch!=='feature/issue-2-native-calendar'||!['verify','android-release','android-motion'].every(n=>jobs.jobs.some(j=>j.name===n&&j.conclusion==='success')))throw Error('Build prerequisites did not pass');
             core.setOutput('run_id',String(id));
+            core.setOutput('number',String(run.run_number));
+            core.setOutput('attempt',String(run.run_attempt));
       - uses: actions/download-artifact@v4
         with:
           name: advent-demo-upgrade-pair
-          path: build/android-upgrade
+          path: android-upgrade
           repository: hoseantonio85-art/advent-calendar
           run-id: ${{ steps.source.outputs.run_id }}
           github-token: ${{ github.token }}
+      - name: Sign the two ordinary release APKs with persistent demo key
+        env:
+          ADVENT_DEMO_SIGNING: ${{ secrets.ADVENT_DEMO_SIGNING }}
+          SOURCE_NUMBER: ${{ steps.source.outputs.number }}
+          SOURCE_ATTEMPT: ${{ steps.source.outputs.attempt }}
+        run: node tools/sign-demo-apks.cjs --upgrade-only
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvmall.rules
@@ -52,9 +61,16 @@ jobs:
           arch: x86_64
           profile: pixel_2
           emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -feature -Vulkan -memory 2048 -cores 2 -noaudio -no-boot-anim -camera-back none
-          script: python tools/android-demo-upgrade.py --baseline build/android-upgrade/advent-calendar-upgrade-baseline.apk --candidate build/android-upgrade/advent-calendar-upgrade-candidate.apk --out build/android-upgrade-proof
+          script: python tools/android-demo-upgrade.py --baseline android-upgrade/advent-calendar-upgrade-baseline.apk --candidate android-upgrade/advent-calendar-upgrade-candidate.apk --out build/android-upgrade-proof
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: advent-demo-upgrade-probe
           path: build/android-upgrade-proof/
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: advent-demo-persistent-key-probe-apks
+          path: |
+            android-upgrade/*.apk
+            android-size/demo-signing.json

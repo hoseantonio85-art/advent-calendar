@@ -19,6 +19,7 @@ const root=fs.realpathSync(process.env.RUNNER_TEMP),dir=fs.mkdtempSync(path.join
 const key=path.join(dir,'key.p12');
 const child={...process.env,ADVENT_STORE_PASSWORD:bundle.storePassword,ADVENT_KEY_PASSWORD:bundle.keyPassword};delete child.ADVENT_DEMO_SIGNING;
 const signer=tool('apksigner'),aapt=tool('aapt');
+const upgradeOnly=process.argv.includes('--upgrade-only');
 const inputs=[
  ['release','android-release/advent-calendar-test-release-arm64.apk',expected.candidate],
  ['debug','android-apk/app-debug.apk',expected.candidate],
@@ -26,7 +27,7 @@ const inputs=[
  ['debug-arm64','android-debug-arm64/advent-calendar-debug-arm64.apk',expected.candidate],
  ['baseline','android-upgrade/advent-calendar-upgrade-baseline.apk',expected.baseline],
  ['candidate','android-upgrade/advent-calendar-upgrade-candidate.apk',expected.candidate],
-];
+].filter(([kind])=>!upgradeOnly||kind==='baseline'||kind==='candidate');
 const result={applicationId:expected.applicationId,versionCode:expected.candidate,baselineVersionCode:expected.baseline,versionName:expected.versionName,certificateSha256:bundle.certificateSha256,scheme:'persistent-demo-v1',apks:{}};
 try{
   fs.writeFileSync(key,Buffer.from(bundle.keystoreBase64,'base64'),{mode:0o600});
