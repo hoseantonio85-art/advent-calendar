@@ -14,6 +14,22 @@
 Ссылки обновляются после проверки обновления APK. Переход со старой debug-подписи — один раз с ручной переустановкой и потерей прежних локальных данных; следующие demo-сборки сохраняют данные. [Правила обновления](docs/ANDROID-DEMO-UPDATES.md).
 <!-- android-preview:end -->
 
+## PR #6 готовится к финальному review · результаты 24 ноября 2026
+
+Main после авторского merge #5 объединён с #6 обычным merge e6375f0; base PR — main.
+[Полный CI #131](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45448214632): все 4 gates успешны, 67 tests (3 visual отдельно),
+29 visual tests, analyze обоих пакетов без замечаний, web, native Android,
+release/profile/debug и APK audit. 12 PNG входа и 8 PNG истории совпали
+с предыдущими принятыми изображениями байт в байт. Flutter lib/assets и HTML не менялись.
+[Защищённая публикация](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45451293476) и [реальный update proof](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45448214632/upgrade-report.json):
+**0.1.125.1 / 12503 → 0.1.131.1 / 13103**, тот же сертификат и UID,
+opened/saved и видимые 2/31/избранное сохранены без uninstall/clear/reset.
+Подготовлена безопасная main-source публикация после merge #6; ключ только в main.
+[Отчёт и границы готовности](docs/PR6-MERGE-READINESS-2026-11-24.md).
+Окончательные Checks последнего документационного merge — в PR #6.
+**PR не слит: требуется отдельное одобрение автора.**
+
+
 ## PR #6: подготовка финального слияния · 24 ноября 2026
 
 Автор слил #5 в main (dad3144); CI #130 и GitHub Pages успешны.

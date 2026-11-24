@@ -1,5 +1,20 @@
 # Дорожная карта · Advent Calendar
 
+## PR #6 готовится к финальному review · результаты 24 ноября 2026
+
+Main после авторского merge #5 объединён с #6 обычным merge e6375f0; base PR — main.
+[Полный CI #131](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45448214632): все 4 gates успешны, 67 tests (3 visual отдельно),
+29 visual tests, analyze обоих пакетов без замечаний, web, native Android,
+release/profile/debug и APK audit. 12 PNG входа и 8 PNG истории совпали
+с предыдущими принятыми изображениями байт в байт. Flutter lib/assets и HTML не менялись.
+[Защищённая публикация](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45451293476) и [реальный update proof](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45448214632/upgrade-report.json):
+**0.1.125.1 / 12503 → 0.1.131.1 / 13103**, тот же сертификат и UID,
+opened/saved и видимые 2/31/избранное сохранены без uninstall/clear/reset.
+Подготовлена безопасная main-source публикация после merge #6; ключ только в main.
+[Отчёт и границы готовности](PR6-MERGE-READINESS-2026-11-24.md).
+Окончательные Checks последнего документационного merge — в PR #6.
+**PR не слит: требуется отдельное одобрение автора.**
+
 ## PR #6: подготовка финального слияния · 24 ноября 2026
 
 Автор слил #5 в main (dad3144); CI #130 и GitHub Pages успешны.
@@ -15,9 +30,9 @@
 | Область | Текущий статус |
 |---|---|
 | PR #5 | Слит автором; CI main #130 и Pages успешны |
-| PR #6 | Base main, обычный merge; полные проверки перед отдельным одобрением |
+| PR #6 | Base main, обычный merge e6375f0; CI #131 и signed update PASS; итоговые Checks — в PR, merge только после отдельного одобрения |
 | Flutter UI / прогресс А / избранное / сюрпризы | Приняты и сохранены; контент 31/14/17 |
-| Demo signing | Постоянный main-only ключ; подготовка main-source публикации и повторной install -r проверки |
+| Demo signing | Постоянный main-only ключ; main-source подготовлен, signed install -r 12503 → 13103 PASS; [доказательства](PR6-MERGE-READINESS-2026-11-24.md) |
 | Физическая QA и реальный хост | Отдельный оставшийся этап; [инструкция](HOST-INTEGRATION.md), [QA](PHYSICAL-ANDROID-QA.md) |
 
 После review #6 — отдельное разрешение автора на merge; затем main CI и

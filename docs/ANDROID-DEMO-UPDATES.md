@@ -108,3 +108,13 @@ Android не позволяет заменить старую подпись н�
 ## Тег тестовой публикации и исходники APK
 
 Для least-privilege GITHUB_TOKEN тег android-preview-* указывает на доверенный publisher commit main. GitHub запрещает такому токену создавать некоторые теги на стороннем PR commit с изменёнными workflow; дополнительный PAT в CI не вводится. **Исходники APK — sourceSha**, явно указанный в Release/README и docs/android-preview.json; publisherCommit указывает отдельно на конфигурацию публикации. Автоматический Source code ZIP этого тестового тега не является исходником Flutter APK. Для воспроизведения использовать sourceSha, для интеграции — согласованный ref package после review. Checksums и signed-upgrade доказательства относятся к выданным APK, не к ZIP исходников тега.
+
+## Повторная проверка после обновления #6 на main
+
+24.11.2026: [CI #131](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45448214632) и [trusted publisher](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45451293476) success.
+Реальная публичная версия 0.1.125.1/code12503 обновлена до 0.1.131.1/code13103:
+тот же certificate/UID, opened/saved/2 из 31/избранный совет сохранены, install -r
+без удаления/очистки. [JSON-доказательство](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45448214632/upgrade-report.json). Main-only policy ключа
+проверена: единственная deployment branch main; secret не читался/не менялся.
+Main-source path подготовлен в #6, его первый реальный запуск — после отдельного
+одобрения merge. [Готовность и Git audit](PR6-MERGE-READINESS-2026-11-24.md).
