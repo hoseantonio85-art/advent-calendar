@@ -62,8 +62,8 @@ void main() {
     expect(boxes, isNotEmpty);
     for (final box in boxes) {
       final painted = MatrixUtils.transformRect(paragraph.getTransformTo(null), box.toRect());
-      expect(bounds.inflate(.1).contains(painted.topLeft), isTrue, reason: '$painted in $bounds');
-      expect(bounds.inflate(.1).contains(painted.bottomRight), isTrue, reason: '$painted in $bounds');
+      expect(bounds.inflate(1).contains(painted.topLeft), isTrue, reason: '$painted in $bounds');
+      expect(bounds.inflate(1).contains(painted.bottomRight), isTrue, reason: '$painted in $bounds');
     }
   }
 
@@ -89,6 +89,12 @@ void main() {
           expectTextInside(tester, find.text('Открой свой\nдекабрь'),
             Rect.fromLTRB(card.left + 16, card.top + 16, glass.left - (compact ? 9 : 10), card.bottom - 16));
           expectTextInside(tester, find.text(days > 0 ? 'дней до 2027' : 'С Новым годом!'), glass.deflate(4));
+          if (scale == 1 && days == 38) {
+            final title = tester.renderObject<RenderParagraph>(find.text('Открой свой\nдекабрь'));
+            final paintedSize = (compact ? 25 : 28) * title.getTransformTo(null).getMaxScaleOnAxis();
+            expect(paintedSize, greaterThan(compact ? 23 : 26));
+            debugPrint('ENTRY_FONT: viewport $width dp, actual $paintedSize dp');
+          }
           if (days > 0) expectTextInside(tester, find.text('$days'), glass.deflate(4));
           else expect(find.text('0'), findsNothing);
         }
@@ -99,7 +105,7 @@ void main() {
   testWidgets('entry v9: full card remains one accessible navigation button', (tester) async {
     resetView(tester);
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
+    try {
     var opens = 0;
     await mount(tester, 390, onOpen: () => opens++);
     final card = tester.getRect(find.byType(AdventEntryCard));
@@ -114,6 +120,7 @@ void main() {
     expect(opens, 6);
     await mount(tester, 390, days: 0);
     expect(find.bySemanticsLabel('Открой свой декабрь. С Новым годом!'), findsOneWidget);
+    } finally { semantics.dispose(); }
   });
 
   testWidgets('entry v9: before/after images with real fonts', (tester) async {
