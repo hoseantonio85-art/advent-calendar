@@ -1,18 +1,127 @@
-## Часовой пояс подтверждён · 22 ноября 2026
-
-Кампания работает по Europe/Moscow независимо от зоны устройства. Добавлена
-CampaignTime.moscow и проверка московской даты при другой зоне устройства.
-Согласование часового пояса больше не является открытым вопросом.
-
-## Реализация основы Issue #3 · 22 ноября 2026
-
-Создан независимый Flutter-package: единый JSON 31/13/18, точные WebP из HTML,
-календарные правила, IANA-часы и интерфейсы хоста. Добавлены unit-тесты и CI.
-[Границы, данные, ограничения и проверки](docs/FLUTTER-MODULE.md).
-index.html и GitHub Pages сохранены. UX/UI не менялся; нативный полный экран — Issue #2.
-Подтверждение расписания и timezone, адаптеры хоста и device QA остаются открыты.
-
 # Декабрь чудес · Advent Calendar
+
+<!-- android-preview:start -->
+## 📱 Android · тестовая release-сборка ARM64
+
+[![Скачать APK](https://img.shields.io/badge/Android-%D0%A2%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20release%20ARM64-2E7D32?logo=android&logoColor=white)](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/advent-calendar-test-release-arm64.apk)
+
+**[Скачать тестовый release APK · ARM64](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/advent-calendar-test-release-arm64.apk)** · [Release](https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-45397779151)
+
+[Debug · универсальный](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/advent-calendar-preview.apk) · [Profile · ARM64, для замеров](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/advent-calendar-profile-arm64.apk) · [Размер и состав APK](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/apk-size-report.md)
+
+Проверенный код PR #6: `a704dba`, 24 ноября 2026 г. в 18:05 (Москва). Release: 17.26 MiB. Постоянная тестовая подпись Advent Demo, версия `0.1.125.1` / code 12503; автономное demo; **не production-релиз**. Нативная графика сохранена.
+
+Ссылки обновляются после проверки обновления APK. Переход со старой debug-подписи — один раз с ручной переустановкой и потерей прежних локальных данных; следующие demo-сборки сохраняют данные. [Правила обновления](docs/ANDROID-DEMO-UPDATES.md).
+<!-- android-preview:end -->
+
+## Подготовка foundation PR #5 к слиянию · 24 ноября 2026
+
+В отдельном рабочем дереве подготовлен обычный merge актуального main в #5,
+без force/reset и без слияния PR. Конфликты README/ROADMAP разрешены с сохранением
+полного текста main и всех отличающихся записей foundation в исторических разделах.
+Текущий контент **31/14/17**. HTML, постоянная подпись, защищённые workflows,
+автонумерация и опубликованный APK 0.1.125.1 сохранены из main без изменений.
+[Отчёт, CI и границы этапа](docs/PR5-MERGE-READINESS-2026-11-24.md).
+Полный native UI/прогресс А/избранное/сюрпризы находятся в #6; foundation отдельно
+не выпускается и не подменяет принятую сборку. После готовности #5 требуется
+отдельное разрешение автора на его merge; только затем обновляется #6 на новый main.
+
+
+## Безопасные demo-обновления подтверждены · 24 ноября 2026
+
+Две независимые CI-публикации **12403 → 12503** реально установлены
+одна поверх другой через install -r: UID, просмотры, прогресс 2/31 и избранное сохранены.
+ApplicationId com.example.advent_demo стабилен; постоянный ключ Advent Demo — только
+в защищённом main-only CI secret. Приватные ключи/пароли не опубликованы.
+[Скачать ARM64 APK](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/advent-calendar-test-release-arm64.apk) · [реальное доказательство](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45397779151/upgrade-report.json) ·
+[инструкция, версии и один переход со старой подписи](docs/ANDROID-DEMO-UPDATES.md).
+Старые APK с временной debug-подписью требуют одного ручного перехода с потерей прежних
+локальных данных; автоматического удаления нет. Дальнейшие demo-обновления сохраняют данные.
+В «ВторомКрыле» подпись и версии принадлежат хосту, Advent остаётся Flutter-package.
+Полные CI #124/#125 прошли; PR не слиты, production/магазин не затронуты.
+Записи подготовки ниже сохранены как летопись; текущий результат — эта запись.
+
+
+## Постоянная demo-подпись настроена · 24 ноября 2026
+
+Ключ хранится в защищённом CI environment только для main; пароли и ключи не опубликованы.
+Подписанная release-пара 12302 → 12303 прошла настоящий install -r: UID, просмотры,
+2/31 и избранное сохранены. Полный CI #124 прошёл; выполняется проверка двух
+независимых CI-публикаций. [Доказательства и переход со старой подписи](docs/ANDROID-DEMO-UPDATES.md).
+
+
+## Дополнение: безопасные demo-обновления · 24 ноября 2026
+
+Проверена исходная APK: com.example.advent_demo, versionName 1.0, versionCode 1,
+временная Android Debug подпись. Подготовлены постоянная защищённая demo-подпись,
+возрастающие codes и реальный UI-тест установки двух release APK через install -r.
+**Настройка environment secret и итоговый signed-upgrade PASS ещё требуются**;
+прежнюю опубликованную ссылку не подменяем непроверенной сборкой.
+[Подпись, один переход со старого ключа и критерий приёмки](docs/ANDROID-DEMO-UPDATES.md).
+В хост переходят только Flutter-package и совместимые данные; подпись/версии принадлежат «ВторомуКрылу».
+
+
+## Визуальная приёмка и техническая передача · 24 ноября 2026
+
+Автор завершил визуальную приёмку Advent Calendar: входная карточка v9, нативный
+Bento-календарь, мероприятия/советы/замороженные даты, сюрпризы и анимации, шторки,
+история декабря, избранное и хвойный новогодний отсчёт приняты. Перенос согласованного
+дизайна во Flutter завершён. Текущий дизайн финален для MVP; HTML остаётся эталоном
+календаря, входная v9 — отдельным эталоном. [Решение автора](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/ACCEPTED-MVP-2026-11-24.md).
+
+24 ноября начат технический этап; его автономная часть завершена. Вариант А
+прогресса реализован в **HTML и Flutter**: ранний просмотр мероприятия сохраняется
+и начисляется с наступлением московской даты. Текущий контент — **31/14/17**.
+Публичный index.html сохранён. Flutter-код пока в [PR #6](https://github.com/hoseantonio85-art/advent-calendar/pull/6), не в main.
+
+**[Тестовый release APK · ARM64 · 17,22 MiB](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45382287564/advent-calendar-test-release-arm64.apk)**. Debug — 153,57 MiB,
+Debug ARM64 — 85,12 MiB; profile ARM64 — 26,54 MiB. Графика не пересжималась.
+Проверенный код [13ec616](https://github.com/hoseantonio85-art/advent-calendar/commit/13ec6164ea9196a716627d7c52388e7e61f12c1e),
+[CI #122](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45382287564): 67 tests, отдельные 29 visual,
+оба analyze, web/Android, реальный Android process restart и 24 цикла шторок.
+Исправлена гонка загрузки прогресса с сохранением избранного. Это тестовая подпись,
+**не production**; физическая скорость/память телефона ещё не приняты.
+
+[Измерения, файлы, коммиты, ограничения](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/TECHNICAL-STABILIZATION-2026-11-24.md) ·
+[Подключение к хосту](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/HOST-INTEGRATION.md) ·
+[Процедура физической QA](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/PHYSICAL-ANDROID-QA.md) ·
+[Аудит PR и безопасный порядок](https://github.com/hoseantonio85-art/advent-calendar/blob/3e5db0c78b23cb2e0d8f4ce07cd7e3bc442ed952/docs/PR-MERGE-READINESS.md).
+PR #5/#6 открыты и не слиты: перед слиянием разрешить doc-конфликты и проверить
+обновлённую базу. Issues #1/#2/#3/#4/#7 остаются открытыми в части QA/следующих работ.
+
+До «ВторогоКрыла»: физическая QA → единый источник контента #7 → подтверждение
+релизных данных/прав → исходники и ограничения хоста → интеграция → финальная
+проверка/production-выпуск. Backend не создавался. [Текущая дорожная карта](docs/ROADMAP.md).
+Старые записи ниже сохраняют историю; прежние 13/18 и статусы «ещё впереди» не являются текущими.
+
+
+## Четыре сюрприза — фон со Снегурочкой · 23 ноября 2026
+
+**Текущий HTML для UX-ревью:** до наступления даты 4, 9, 11 и 15 декабря вместо знака вопроса показывают [Снегурочку с подарком](assets/snow-maiden-surprise.webp) на **весь фон карточки** (`cover`); поверх **число в левом верхнем углу и маленькую полупрозрачную подпись «Сюрприз» внизу слева**. Подпись показывается только до даты раскрытия ([HTML-коммит `59d3eb1`](https://github.com/hoseantonio85-art/advent-calendar/commit/59d3eb10a629e25036f681612388f6d900dd4382)). Больше нет вопроса, снежинки, шарика, снежных частиц или дополнительного frost-слоя. Лёгкое затемнение верхней части обеспечивает читаемость даты. Все 4 карточки используют одну картинку; широкая и узкие кадрируют её по-разному.
+
+В 00:00 `Europe/Moscow` карточки автоматически раскрываются в обычные мероприятия; при первом просмотре — одноразовые конфетти внутри прежнего bottom sheet. Количество дней/событий без изменений (31/14/17). **Старый 3D-вопрос сохранён только как вариант для бэклога**, не используется в карточках. [HTML-коммит `30ad419`](https://github.com/hoseantonio85-art/advent-calendar/commit/30ad41953eb2665140ec61b870da3c3b1e0644bc).
+
+QA: [3 декабря — все четыре скрыты](https://hoseantonio85-art.github.io/advent-calendar/?preview=3) · [4 декабря — раскрыто какао](https://hoseantonio85-art.github.io/advent-calendar/?preview=4) · [15 декабря — все раскрыты](https://hoseantonio85-art.github.io/advent-calendar/?preview=15). [Спецификация](docs/SURPRISE-EVENTS-UX.md) · [handoff для Flutter](docs/FLUTTER-SYNC-HANDOFF-2026-11-23.md) · [Issue #9](https://github.com/hoseantonio85-art/advent-calendar/issues/9). Flutter пока не меняли.
+
+## Сводная спецификация для Work / Flutter · 23 ноября 2026
+
+Все утверждённые изменения с добавления **19 декабря** (31 день, 14 мероприятий, 17 дней с советами) до последнего согласованного **мягкого шиммера на сердечке** собраны в **[FLUTTER-SYNC-HANDOFF-2026-11-23.md](docs/FLUTTER-SYNC-HANDOFF-2026-11-23.md)**. Документ отделяет уже синхронизированный контент Flutter от ещё не перенесённых сердечек, истории избранного и анимации; содержит конкретные состояния, поля события, ссылки на исходники и QA-чеклист. **Flutter-код этим документированием не изменён**. Автор планирует дополнительную доработку HTML перед окончательным Work-промптом.
+
+## Градиентный блик на сохранённом сердце · 23 ноября 2026
+
+Сердечко в HTML теперь раз в 8 секунд подсвечивается **проходящим световым градиентом внутри формы**, а не одной лишь вспышкой яркости. Период и положение сохранены; уменьшение анимаций в настройках устройства отключает эффект. [Коммит](https://github.com/hoseantonio85-art/advent-calendar/commit/fc2a9cc846392c7962ef9fceda4e8acf470b2fc6). Flutter-переносу соответствует [Issue #8](https://github.com/hoseantonio85-art/advent-calendar/issues/8).
+
+## Изящное сердечко без квадрата · 23 ноября 2026
+
+По результатам просмотра сердечко сохранённой даты приведено к масштабу снежинки: 15 px внутри 17 × 17 px, зеркальные отступы 10 px сверху / 11 px справа, без фоновой плашки, рамки и тяжёлой тени. Цвет `#e04460`, редкий деликатный блик с поддержкой reduced motion. Положение на today скорректировано, чтобы не конфликтовать со звездой. [Коммит](https://github.com/hoseantonio85-art/advent-calendar/commit/0c3fb177fa92a6a776f1616072db03581afe1c1c). Для Flutter см. [спецификацию](docs/SAVED-ADVICE-UX.md), [Issue #8](https://github.com/hoseantonio85-art/advent-calendar/issues/8).
+
+## Сохранённые советы: сердечки и список в истории · 23 ноября 2026
+
+В [единственном HTML-календаре](index.html) добавлен понятный результат действия **«Сохранить совет»**: заполненное сердечко на карточке доступного сохранённого совета, при повторном нажатии сердечко исчезает. В кнопке шторки состояние отображается сердечком и текстом **«Совет сохранён»**. Открытие дат и счётчик прогресса на это не зависят.
+
+В существующей нижней шторке **«Твоя история декабря»** после новогоднего виджета показывается компактная секция избранных советов: 0 — пустое состояние; 1–3 — весь список; 4+ — первые три по дате и кнопка «Показать все N». Каждый совет раскрывает **полный текст и действие** прямо внутри списка без второй шторки, маршрута или кнопки назад. Переход «Свернуть» возвращает список к трём строкам. Существующий localStorage `advent2026-saved` сохранён.
+
+**HTML-коммит:** [9a2cf51](https://github.com/hoseantonio85-art/advent-calendar/commit/9a2cf510ba201fc432c54862b267e7ce3a4a4daa). **Спецификация:** [SAVED-ADVICE-UX.md](docs/SAVED-ADVICE-UX.md). **Перенос в Flutter:** [Issue #8](https://github.com/hoseantonio85-art/advent-calendar/issues/8); нативный код в текущем шаге **не изменялся**. Веб-версию можно проверить через [QA-дату 31 декабря](https://hoseantonio85-art.github.io/advent-calendar/?preview=31). Синтаксис inline JS проверен, полноценная визуальная проверка на телефоне ещё требуется.
 
 ## Новое мероприятие · 19 декабря 2026 (добавлено 23.11.2026)
 
@@ -534,3 +643,30 @@ JavaScript синтаксически проверен, пользователь
 **Геометрическая проверка** в изолированном Chromium-макете с теми же стилями: на 390/430 px высота первых двух карточек **56 px вместо 55,8 px**; на 360 px **52 px вместо 51,4 px**. На 320 px обычные даты и время также укладываются в **52 px**; длинная строка места естественно допускает несколько строк без искусственного ограничения. Проверены дата 31 декабря и время «В течение дня». JavaScript `index.html` успешно прошёл синтаксический разбор. Проверка реальной страницы на физическом Android пока не выполнялась.
 
 [Коммит с изменениями](https://github.com/hoseantonio85-art/advent-calendar/commit/b3070ab54164172586574732622e380cd0c183e0) · [Единый календарь](https://hoseantonio85-art.github.io/advent-calendar/).
+
+<details>
+<summary>Сохранённые записи foundation до синхронизации с main (704aa86); исторические статусы</summary>
+
+Ниже дословно сохранены блоки foundation, отсутствовавшие в main. Их прежние
+подсчёты/статусы относятся к указанным датам; текущие сведения находятся выше.
+Полный исходный [документ](https://github.com/hoseantonio85-art/advent-calendar/blob/704aa862aaa893151ff17f46c23869a7b2a9ab27/README.md)
+и [main до синхронизации](https://github.com/hoseantonio85-art/advent-calendar/blob/5a7dc1a021aab191dcd6a49e6b0b645774b95f6b/README.md)
+остаются в Git-истории и не переписываются.
+
+## Часовой пояс подтверждён · 22 ноября 2026
+
+Кампания работает по Europe/Moscow независимо от зоны устройства. Добавлена
+CampaignTime.moscow и проверка московской даты при другой зоне устройства.
+Согласование часового пояса больше не является открытым вопросом.
+
+## Реализация основы Issue #3 · 22 ноября 2026
+
+Создан независимый Flutter-package: единый JSON 31/13/18, точные WebP из HTML,
+календарные правила, IANA-часы и интерфейсы хоста. Добавлены unit-тесты и CI.
+[Границы, данные, ограничения и проверки](docs/FLUTTER-MODULE.md).
+index.html и GitHub Pages сохранены. UX/UI не менялся; нативный полный экран — Issue #2.
+Подтверждение расписания и timezone, адаптеры хоста и device QA остаются открыты.
+
+# Декабрь чудес · Advent Calendar
+
+</details>
