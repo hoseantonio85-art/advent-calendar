@@ -31,17 +31,20 @@ DateTime civilDate(DateTime value) => DateTime.utc(value.year, value.month, valu
 
 class AdventCalendar {
   AdventCalendar(Iterable<AdventDay> values) : days = List.unmodifiable(values) {
-    if (days.length != 31 || days.map((d) => d.id).toSet().length != 31 ||
-        days.where((d) => d.kind == DayKind.event).length != 14 ||
-        days.where((d) => d.kind == DayKind.advice).length != 17) {
-      throw FormatException('Expected 31 unique days / 14 events / 17 advice');
+    // Event/advice counts are editorial data, not a runtime schema constraint.
+    if (days.length != 31 || days.map((d) => d.id).toSet().length != 31) {
+      throw FormatException('Expected 31 unique December days');
     }
     for (var i = 0; i < days.length; i++) {
       final d = days[i];
+      final advice = d.data['advice'];
       if (d.data['date'] != '2026-12-${(i + 1).toString().padLeft(2, '0')}' ||
           d.id != 'december-2026-${(i + 1).toString().padLeft(2, '0')}' ||
           d.title.isEmpty || d.art.isEmpty || ![1, 2].contains(d.columns) ||
-          (d.kind == DayKind.event) != (d.event != null)) {
+          (d.kind == DayKind.event) != (d.event != null) ||
+          (d.revealOnDate && (d.kind != DayKind.event || ![4, 9, 11, 15].contains(d.date.day))) ||
+          (advice is! Map<String, dynamic> ||
+           ['title', 'text', 'action'].any((key) => advice[key] is! String || (advice[key] as String).trim().isEmpty))) {
         throw FormatException('Invalid day ${d.id}');
       }
     }

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Advent Calendar editable content, version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "schemaVersion", "campaignId", "year", "month", "assets", "days"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "format": {"const": "advent-content"},
+    "schemaVersion": {"const": 1},
+    "campaignId": {"const": "december-2026"},
+    "year": {"const": 2026},
+    "month": {"const": 12},
+    "assets": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[A-Za-z][A-Za-z0-9_]*$"},
+      "additionalProperties": {"type": "string", "pattern": "^assets/"}
+    },
+    "days": {
+      "type": "array", "minItems": 31, "maxItems": 31,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "date", "advice", "event", "revealOnDate"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^december-2026-(0[1-9]|[12][0-9]|3[01])$"},
+          "date": {"type": "string", "pattern": "^2026-12-(0[1-9]|[12][0-9]|3[01])$"},
+          "advice": {"$ref": "#/$defs/advice"},
+          "event": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/event"}]},
+          "revealOnDate": {
+            "type": "boolean",
+            "description": "Active only with an event, and only on agreed dates 4, 9, 11, 15. Retained when the event is removed."
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "text": {"type": "string", "minLength": 1},
+    "advice": {
+      "type": "object", "additionalProperties": false,
+      "required": ["title", "text", "action", "art", "theme", "columns"],
+      "properties": {
+        "title": {"$ref": "#/$defs/text"},
+        "text": {"$ref": "#/$defs/text"},
+        "action": {"$ref": "#/$defs/text"},
+        "art": {"$ref": "#/$defs/text"},
+        "theme": {"enum": ["", "alt"]},
+        "columns": {"enum": [1, 2]}
+      }
+    },
+    "event": {
+      "type": "object", "additionalProperties": false,
+      "required": ["title", "shortTitle", "art", "theme", "columns", "time", "duration", "place", "desc", "verification"],
+      "properties": {
+        "title": {"$ref": "#/$defs/text"},
+        "shortTitle": {"$ref": "#/$defs/text"},
+        "art": {"$ref": "#/$defs/text"},
+        "theme": {"enum": ["ruby", "green", "moss", "purple", "sand", "ice", "night"]},
+        "columns": {"enum": [1, 2]},
+        "time": {"$ref": "#/$defs/text", "description": "Original source label or HH:mm; never inferred."},
+        "duration": {"type": ["integer", "null"], "minimum": 1},
+        "place": {"$ref": "#/$defs/text"},
+        "desc": {"$ref": "#/$defs/text"},
+        "cta": {"$ref": "#/$defs/text"},
+        "cardLines": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}},
+        "sourceCopy": {"type": "boolean"},
+        "verification": {"$ref": "#/$defs/text"}
+      }
+    }
+  }
+}

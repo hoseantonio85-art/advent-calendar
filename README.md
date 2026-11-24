@@ -14,6 +14,21 @@
 Ссылки обновляются после проверки обновления APK. Переход со старой debug-подписи — один раз с ручной переустановкой и потерей прежних локальных данных; следующие demo-сборки сохраняют данные. [Правила обновления](docs/ANDROID-DEMO-UPDATES.md).
 <!-- android-preview:end -->
 
+## Issue #7 · единый источник HTML/Flutter · 24 ноября 2026
+
+После авторского merge #5/#6 реализуется отдельная content-ветка от main.
+Редактируемый master — [content/calendar_2026.json](content/calendar_2026.json):
+31 стабильная дата, совет на каждой дате, optional event, независимое оформление
+и согласованный revealOnDate. `node tools/generate-content.cjs` обновляет только
+данные standalone HTML и совместимый Flutter JSON; `--check` блокирует drift.
+`node tools/export-content.cjs` создаёт редакторский CSV. Текущие тексты/31/14/17,
+графика и первоначальный Flutter JSON сохранены, runtime больше не фиксирует
+число событий. [Инструкция редактора](docs/CONTENT-EDITOR.md) ·
+[Реализация/проверки/границы](docs/CONTENT-SOURCE-2026-11-24.md).
+Новые тесты проверяют edit19, overlay/removal, советы/ключи/сюрпризы и preview=31;
+итог полного CI будет добавлен после прогона. Старые записи ниже — история.
+Подпись demo и доверенный main-only publisher не менялись. **PR не сливается автоматически.**
+
 ## PR #6 · этап 2/2 завершён · 24 ноября 2026
 
 [Полный CI #133](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45462441956) на a803adf успешно завершён: analyze package/demo без

@@ -1,5 +1,17 @@
 # Дорожная карта · Advent Calendar
 
+## Issue #7 · единый content-source · 24 ноября 2026
+
+PR #5/#6 слиты автором. Новый самостоятельный этап: content/calendar_2026.json,
+генерация standalone HTML/Flutter, schema/validation/drift gate, editor CSV и
+существующий preview=31. Текущие 31/14/17 защищены как согласованный snapshot;
+редакторская схема и runtime допускают иной состав событий без смены dayId.
+Реализация и локальные 9 Node-тестов готовы; полный CI/visual acceptance — в PR.
+[Инструкция](CONTENT-EDITOR.md) · [Отчёт](CONTENT-SOURCE-2026-11-24.md).
+После review #7 — физическая QA, утверждение релизного контента/прав, интеграция
+хоста и финальная проверка/production signing по процессу «ВторогоКрыла».
+Ниже сохранена история предыдущих этапов; backend/CMS и новый UI не добавляются.
+
 ## PR #6 · этап 2/2 завершён · 24 ноября 2026
 
 [Полный CI #133](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45462441956) на a803adf успешно завершён: analyze package/demo без
