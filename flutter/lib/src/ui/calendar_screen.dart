@@ -42,7 +42,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
   Set<String> _savedIds = {};
   String? _error;
   bool _opening = false;
-  int _refreshRevision = 0;
+  int _refreshRevision = 0, _viewRevision = 0;
   @override
   void initState() {
     super.initState();
@@ -64,7 +64,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
   }
   Future<void> _refresh() async {
     if (!mounted) return;
-    final revision = ++_refreshRevision;
+    final revision = ++_refreshRevision, viewRevision = _viewRevision;
     final progress = widget.progress, savedAdvice = widget.savedAdvice;
     _midnight?.cancel();
     final now = tz.TZDateTime.from(widget.time.clock.nowUtc(), widget.time.location);
@@ -73,8 +73,11 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
     try {
       final opened = await progress.read();
       final savedIds = await savedAdvice?.readSaved(AdventProgress.campaignId) ?? <String>{};
-      if (mounted && revision == _refreshRevision) setState(() { _creditedDays.value = opened; _savedIds = savedIds; _error = null; });
-    } catch (_) { if (mounted && revision == _refreshRevision) setState(() => _error = 'Не удалось загрузить прогресс. Повторить'); }
+      if (mounted && revision == _refreshRevision) setState(() {
+        if (viewRevision == _viewRevision) _creditedDays.value = opened;
+        _savedIds = savedIds; _error = null;
+      });
+    } catch (_) { if (mounted && revision == _refreshRevision && viewRevision == _viewRevision) setState(() => _error = 'Не удалось загрузить прогресс. Повторить'); }
   }
   @override
   void dispose() {
@@ -118,7 +121,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
       final celebrate=day.revealOnDate?(await widget.progress.surprises?.claimSurprise(AdventProgress.campaignId,day.id)??false):false;
       final opened = await widget.progress.read();
       if (!mounted) return;
-      ++_refreshRevision; // Invalidate earlier storage snapshots after a new view.
+      ++_viewRevision; // Invalidate older progress, but retain a valid saved-advice read.
       setState(() => _creditedDays.value = opened);
       await showModalBottomSheet<void>(context: context, isScrollControlled: true,
         useSafeArea: true, enableDrag: true, sheetAnimationStyle: _calendarSheetMotion(context), showDragHandle: false, barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor: const Color(0xfffaf2e6),

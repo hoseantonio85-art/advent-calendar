@@ -27,6 +27,14 @@ class RaceStore implements ProgressRepository {
   @override
   Future<void> recordOpened(String c, String id) async { ids.add(id); }
 }
+class SavedRaceStore extends RaceStore implements SavedAdviceRepository {
+  SavedRaceStore(this.saved);
+  final Set<String> saved;
+  @override
+  Future<Set<String>> readSaved(String c) async => {...saved};
+  @override
+  Future<void> setSaved(String c,String id,bool value) async { if(value){saved.add(id);}else{saved.remove(id);} }
+}
 class FailingActions implements AdventSystemActions {
   var fail = true;
   @override
@@ -47,7 +55,7 @@ void main() {
     await t.pumpWidget(DefaultAssetBundle(bundle: TestAssets(), child: MaterialApp(
       builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child!),
       home: AdventCalendarScreen(key: ValueKey(user), content: content, time: time,
-        progress: AdventProgress(calendar: content.calendar, time: time, repository: store), actions: actions))));
+        progress: AdventProgress(calendar: content.calendar, time: time, repository: store), savedAdvice: store is SavedAdviceRepository ? store as SavedAdviceRepository : null, actions: actions))));
     await t.pumpAndSettle();
   }
   void reset(WidgetTester t) { addTearDown(t.view.resetPhysicalSize); addTearDown(t.view.resetDevicePixelRatio); }
@@ -77,6 +85,17 @@ void main() {
     expect(find.text('1 / 31'), findsOneWidget);
     await t.pumpWidget(const SizedBox());
   });
+  testWidgets('late progress snapshot preserves existing saved advice after a new view', (t) async {
+    reset(t); final advice=content.calendar.days[2], store=SavedRaceStore({content.calendar.days[2].id});
+    await mount(t,store); await t.tap(find.byKey(const ValueKey('day-1'))); await t.pumpAndSettle();
+    await t.tap(find.byTooltip('Закрыть')); await t.pumpAndSettle();
+    store.first.complete({}); await t.pumpAndSettle();
+    expect(find.text('1 / 31'),findsOneWidget);
+    await t.tap(find.text('Твоя история декабря')); await t.pumpAndSettle();
+    expect(find.text(advice.title),findsOneWidget);
+    await t.pumpWidget(const SizedBox());
+  });
+
   testWidgets('logout keyed replacement ignores old in-flight account data', (t) async {
     reset(t); final a = RaceStore(), b = RaceStore(); await mount(t, a);
     await mount(t, b, user: 'b');
