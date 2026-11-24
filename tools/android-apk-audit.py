@@ -12,6 +12,8 @@ p.add_argument('--debug-arm64', required=True)
 p.add_argument('--release', required=True)
 p.add_argument('--profile', required=True)
 p.add_argument('--out', required=True)
+p.add_argument('--inventory-from')
+p.add_argument('--signing-report')
 a = p.parse_args()
 out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
 
@@ -51,20 +53,24 @@ assert not reports['release']['qa_files'], reports['release']['qa_files']
 assert 'Dart debug kernel' not in reports['release']['categories']
 assert 'Dart AOT' in reports['release']['categories']
 
-assets = Path('flutter/assets')
-references = json.loads((assets / 'advent/calendar_2026.json').read_text(encoding='utf-8'))['assets']
-used = set(references.values()) | {'assets/advent/entry_fir_v9.webp'}
-inventory = []
-for f in sorted(assets.rglob('*')):
-    if f.is_file() and f.suffix.lower() == '.webp':
-        inventory.append({'path': 'assets/' + f.relative_to(assets).as_posix(), 'bytes': f.stat().st_size,
-            'sha256': hashlib.sha256(f.read_bytes()).hexdigest(), 'referenced': 'assets/' + f.relative_to(assets).as_posix() in used})
+if a.inventory_from:
+    inventory = json.loads(Path(a.inventory_from).read_text())['images']
+else:
+    assets = Path('flutter/assets')
+    references = json.loads((assets / 'advent/calendar_2026.json').read_text(encoding='utf-8'))['assets']
+    used = set(references.values()) | {'assets/advent/entry_fir_v9.webp'}
+    inventory = []
+    for f in sorted(assets.rglob('*')):
+        if f.is_file() and f.suffix.lower() == '.webp':
+            inventory.append({'path': 'assets/' + f.relative_to(assets).as_posix(), 'bytes': f.stat().st_size,
+                'sha256': hashlib.sha256(f.read_bytes()).hexdigest(), 'referenced': 'assets/' + f.relative_to(assets).as_posix() in used})
 result = {'apks': reports, 'images': inventory, 'notes': [
-    'Release/profile ARM64 are test builds signed with the generated Android debug key; not production.',
+    ('Release/profile ARM64 use the persistent demo certificate; not production.' if a.signing_report else 'Build-local debug certificate only; persistent demo signing happens in trusted publication CI.'),
     'Universal debug vs ARM64 release changes both build mode and ABI. Debug ARM64 controls the ABI difference.',
     'ZIP compressed sums exclude ZIP/signing/alignment overhead; libflutter.so may be stored uncompressed.',
     'Byte-identical images are retained aliases pending Issue #7, without recompression or visual changes.',
     'No artificial size target is imposed. Physical-device performance is not inferred from APK size.']}
+if a.signing_report: result['signing'] = json.loads(Path(a.signing_report).read_text())
 (out / 'apk-size-report.json').write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding='utf-8')
 lines = ['# Test APK size audit', '', '| Build | Bytes | MiB | ABIs |', '|---|---:|---:|---|']
 for name, r in reports.items(): lines.append(f"| {name} | {r['bytes']} | {r['bytes']/1048576:.2f} | {', '.join(r['abis'])} |")

@@ -107,3 +107,11 @@ final hostActions = NativeAdventActions(
 ## Что запросить у команды хоста
 
 Flutter/Dart, Android Gradle/Kotlin/minSdk, router/nested Navigators, id и жизненный цикл аккаунта, политика logout/backup/purge, используемые plugin-версии и OS-action ограничения. Доступ к исходникам нужен для интеграции, не для выполненной автономной стабилизации.
+
+## 7. Обновление версии модуля в работающем хосте
+
+Подпись APK, applicationId и возрастающий versionCode принадлежат «ВторомуКрылу». Demo key/environment и demo version namespace в хост не переносятся; package не содержит собственного Android-приложения. [Правила demo-обновлений](ANDROID-DEMO-UPDATES.md).
+
+Зафиксировать новый package ref/lock хоста, проверить совместимость SDK/plugins и сравнить campaignId/dayId/schema. При прежнем контракте сохранить стабильный несекретный userId и ключи advent.v1, raw opened/saved/revealed; не очищать Preferences и не заводить новый namespace на каждый package release. Если схема/идентификаторы меняются, требуется отдельная совместимая миграция с тестом старых данных (#7), а не молчаливый сброс.
+
+Проверка хоста: установить предыдущий APK хоста, открыть дни/сохранить советы/claim сюрприза; обновить APK хоста обычной подписью и увеличенным host versionCode; после нового процесса проверить данные, московский derived progress, logout/relogin и отсутствие повторного конфетти. Тестировать прежние data fixtures, не только новую установку. Затем QA/выпуск по процессу хоста. Не менять signing identity из-за подключения/обновления Advent.

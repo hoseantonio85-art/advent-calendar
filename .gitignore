@@ -1,1 +1,10 @@
 /build/
+
+# Private signing material belongs only in protected CI secrets.
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.key
+key.properties
+demo-signing-secret.json
