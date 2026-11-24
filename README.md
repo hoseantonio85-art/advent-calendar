@@ -3,11 +3,11 @@
 <!-- android-preview:start -->
 ## 📱 Android · сборка для проверки
 
-[![Скачать APK](https://img.shields.io/badge/Android-%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C%20APK-2E7D32?logo=android&logoColor=white)](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45345861756/advent-calendar-preview.apk)
+[![Скачать APK](https://img.shields.io/badge/Android-%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C%20APK-2E7D32?logo=android&logoColor=white)](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45365899931/advent-calendar-preview.apk)
 
-**[Скачать APK напрямую](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45345861756/advent-calendar-preview.apk)** · [Страница сборки](https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-45345861756)
+**[Скачать APK напрямую](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45365899931/advent-calendar-preview.apk)** · [Страница сборки](https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-45365899931)
 
-Проверенная Flutter-сборка из PR #6: `51b29e4`, 24 ноября 2026 г. в 10:26 (Москва). Обычный APK, без ZIP и входа в Actions. Это demo для приёмки.
+Проверенная Flutter-сборка из PR #6: `a6ce095`, 24 ноября 2026 г. в 12:39 (Москва). Обычный APK, без ZIP и входа в Actions. Это demo для приёмки.
 
 Ссылка обновляется после успешных проверок новой сборки. При конфликте отладочной подписи потребуется переустановка demo с удалением локального прогресса.
 <!-- android-preview:end -->
