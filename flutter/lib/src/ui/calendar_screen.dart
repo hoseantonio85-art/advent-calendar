@@ -37,7 +37,8 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
   String? _noticeMessage;
   int _noticeVersion = 0;
   Timer? _midnight;
-  Set<String> _opened = {}, _savedIds = {};
+  final _creditedDays = ValueNotifier<Set<String>>({});
+  Set<String> _savedIds = {};
   String? _error;
   bool _opening = false;
   @override
@@ -67,14 +68,14 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
     try {
       final opened = await widget.progress.read();
       _savedIds=await widget.savedAdvice?.readSaved(AdventProgress.campaignId)??{};
-      if (mounted) setState(() { _opened = opened; _error = null; });
+      if (mounted) setState(() { _creditedDays.value = opened; _error = null; });
     } catch (_) { if (mounted) setState(() => _error = 'Не удалось загрузить прогресс. Повторить'); }
   }
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _midnight?.cancel(); _noticeTimer?.cancel(); _noticeEntry?.remove(); _noticeEntry?.dispose();
-    _noticeMotion.dispose(); _starMotion.dispose(); _motion.dispose(); _heroMotion.dispose(); super.dispose();
+    _creditedDays.dispose(); _noticeMotion.dispose(); _starMotion.dispose(); _motion.dispose(); _heroMotion.dispose(); super.dispose();
   }
   void _showClosedNotice(String message) {
     final version = ++_noticeVersion;
@@ -112,7 +113,7 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
       final celebrate=day.revealOnDate?(await widget.progress.surprises?.claimSurprise(AdventProgress.campaignId,day.id)??false):false;
       final opened = await widget.progress.read();
       if (!mounted) return;
-      setState(() => _opened = opened);
+      setState(() => _creditedDays.value = opened);
       await showModalBottomSheet<void>(context: context, isScrollControlled: true,
         useSafeArea: true, enableDrag: true, sheetAnimationStyle: _calendarSheetMotion(context), showDragHandle: false, barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor: const Color(0xfffaf2e6),
         builder: (_) => _DaySheet(day: day, content: widget.content, time: widget.time,
@@ -144,12 +145,12 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
               style: TextStyle(color: _gold, fontSize: 10, letterSpacing: 1, fontWeight: FontWeight.w800))),
           ])),
           _Hero(content: widget.content, motion: _heroMotion, stars: _starMotion, width: width),
-          _ProgressPanel(opened: _opened.length, onTap: () => showModalBottomSheet<void>(
+          _ProgressPanel(opened: _creditedDays.value.length, onTap: () => showModalBottomSheet<void>(
             context: context, isScrollControlled: true, useSafeArea: true, enableDrag: true, showDragHandle: false,
             sheetAnimationStyle: _calendarSheetMotion(context), barrierColor: const Color(0xc202100c),
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(27))),
             backgroundColor: const Color(0xfffaf2e6),
-            builder: (_) => _HistorySheet(opened: _opened.length, content: widget.content, time: widget.time, saved: _savedIds))),
+            builder: (_) => _HistorySheet(creditedDays: _creditedDays, content: widget.content, time: widget.time, saved: _savedIds))),
           if (_error != null) TextButton(onPressed: _refresh, child: Text(_error!, style: const TextStyle(color: _gold))),
           for (final row in rows) Padding(padding: EdgeInsets.only(bottom: row == rows.last ? 0 : gap), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             for (var i = 0; i < row.length; i++) ...[
@@ -613,8 +614,8 @@ class _BackdropPainter extends CustomPainter {
 }
 
 class _HistorySheet extends StatefulWidget {
-  const _HistorySheet({required this.opened,required this.content,required this.time,required this.saved});
-  final int opened;final AdventContent content;final CampaignTime time;final Set<String> saved;
+  const _HistorySheet({required this.creditedDays,required this.content,required this.time,required this.saved});
+  final ValueNotifier<Set<String>> creditedDays;final AdventContent content;final CampaignTime time;final Set<String> saved;
   @override
   State<_HistorySheet> createState()=>_HistoryState();
 }
@@ -636,7 +637,7 @@ class _HistoryState extends State<_HistorySheet>{
         child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
           const Padding(padding:EdgeInsets.only(top:3,bottom:6),child:Text('ТВОЙ ДЕКАБРЬ',style:TextStyle(color:Color(0xff688576),fontSize:10,fontWeight:FontWeight.w800,letterSpacing:1.3))),
           Text('Твоя история декабря',style:_serif.copyWith(fontSize:titleSize,height:1.04,letterSpacing:-.025*titleSize,color:const Color(0xff21372b))),
-          Padding(padding:const EdgeInsets.only(top:9,bottom:16),child:Text.rich(TextSpan(children:[const TextSpan(text:'Открыто '),TextSpan(text:'${widget.opened} из 31',style:const TextStyle(fontWeight:FontWeight.w700)),const TextSpan(text:' дней календаря')]),style:const TextStyle(fontSize:13,color:Color(0xff686b66)))),
+          ValueListenableBuilder<Set<String>>(valueListenable:widget.creditedDays,builder:(_,days,__)=>Padding(padding:const EdgeInsets.only(top:9,bottom:16),child:Text.rich(TextSpan(children:[const TextSpan(text:'Засчитано '),TextSpan(text:'${days.length} из 31',style:const TextStyle(fontWeight:FontWeight.w700)),const TextSpan(text:' дней календаря')]),key:const ValueKey('history-progress'),style:const TextStyle(fontSize:13,color:Color(0xff686b66))))),
           ClipRRect(borderRadius:BorderRadius.circular(18),child:Container(padding:const EdgeInsets.fromLTRB(12,16,12,12),decoration:BoxDecoration(border:Border.all(color:const Color(0x369fc69d)),gradient:const LinearGradient(colors:[Color(0xff174638),Color(0xff10382c),Color(0xff0a291f)],stops:[0,.53,1])),
             child:Stack(children:[
               Positioned(right:-54,top:-56,child:Opacity(opacity:.28,child:Transform.rotate(angle:-9*math.pi/180,child:_art(widget.content,'hero_tree',size:192)))),
@@ -654,7 +655,7 @@ class _HistoryState extends State<_HistorySheet>{
           _SavedAdviceList(days:widget.content.calendar.days.where((d)=>d.kind==DayKind.advice&&widget.saved.contains(d.id)&&widget.content.calendar.isAvailable(d,widget.time.today)).toList()),
           const Text('Открывай даты, узнавай о мероприятиях и собирай маленькие моменты праздника.',style:TextStyle(fontSize:13.5,height:1.68,color:Color(0xff526257))),const SizedBox(height:16),
           Container(padding:const EdgeInsets.symmetric(vertical:16,horizontal:17),decoration:BoxDecoration(gradient:const LinearGradient(colors:[Color(0xffeaf0dd),Color(0xffe7e8d6)]),border:Border.all(color:const Color(0xffdce4cf)),borderRadius:BorderRadius.circular(17)),
-            child:const Column(crossAxisAlignment:CrossAxisAlignment.start,children:[_Kicker('О КАЛЕНДАРЕ'),SizedBox(height:9),Text('У каждого дня — своё время',style:TextStyle(fontSize:17,height:1.38,letterSpacing:-.425,fontWeight:FontWeight.w700,color:Color(0xff284936))),SizedBox(height:9),Text('Просмотр доступных дней отмечается в прогрессе. События доступны заранее, а советы открываются в свой день и остаются доступными позже.',style:TextStyle(fontSize:12,height:1.45,color:Color(0xff758476)))])),
+            child:const Column(crossAxisAlignment:CrossAxisAlignment.start,children:[_Kicker('О КАЛЕНДАРЕ'),SizedBox(height:9),Text('У каждого дня — своё время',style:TextStyle(fontSize:17,height:1.38,letterSpacing:-.425,fontWeight:FontWeight.w700,color:Color(0xff284936))),SizedBox(height:9),Text('В прогрессе — просмотренные дни, даты которых уже наступили по Москве. Просмотр будущего мероприятия сохранится и будет учтён в его дату.',style:TextStyle(fontSize:12,height:1.45,color:Color(0xff758476)))])),
           const SizedBox(height:19),FilledButton(style:_primaryButtonStyle,onPressed:()=>Navigator.pop(context),child:const Text('Понятно!')),
         ]))),
     ]))));

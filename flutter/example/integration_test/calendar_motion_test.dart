@@ -46,6 +46,7 @@ void main() {
     expect(notice, findsOneWidget);
     await tester.pump(const Duration(seconds: 3)); await tester.pump(const Duration(milliseconds: 250)); expect(notice, findsNothing);
     expect(store.ids.length, 7);
+    expect(find.text('2 / 31'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('day-4'))); await tester.pump(const Duration(seconds: 1));
     expect(find.text('Сюрприз откроется 4 декабря'), findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
@@ -76,6 +77,7 @@ void main() {
     await tester.timedDrag(chrome, const Offset(0, 700), const Duration(milliseconds: 400));
     await tester.pump(const Duration(seconds: 1)); expect(chrome, findsNothing);
     await tester.tap(find.text('Твоя история декабря')); await tester.pump(const Duration(seconds: 2));
+    expect(find.text('Засчитано 2 из 31 дней календаря'), findsOneWidget);
     await tester.binding.handlePopRoute(); await tester.pump(); await tester.pump(const Duration(seconds: 1)); expect(chrome, findsNothing);
     reduced.value = true; await tester.pump(const Duration(milliseconds: 200));
     await tester.tap(find.byKey(const ValueKey('day-1'))); await tester.pump(); await tester.pump();

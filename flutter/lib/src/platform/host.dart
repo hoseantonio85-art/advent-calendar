@@ -20,6 +20,8 @@ class CampaignTime {
 }
 
 abstract interface class ProgressRepository {
+  /// Raw unique views, including ordinary events viewed before their date.
+  /// Never replace these with the filtered display progress.
   Future<Set<String>> read(String campaignId);
   /// Atomic set-union, scoped to the host user + campaign. Never overwrite.
   Future<void> recordOpened(String campaignId, String dayId);
@@ -44,10 +46,10 @@ class AdventProgress {
   final ProgressRepository repository;
   static const campaignId = 'december-2026';
   SurpriseRepository? get surprises => repository is SurpriseRepository ? repository as SurpriseRepository : null;
-  Future<Set<String>> read() async {
-    final revealed=await surprises?.readSurprises(campaignId)??<String>{};
-    return calendar.eligibleProgress(await repository.read(campaignId),time.today).where((id)=>!calendar.days.firstWhere((d)=>d.id==id).revealOnDate||revealed.contains(id)).toSet();
-  }
+  /// Derived on every read: no second persisted counter or surprise-flag gate.
+  /// Existing opened ids remain authoritative; confetti claims are independent.
+  Future<Set<String>> read() async =>
+      calendar.eligibleProgress(await repository.read(campaignId), time.today);
   Future<bool> open(String id) async {
     final day = calendar.days.where((d) => d.id == id).firstOrNull;
     if (day == null || !calendar.isAvailable(day, time.today)) return false;

@@ -49,10 +49,19 @@ class AdventCalendar {
   final List<AdventDay> days;
   bool isAvailable(AdventDay day, DateTime campaignDate) =>
       day.kind == DayKind.event && !day.revealOnDate || !civilDate(day.date).isAfter(civilDate(campaignDate));
-  Set<String> eligibleProgress(Iterable<String> opened, DateTime campaignDate) =>
-      UnmodifiableSetView(days.where((d) => opened.contains(d.id) && isAvailable(d, campaignDate)).map((d) => d.id).toSet());
+  /// Credited days are viewed AND reached their full campaign date.
+  /// Availability is separate: an ordinary future event may be viewed early.
+  Set<String> eligibleProgress(Iterable<String> opened, DateTime campaignDate) {
+    final viewed = opened.toSet(), today = civilDate(campaignDate);
+    return UnmodifiableSetView(days.where((day) =>
+      viewed.contains(day.id) && !civilDate(day.date).isAfter(today)).map((day) => day.id).toSet());
+  }
+
+  /// Returns raw known views, not the displayed progress. Future views survive
+  /// subsequent opens; callers project them with eligibleProgress when needed.
   Set<String> open(String id, Iterable<String> opened, DateTime campaignDate) {
-    final result = eligibleProgress(opened, campaignDate).toSet();
+    final known = days.map((day) => day.id).toSet();
+    final result = opened.where(known.contains).toSet();
     for (final day in days) {
       if (day.id == id && isAvailable(day, campaignDate)) result.add(id);
     }

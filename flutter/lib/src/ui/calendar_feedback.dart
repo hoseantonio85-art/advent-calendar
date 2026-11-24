@@ -38,7 +38,7 @@ class _ProgressPanel extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => Semantics(button: true,
-    label: 'Твоя история декабря. Открыто $opened из 31',
+    label: 'Твоя история декабря. Засчитано $opened из 31',
     child: Padding(padding: const EdgeInsets.only(bottom: 24),
       child: CustomPaint(painter: const _PanelShadowPainter(),
         child: ClipRRect(borderRadius: BorderRadius.circular(16),

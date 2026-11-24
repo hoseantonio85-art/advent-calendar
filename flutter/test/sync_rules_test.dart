@@ -20,13 +20,13 @@ void main(){
    expect(calendar.isAvailable(calendar.days[3],CampaignTime.moscow(clock:clock).today),isTrue);
    expect(tz.getLocation('Europe/Moscow').name,'Europe/Moscow');
  });
- test('legacy opens do not consume reveal; no progress at midnight; first claim is unique',()async{
+ test('legacy views are credited on date without consuming the independent surprise claim',()async{
    final memory=Memory(),clock=Clock(DateTime.parse('2026-12-03T20:59:59Z'));
    final repo=LocalAdventRepository(storage:memory,calendar:calendar,userId:'a');
    final progress=AdventProgress(calendar:calendar,time:CampaignTime.moscow(clock:clock),repository:repo);
    final id=calendar.days[3].id;await repo.recordOpened(AdventProgress.campaignId,id);
    expect(await progress.read(),isEmpty);expect(await progress.open(id),isFalse);
-   clock.now=DateTime.parse('2026-12-03T21:00:00Z');expect(await progress.read(),isEmpty);
+   clock.now=DateTime.parse('2026-12-03T21:00:00Z');expect(await progress.read(),{id});
    expect(await progress.open(id),isTrue);
    final claims=await Future.wait([repo.claimSurprise(AdventProgress.campaignId,id),repo.claimSurprise(AdventProgress.campaignId,id)]);
    expect(claims.where((v)=>v),hasLength(1));expect(await progress.read(),{id});
