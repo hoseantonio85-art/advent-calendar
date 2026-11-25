@@ -14,6 +14,38 @@
 Ссылки обновляются после проверки обновления APK. Переход со старой debug-подписи — один раз с ручной переустановкой и потерей прежних локальных данных; следующие demo-сборки сохраняют данные. [Правила обновления](docs/ANDROID-DEMO-UPDATES.md).
 <!-- android-preview:end -->
 
+## Issue #7 · проверка завершена, PR #10 · 24 ноября 2026
+
+[PR #10](https://github.com/hoseantonio85-art/advent-calendar/pull/10) реализует
+единый [content/calendar_2026.json](content/calendar_2026.json), генерацию
+standalone HTML/Flutter, --check и CSV. [Полный CI #135](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45480145540) успешен:
+9 content + 6 version/policy Node-тестов, 71 unit/widget, 29 visual, оба analyze,
+browser preview/edit19/overlay/fallback, native API35/restart/stress, web,
+release/profile/audit и APK update на API28 с сохранением данных.
+Все **65 PNG** совпали с принятой версией побайтово. Текущие тексты/31/14/17,
+Flutter JSON, графика, хранилище и подпись сохранены. Тестовые изменения — только
+временные fixtures; master содержит исходное мероприятие 19 декабря.
+[Инструкция редактора](docs/CONTENT-EDITOR.md) · [полный отчёт](docs/CONTENT-SOURCE-2026-11-24.md).
+PR готов к review, **не слит**. После merge — main CI/защищённая публикация;
+перед реальным выпуском остаются физическая QA, контент/права и интеграция хоста.
+Ниже сохранён ход работы и предыдущие этапы.
+
+
+## Issue #7 · единый источник HTML/Flutter · 24 ноября 2026
+
+После авторского merge #5/#6 реализуется отдельная content-ветка от main.
+Редактируемый master — [content/calendar_2026.json](content/calendar_2026.json):
+31 стабильная дата, совет на каждой дате, optional event, независимое оформление
+и согласованный revealOnDate. `node tools/generate-content.cjs` обновляет только
+данные standalone HTML и совместимый Flutter JSON; `--check` блокирует drift.
+`node tools/export-content.cjs` создаёт редакторский CSV. Текущие тексты/31/14/17,
+графика и первоначальный Flutter JSON сохранены, runtime больше не фиксирует
+число событий. [Инструкция редактора](docs/CONTENT-EDITOR.md) ·
+[Реализация/проверки/границы](docs/CONTENT-SOURCE-2026-11-24.md).
+Новые тесты проверяют edit19, overlay/removal, советы/ключи/сюрпризы и preview=31;
+итог полного CI будет добавлен после прогона. Старые записи ниже — история.
+Подпись demo и доверенный main-only publisher не менялись. **PR не сливается автоматически.**
+
 ## PR #6 · этап 2/2 завершён · 24 ноября 2026
 
 [Полный CI #133](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45462441956) на a803adf успешно завершён: analyze package/demo без

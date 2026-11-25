@@ -1,5 +1,33 @@
 # Дорожная карта · Advent Calendar
 
+## Issue #7 · проверка завершена, PR #10 · 24 ноября 2026
+
+[PR #10](https://github.com/hoseantonio85-art/advent-calendar/pull/10) реализует
+единый [content/calendar_2026.json](../content/calendar_2026.json), генерацию
+standalone HTML/Flutter, --check и CSV. [Полный CI #135](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45480145540) успешен:
+9 content + 6 version/policy Node-тестов, 71 unit/widget, 29 visual, оба analyze,
+browser preview/edit19/overlay/fallback, native API35/restart/stress, web,
+release/profile/audit и APK update на API28 с сохранением данных.
+Все **65 PNG** совпали с принятой версией побайтово. Текущие тексты/31/14/17,
+Flutter JSON, графика, хранилище и подпись сохранены. Тестовые изменения — только
+временные fixtures; master содержит исходное мероприятие 19 декабря.
+[Инструкция редактора](CONTENT-EDITOR.md) · [полный отчёт](CONTENT-SOURCE-2026-11-24.md).
+PR готов к review, **не слит**. После merge — main CI/защищённая публикация;
+перед реальным выпуском остаются физическая QA, контент/права и интеграция хоста.
+Ниже сохранён ход работы и предыдущие этапы.
+
+## Issue #7 · единый content-source · 24 ноября 2026
+
+PR #5/#6 слиты автором. Новый самостоятельный этап: content/calendar_2026.json,
+генерация standalone HTML/Flutter, schema/validation/drift gate, editor CSV и
+существующий preview=31. Текущие 31/14/17 защищены как согласованный snapshot;
+редакторская схема и runtime допускают иной состав событий без смены dayId.
+Реализация и локальные 9 Node-тестов готовы; полный CI/visual acceptance — в PR.
+[Инструкция](CONTENT-EDITOR.md) · [Отчёт](CONTENT-SOURCE-2026-11-24.md).
+После review #7 — физическая QA, утверждение релизного контента/прав, интеграция
+хоста и финальная проверка/production signing по процессу «ВторогоКрыла».
+Ниже сохранена история предыдущих этапов; backend/CMS и новый UI не добавляются.
+
 ## PR #6 · этап 2/2 завершён · 24 ноября 2026
 
 [Полный CI #133](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45462441956) на a803adf успешно завершён: analyze package/demo без
