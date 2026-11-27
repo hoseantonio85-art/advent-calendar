@@ -3,13 +3,13 @@
 <!-- android-preview:start -->
 ## 📱 Android · тестовая release-сборка ARM64
 
-[![Скачать APK](https://img.shields.io/badge/Android-%D0%A2%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20release%20ARM64-2E7D32?logo=android&logoColor=white)](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45557889946/advent-calendar-test-release-arm64.apk)
+[![Скачать APK](https://img.shields.io/badge/Android-%D0%A2%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20release%20ARM64-2E7D32?logo=android&logoColor=white)](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-46004666174/advent-calendar-test-release-arm64.apk)
 
-**[Скачать тестовый release APK · ARM64](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45557889946/advent-calendar-test-release-arm64.apk)** · [Release](https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-45557889946)
+**[Скачать тестовый release APK · ARM64](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-46004666174/advent-calendar-test-release-arm64.apk)** · [Release](https://github.com/hoseantonio85-art/advent-calendar/releases/tag/android-preview-46004666174)
 
-[Debug · универсальный](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45557889946/advent-calendar-preview.apk) · [Profile · ARM64, для замеров](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45557889946/advent-calendar-profile-arm64.apk) · [Размер и состав APK](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-45557889946/apk-size-report.md)
+[Debug · универсальный](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-46004666174/advent-calendar-preview.apk) · [Profile · ARM64, для замеров](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-46004666174/advent-calendar-profile-arm64.apk) · [Размер и состав APK](https://github.com/hoseantonio85-art/advent-calendar/releases/download/android-preview-46004666174/apk-size-report.md)
 
-Проверенный Flutter-код: `6c80862`, 25 ноября 2026 г. в 09:25 (Москва). Release: 17.26 MiB. Постоянная тестовая подпись Advent Demo, версия `0.1.137.1` / code 13703; автономное demo; **не production-релиз**. Нативная графика сохранена.
+Проверенный Flutter-код: `2753753`, 27 ноября 2026 г. в 16:31 (Москва). Release: 17.34 MiB. Постоянная тестовая подпись Advent Demo, версия `0.1.144.1` / code 14403; автономное demo; **не production-релиз**. Нативная графика сохранена.
 
 Ссылки обновляются после проверки обновления APK. Переход со старой debug-подписи — один раз с ручной переустановкой и потерей прежних локальных данных; следующие demo-сборки сохраняют данные. [Правила обновления](docs/ANDROID-DEMO-UPDATES.md).
 <!-- android-preview:end -->
