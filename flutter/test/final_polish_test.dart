@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:advent_calendar/advent_calendar.dart';
@@ -78,7 +79,7 @@ void main() {
   test('mapUrl remains optional and rejects malformed or non-HTTPS runtime URLs', () {
     expect(content.calendar.days[13].event!['mapUrl'], mapUrl);
     expect(content.calendar.days[13].event!['locations'],
-      ['Навка Арена · Москва, ул. Нижние Мнёвники, 10А']);
+      ['Москва, ул. Нижние Мнёвники, 10А']);
     for (final value in [null, 42, '', 'javascript:alert(1)', 'http://example.com',
       'https:example.com', 'https://', 'https://u:p@example.com/',
       'https://example.com/a b', r'https://example.com/\bad', 'https://example.com/%zz',
@@ -153,7 +154,7 @@ void main() {
     final semantics = t.ensureSemantics();
     try {
     await mount(t);
-    for (final entry in {14:'Навка Арена · Москва, ул. Нижние Мнёвники, 10А',
+    for (final entry in {14:'Москва, ул. Нижние Мнёвники, 10А',
       17:'БКЗ, корпус Г', 18:'Елка возле переговорной Б.39.04'}.entries) {
       await open(t, entry.key); expect(find.text(entry.value), findsOneWidget);
       final link = find.byKey(const ValueKey('event-map-link'));
@@ -198,6 +199,26 @@ void main() {
         await t.pumpWidget(const SizedBox());
       }
       expect(shares, 2, reason: 'both bottom-edge taps reach the real Share callback');
+    });
+  }
+  for (final width in [320.0, 360.0, 390.0, 430.0]) {
+    testWidgets('14 December: address stays one line and venue is bold in description at $width', (t) async {
+      await t.runAsync(() async {
+        await (FontLoader('packages/advent_calendar/Roboto')..addFont(Future.value(
+          ByteData.sublistView(File('assets/fonts/Roboto-Variable.ttf').readAsBytesSync())))).load();
+      });
+      await mount(t, width: width); await open(t, 14);
+      const address = 'Москва, ул. Нижние Мнёвники, 10А';
+      final place = find.text(address);
+      await t.ensureVisible(place); await t.pumpAndSettle();
+      final paragraph = t.renderObject<RenderParagraph>(place);
+      expect(paragraph.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: address.length)),
+        hasLength(1), reason: 'full address fits one line with the real Roboto font');
+      final description = t.widget<Text>(find.byWidgetPredicate((widget) => widget is Text &&
+        widget.textSpan?.toPlainText().contains('пройдёт на площадке «Навка Арена»') == true));
+      final spans = (description.textSpan! as TextSpan).children!.whereType<TextSpan>();
+      expect(spans.any((span) => span.text == '«Навка Арена»' && span.style?.fontWeight == FontWeight.w800), isTrue);
+      expect(t.takeException(), isNull); await t.pumpWidget(const SizedBox());
     });
   }
 }

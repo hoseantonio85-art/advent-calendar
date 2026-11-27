@@ -20,7 +20,7 @@ async function main(){
   }
   async function close(){await page.locator('#closeSheet').click();}
   await load(data.original);
-  for(const [day,place] of [[14,'Навка Арена · Москва, ул. Нижние Мнёвники, 10А'],[17,'БКЗ, корпус Г'],[18,'Елка возле переговорной Б.39.04']]){
+  for(const [day,place] of [[14,'Москва, ул. Нижние Мнёвники, 10А'],[17,'БКЗ, корпус Г'],[18,'Елка возле переговорной Б.39.04']]){
    await page.locator(`[data-day="${day}"]`).click();
    assert((await page.locator('#sheet').textContent()).includes(place));
    const link=page.locator('a.sheet-detail');
@@ -29,6 +29,13 @@ async function main(){
     assert.equal(await link.getAttribute('href'),data.original.days[13].event.mapUrl);
     assert.equal(await link.getAttribute('rel'),'noopener noreferrer');
     assert.equal(await link.locator('.sheet-detail-value').textContent(),place);
+    assert.equal(await page.locator('.sheet-event-description strong').textContent(),'«Навка Арена»');
+    for(const width of [320,360,390,430]){
+     await page.setViewportSize({width,height:844});
+     const layout=await link.locator('.sheet-detail-value').evaluate(el=>({height:el.getBoundingClientRect().height,lineHeight:parseFloat(getComputedStyle(el).lineHeight)}));
+     assert(layout.height<=layout.lineHeight+1,`14 December address must fit one line at ${width}: ${JSON.stringify(layout)}`);
+    }
+    await page.setViewportSize({width:390,height:844});
     await page.screenshot({path:path.join(folder,'map-place-14.png')});
    }
    await close();

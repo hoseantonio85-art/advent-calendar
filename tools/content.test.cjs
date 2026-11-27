@@ -6,7 +6,7 @@ const approved=require('./fixtures/calendar-2026-approved.json'),hash=s=>crypto.
 const polish=require('./fixtures/final-polish-approved.json');
 function shell(s){for(const name of Object.values(BLOCKS)){const a=s.indexOf(marker(name))+marker(name).length,b=s.indexOf(marker(name,true));s=s.slice(0,a)+'\n'+s.slice(b);}return s;}
 function parsed(s){return {events:JSON.parse(s.match(/ const events=(\{[\s\S]*?\n \});/)[1]),thoughts:JSON.parse(s.match(/ const thoughts=(\[[\s\S]*?\n \]);/)[1])};}
-test('approved campaign: only three places/mapUrl changed; 31/14/17, HTML shell and all art retained',()=>{
+test('approved campaign: only requested places/mapUrl/venue description changed; 31/14/17 and all art retained',()=>{
  assert.equal(master.days.length,approved.days);assert.equal(master.days.filter(d=>d.event).length,approved.events);
  assert.equal(master.days.filter(d=>!d.event).length,approved.advice);
  assert.equal(hash(JSON.stringify(projectFlutter(master),null,2)+'\n'),polish.runtimeSha256);
@@ -14,8 +14,9 @@ test('approved campaign: only three places/mapUrl changed; 31/14/17, HTML shell 
  assert.equal(hash(shell(html)),polish.htmlShellSha256);
  const previous=structuredClone(master);
  for(const edit of polish.places){assert.equal(previous.days[edit.day-1].event.place,edit.after);previous.days[edit.day-1].event.place=edit.before;}
+ for(const edit of polish.descriptions){assert.equal(previous.days[edit.day-1].event.desc,edit.after);previous.days[edit.day-1].event.desc=edit.before;}
  assert.equal(previous.days[13].event.mapUrl,polish.mapUrl);delete previous.days[13].event.mapUrl;
- // Keep the original approved hashes as proof that no other copy/Bento changed.
+ // Restore exactly the author's edits to prove all other copy/Bento is intact.
  assert.equal(hash(JSON.stringify(projectFlutter(previous),null,2)+'\n'),approved.runtimeSha256);
  assert.equal(hash(JSON.stringify(webData(previous))),approved.webDataSha256);
  for(const [key,digest] of Object.entries(approved.assets))assert.equal(hash(fs.readFileSync(path.join(ROOT,'flutter',master.assets[key]))),digest,key);
