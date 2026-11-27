@@ -614,14 +614,15 @@ final _primaryButtonStyle=FilledButton.styleFrom(backgroundColor:const Color(0xf
 Widget _detail(IconData icon,String label,String value,double width,{bool first=false,VoidCallback? onTap}){
   final iconSize=width<=360?34.0:38.0,valueSize=width<=335&&first?10.0:width<=360?11.0:12.0;
   final decoration=BoxDecoration(color:const Color(0xffeff0e8),border:Border.all(color:const Color(0xffe4e7dc)),borderRadius:BorderRadius.circular(13));
-  final child=Padding(padding:const EdgeInsets.all(8),child:Row(children:[Container(width:iconSize,height:iconSize,decoration:BoxDecoration(gradient:const LinearGradient(colors:[Color(0xffdce8dd),Color(0xffe5ebdf)]),borderRadius:BorderRadius.circular(width<=360?10:11),border:Border.all(color:const Color(0xffd3ddd3))),child:Icon(icon,size:19,color:const Color(0xff557e65))),
+  // Preserve Container's original 8 dp content inset + 1 dp border inset.
+  final child=Padding(padding:const EdgeInsets.all(9),child:Row(children:[Container(width:iconSize,height:iconSize,decoration:BoxDecoration(gradient:const LinearGradient(colors:[Color(0xffdce8dd),Color(0xffe5ebdf)]),borderRadius:BorderRadius.circular(width<=360?10:11),border:Border.all(color:const Color(0xffd3ddd3))),child:Icon(icon,size:19,color:const Color(0xff557e65))),
       const SizedBox(width:8),Expanded(child:Column(mainAxisAlignment:MainAxisAlignment.center,crossAxisAlignment:CrossAxisAlignment.start,children:[Text(label,style:const TextStyle(fontSize:10,fontWeight:FontWeight.w600,color:Color(0xff819285))),const SizedBox(height:3),Text(value,style:TextStyle(fontSize:valueSize,height:1.4,fontWeight:FontWeight.w700,color:const Color(0xff2d4536)))])),
       if(onTap!=null)const Padding(padding:EdgeInsets.only(left:8),child:Icon(Icons.open_in_new,size:14,color:Color(0xff557e65))),
     ]));
   if(onTap==null)return DecoratedBox(decoration:decoration,child:child);
   return Semantics(key:const ValueKey('event-map-link'),link:true,hint:'Открыть место на карте',
     child:Material(color:Colors.transparent,borderRadius:BorderRadius.circular(13),clipBehavior:Clip.antiAlias,
-      child:Ink(decoration:decoration,child:InkWell(onTap:onTap,child:child))));
+      child:Ink(padding:EdgeInsets.zero,decoration:decoration,child:InkWell(onTap:onTap,child:child))));
 }
 
 
