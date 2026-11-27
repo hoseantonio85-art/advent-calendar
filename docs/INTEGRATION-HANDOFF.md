@@ -6,12 +6,15 @@
 
 ## 1. Что зафиксировать и получить
 
-**Финальный code SHA: a4f9aa09a4359da777ba93b3551a22a138c471a3**, [PR #12](https://github.com/hoseantonio85-art/advent-calendar/pull/12),
-[CI #142](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835) успешен: analyze, функциональные/визуальные тесты, Android integration,
+**Финальный code SHA: 1d711936b0716a77cf4963f20f59539301863a6c**, [PR #12](https://github.com/hoseantonio85-art/advent-calendar/pull/12),
+[CI #143](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866) успешен: analyze, функциональные/визуальные тесты, Android integration,
 release/audit/update. **PR ещё не слит; merge требует одобрения автора.**
 Предыдущая поставка main/CI #136 сохранена в летописи. Package version **0.1.0**;
-demo 0.1.142.1/code14203 — другая нумерация. Новый tag не создаётся.
+demo 0.1.143.1/code14303 — другая нумерация. Новый tag не создаётся.
 [Проверки, APK и ограничения](FINAL-POLISH-2026-11-27.md).
+Уточнение 14 декабря: в place/locations только адрес; **«Навка Арена»** выделена
+в описании. HTML/Flutter проверены на одну строку адреса при обычном масштабе на
+320/360/390/430 dp; при крупном тексте переносы сохраняются для доступности.
 
 В pubspec.yaml host:
 
@@ -22,12 +25,12 @@ dependencies:
   advent_calendar:
     git:
       url: https://github.com/hoseantonio85-art/advent-calendar.git
-      ref: a4f9aa09a4359da777ba93b3551a22a138c471a3
+      ref: 1d711936b0716a77cf4963f20f59539301863a6c
       path: flutter
   timezone: ^0.10.1 # прямой import в bootstrap ниже
 ```
 
-Альтернатива: [полный ZIP того же SHA](https://github.com/hoseantonio85-art/advent-calendar/archive/a4f9aa09a4359da777ba93b3551a22a138c471a3.zip),
+Альтернатива: [полный ZIP того же SHA](https://github.com/hoseantonio85-art/advent-calendar/archive/1d711936b0716a77cf4963f20f59539301863a6c.zip),
 распаковать целиком, подключить вложенный flutter/ как path dependency и передать
 **эту актуальную инструкцию вместе с архивом**. Архив содержит также master-source
 и генераторы; его старая документация относится к моменту code SHA. Проверены

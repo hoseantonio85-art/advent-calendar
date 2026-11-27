@@ -15,17 +15,17 @@ dependencies:
   advent_calendar:
     git:
       url: https://github.com/hoseantonio85-art/advent-calendar.git
-      ref: a4f9aa09a4359da777ba93b3551a22a138c471a3
+      ref: 1d711936b0716a77cf4963f20f59539301863a6c
       path: flutter
   timezone: ^0.10.1 # прямая зависимость для bootstrap import ниже
 ```
 
 Это финальный code SHA [PR #12](https://github.com/hoseantonio85-art/advent-calendar/pull/12),
-[CI #142](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835) полностью успешен. До merge требуется отдельное одобрение автора.
-Package version остаётся **0.1.0**; demo APK 0.1.142.1 имеет другую нумерацию
+[CI #143](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866) полностью успешен. До merge требуется отдельное одобрение автора.
+Package version остаётся **0.1.0**; demo APK 0.1.143.1 имеет другую нумерацию
 и в PR подписана только CI debug-ключом. Постоянная demo-подпись доступна лишь
 доверенному main после разрешённого merge. Поставка: закреплённые исходники плюс актуальная handoff-
-инструкция. Если Git недоступен, [полный ZIP этого SHA](https://github.com/hoseantonio85-art/advent-calendar/archive/a4f9aa09a4359da777ba93b3551a22a138c471a3.zip)
+инструкция. Если Git недоступен, [полный ZIP этого SHA](https://github.com/hoseantonio85-art/advent-calendar/archive/1d711936b0716a77cf4963f20f59539301863a6c.zip)
 содержит flutter/, master-source и tools; после распаковки можно использовать
 `path: ../vendor/advent-calendar/flutter` (путь выбрать по фактическому каталогу).
 Архивная документация соответствует моменту code SHA; передавайте вместе с ZIP

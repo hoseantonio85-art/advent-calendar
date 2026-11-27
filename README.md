@@ -30,15 +30,19 @@
 release ARM64/audit и adb install -r 14202 → 14203 с сохранением данных.
 [PR #12](https://github.com/hoseantonio85-art/advent-calendar/pull/12),
 [CI](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835), [тестовая APK (ZIP)](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835/artifacts/15187660383).
-Финальный code SHA для интеграторов: **a4f9aa09a4359da777ba93b3551a22a138c471a3**;
+Ревизия первой итерации (CI #142): **a4f9aa09a4359da777ba93b3551a22a138c471a3**;
 [handoff](docs/INTEGRATION-HANDOFF.md) обновлён. APK PR имеет CI debug-подпись;
 обновление постоянной demo #137 требует отдельно одобренного merge и штатной
 защищённой main-публикации. Входная v9 и хвойный счётчик совпали с эталоном попиксельно.
 
 Уточнение автора от 27 ноября: название **«Навка Арена»** перенесено в описание
 14 декабря, блок «Место» содержит только «Москва, ул. Нижние Мнёвники, 10А».
-Ссылка на карты прежняя. Проверка одной строки на стандартном масштабе добавлена
-для четырёх ширин; последующая ревизия package будет закреплена после CI.
+Ссылка на карты прежняя. **[CI #143](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866) успешен**: 85 unit/widget, 29 visual,
+HTML/Flutter one-line/bold на четырёх ширинах, Android integration/release/audit/update.
+Актуальный code SHA: **1d711936b0716a77cf4963f20f59539301863a6c**; [handoff](docs/INTEGRATION-HANDOFF.md).
+[Новая тестовая APK 0.1.143.1 (ZIP)](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866/artifacts/15198203244).
+Это PR-сборка с CI debug-подписью. Главный download-блок сверху остаётся
+постоянной подписанной demo из main и обновится его защищённым publisher после merge.
 
 ## Передача Flutter-package команде «ВторогоКрыла» · 25 ноября 2026
 

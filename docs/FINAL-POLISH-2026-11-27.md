@@ -46,7 +46,7 @@ tests и version/publication policy tests, parity прогресса и ауди
 Flutter analyze, unit/widget, snapshots/pressed pixel regression, browser map
 anchor, Android motion/release/audit/update выполнены штатным CI этого PR.
 **CI #142 завершён успешно**, [полный запуск](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835).
-Зафиксированный code SHA **a4f9aa09a4359da777ba93b3551a22a138c471a3**, package version 0.1.0.
+Code SHA первой итерации **a4f9aa09a4359da777ba93b3551a22a138c471a3**, package version 0.1.0.
 Документальный follow-up не меняет проверенные runtime/tests/assets/locks.
 
 - Package + demo: flutter analyze без замечаний. Unit/widget: **81 passed**, три
@@ -97,5 +97,17 @@ merge main workflow штатно выпускает подписанную ве�
 производных файла пересозданы. Дополнены Flutter/browser-тесты: полный адрес
 в одну строку на 320/360/390/430 dp при стандартном масштабе и bold названия в
 описании; крупный системный текст по-прежнему может переносить адрес.
-CI #142 выше описывает предыдущую итерацию; проверка этого уточнения и новый
-package SHA будут зафиксированы отдельно после завершения CI.
+CI #142 выше описывает предыдущую итерацию. **[CI #143](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866) полностью успешен**:
+analyze package/demo, 85 unit/widget + 29 visual, HTML one-line/bold/URL, Android
+integration/motion/release/audit/update. Проверены прежние 31/14/17 и 17 art.
+Из 42 Flutter snapshot 38 попиксельно совпали с CI #142; изменились только
+четыре polish-map-14 на 320/360/390/430 dp. Подтверждены одна строка адреса
+и bold названия; UI/шрифты/остальные даты не менялись.
+Code SHA для передачи: **1d711936b0716a77cf4963f20f59539301863a6c**, package 0.1.0. ZIP того же SHA проверен:
+36 runtime-файлов/18 относительных ссылок/17 art соответствуют Git.
+[Новые snapshots](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866/artifacts/15197698294).
+[Новая тестовая APK 0.1.143.1, code14303 (ZIP)](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866/artifacts/15198203244).
+[adb install -r 14302 → 14303, сохранение данных](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866/artifacts/15199710793).
+У APK CI debug-подпись; обновление установленной постоянной demo по-прежнему
+выпускается только trusted main после разрешённого merge. Ключи/workflows прежние.
+Handoff/README/ROADMAP обновлены отдельным docs-only коммитом без нового CI.
