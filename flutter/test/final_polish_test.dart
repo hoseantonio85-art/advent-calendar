@@ -33,6 +33,15 @@ class MapLauncher extends UrlLauncherPlatform {
   }
 }
 
+class ReorderedStore extends VisualStore {
+  final gates = <String, Completer<void>>{};
+  @override
+  Future<void> recordOpened(String campaign, String id) async {
+    await gates.putIfAbsent(id, () => Completer<void>()).future;
+    return super.recordOpened(campaign, id);
+  }
+}
+
 void main() {
   setUpAll(zones.initializeTimeZones);
   final source = File('assets/advent/calendar_2026.json').readAsStringSync();
@@ -99,6 +108,17 @@ void main() {
     expect(store.ids, isEmpty); await close(t);
     expect(find.text('0 / 31'), findsOneWidget);
     expect(find.text('Не удалось открыть день. Попробуйте ещё раз.'), findsOneWidget);
+    expect(t.takeException(), isNull); await t.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('quick close/reopen and reversed storage completion credit both unique days', (t) async {
+    final store = ReorderedStore(); await mount(t, store: store);
+    final one = content.calendar.days[0].id, two = content.calendar.days[1].id;
+    await open(t, 1); await close(t);
+    await open(t, 2); store.gates[two]!.complete(); await t.pumpAndSettle(); await close(t);
+    expect(find.text('1 / 31'), findsOneWidget);
+    store.gates[one]!.complete(); await t.pumpAndSettle();
+    expect(store.ids, {one, two}); expect(find.text('2 / 31'), findsOneWidget);
     expect(t.takeException(), isNull); await t.pumpWidget(const SizedBox());
   });
 

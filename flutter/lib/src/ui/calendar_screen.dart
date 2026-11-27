@@ -130,12 +130,16 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
     } finally { _opening = false; }
   }
   Future<bool> _recordOpening(AdventDay day) async {
-    final progress = widget.progress, revision = ++_viewRevision;
+    final progress = widget.progress;
+    ++_viewRevision; // Invalidate a snapshot begun before this write.
     try {
       if (!await progress.open(day.id)) return false;
       final celebrate = day.revealOnDate
           ? (await progress.surprises?.claimSurprise(AdventProgress.campaignId, day.id) ?? false)
           : false;
+      // Writes may finish out of order after a quick close/reopen. The last
+      // completed write starts a fresh read containing every completed fact.
+      final revision = ++_viewRevision;
       final opened = await progress.read();
       if (mounted && revision == _viewRevision) {
         setState(() => _creditedDays.value = opened);
