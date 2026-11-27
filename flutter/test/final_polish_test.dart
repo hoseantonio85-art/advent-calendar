@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:advent_calendar/advent_calendar.dart';
 import 'package:timezone/data/latest.dart' as zones;
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+import 'package:url_launcher_platform_interface/link.dart';
 import 'visual_test.dart' show TestAssets, VisualClock, VisualStore;
 
 class PendingStore extends VisualStore {
@@ -22,6 +23,8 @@ class PendingStore extends VisualStore {
 }
 
 class MapLauncher extends UrlLauncherPlatform {
+  @override
+  LinkDelegate? get linkDelegate => null;
   final urls = <String>[];
   bool available = true, fail = false;
   @override
