@@ -19,6 +19,20 @@ async function main(){
    assert.equal(await page.locator('.day-card').count(),31);
   }
   async function close(){await page.locator('#closeSheet').click();}
+  await load(data.original);
+  for(const [day,place] of [[14,'Навка Арена · Москва, ул. Нижние Мнёвники, 10А'],[17,'БКЗ, корпус Г'],[18,'Елка возле переговорной Б.39.04']]){
+   await page.locator(`[data-day="${day}"]`).click();
+   assert((await page.locator('#sheet').textContent()).includes(place));
+   const link=page.locator('a.sheet-detail');
+   assert.equal(await link.count(),day===14?1:0);
+   if(day===14){
+    assert.equal(await link.getAttribute('href'),data.original.days[13].event.mapUrl);
+    assert.equal(await link.getAttribute('rel'),'noopener noreferrer');
+    assert.equal(await link.locator('.sheet-detail-value').textContent(),place);
+    await page.screenshot({path:path.join(folder,'map-place-14.png')});
+   }
+   await close();
+  }
   await load(data.edit19);await page.locator('[data-day="19"]').click();
   assert((await page.locator('#sheet').textContent()).includes('Проверка редактирования 19 декабря'));
   assert((await page.locator('#sheet').textContent()).includes('из единого источника'));await close();
@@ -39,7 +53,7 @@ async function main(){
   assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('advent2026-saved'))),[3]);
   await load(data.original);await page.screenshot({path:path.join(folder,'restored-preview-31.png')});
   assert.deepEqual(errors,[]);await context.close();
-  fs.writeFileSync(path.join(folder,'result.json'),JSON.stringify({result:'PASS',cases:['edit19','add/remove event','advice art/Bento fallback','preview=31/3','removed surprise','raw views/saved persistence'],productionFilesChanged:false},null,2)+'\n');
+  fs.writeFileSync(path.join(folder,'result.json'),JSON.stringify({result:'PASS',cases:['14/17/18 places and optional map anchor','edit19','add/remove event','advice art/Bento fallback','preview=31/3','removed surprise','raw views/saved persistence'],productionFilesChanged:false},null,2)+'\n');
   console.log('PASS: generated HTML preview=31, edit19, event overlay/fallback, surprises, progress/saved persistence');
  }finally{await browser.close();}
 }

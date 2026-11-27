@@ -107,7 +107,7 @@ void main() {
     }
     SchedulerBinding.instance.addPostFrameCallback(sample);
     await tester.tap(find.byKey(const ValueKey('day-1'))); await tester.pump(); await tester.pump();
-    expect(ModalRoute.of(tester.element(chrome))!.transitionDuration, const Duration(milliseconds: 420));
+    expect(ModalRoute.of(tester.element(chrome))!.transitionDuration, const Duration(milliseconds: 360));
     await tester.pump(const Duration(milliseconds: 650)); sampling = false; watch.stop();
     expect(samples.length, greaterThan(1));
     expect(samples.first, greaterThan(samples.last));
@@ -128,7 +128,7 @@ void main() {
       'sheetTopSamples': samples, 'sheetFrames': motionFrames, 'frameCount': frames.length,
       'buildUs': frames.map((f) => f.buildDuration.inMicroseconds).toList(),
       'rasterUs': frames.map((f) => f.rasterDuration.inMicroseconds).toList(),
-      'verified': ['entry glass/countdown/festive/text200/tap', 'history countdown glass/text100/text200/system screenshots', 'XXS minimum', 'locked advice/surprise', 'single safe top notice', 'no locked progress', '420ms motion', 'handle drag', 'Back', 'close', 'reduced motion'],
+      'verified': ['entry glass/countdown/festive/text200/tap', 'history countdown glass/text100/text200/system screenshots', 'XXS minimum', 'locked advice/surprise', 'single safe top notice', 'no locked progress', '360ms motion', 'handle drag', 'Back', 'close', 'reduced motion'],
     };
     expect(tester.takeException(), isNull);
     // Capture actual Android windows after the motion checks. The adb helper

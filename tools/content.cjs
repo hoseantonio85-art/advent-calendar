@@ -40,8 +40,13 @@ function validateContent(data,{root=ROOT}={}){
   if(!Object.hasOwn(day,'event'))fail(where,'event must be an object or explicit null');
   if(day.event!==null){
    const event=day.event;
-   object(event,where+'.event',['title','shortTitle','art','theme','columns','time','duration','place','desc','cta','cardLines','sourceCopy','verification']);
+   object(event,where+'.event',['title','shortTitle','art','theme','columns','time','duration','place','mapUrl','desc','cta','cardLines','sourceCopy','verification']);
    for(const field of ['title','shortTitle','time','place','desc','verification'])text(event[field],where+'.event.'+field);
+   if(Object.hasOwn(event,'mapUrl')){
+    const value=event.mapUrl;
+    let url;try{url=new URL(value);}catch{}
+    if(typeof value!=='string'||!/^https:\/\//.test(value)||/[\s\\]/.test(value)||/%(?![\da-f]{2})/i.test(value)||!url?.hostname||url.username||url.password)fail(where+'.event.mapUrl','expected an absolute HTTPS URL without credentials or whitespace');
+   }
    card(event,where+'.event',data.assets);
    if(event.duration!==null&&(!Number.isInteger(event.duration)||event.duration<=0))fail(where,'duration must be positive minutes or null');
    if(/^\d{1,2}:\d{2}$/.test(event.time)&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(event.time))fail(where,'invalid source time');

@@ -65,7 +65,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     } finally { semantics.dispose(); }
   });
-  testWidgets('420 ms sheet moves progressively and remains dismissible by handle, Back, close', (tester) async {
+  testWidgets('360 ms sheet moves progressively and remains dismissible by handle, Back, close', (tester) async {
     await mount(tester, reduced: false);
     Future<void> open() async {
       await tester.tap(find.byKey(const ValueKey('day-1'))); await tester.pump(); await tester.pump();
@@ -73,7 +73,7 @@ void main() {
     final chrome = find.byKey(const ValueKey('sheet-chrome'));
     await open();
     final route = ModalRoute.of(tester.element(chrome))!;
-    expect(route.transitionDuration, const Duration(milliseconds: 420));
+    expect(route.transitionDuration, const Duration(milliseconds: 360));
     await tester.pump(const Duration(milliseconds: 70)); final early = tester.getTopLeft(chrome).dy;
     await tester.pump(const Duration(milliseconds: 140)); final middle = tester.getTopLeft(chrome).dy;
     await tester.pump(const Duration(milliseconds: 250)); final finalY = tester.getTopLeft(chrome).dy;

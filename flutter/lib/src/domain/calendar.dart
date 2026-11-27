@@ -47,6 +47,16 @@ class AdventCalendar {
            ['title', 'text', 'action'].any((key) => advice[key] is! String || (advice[key] as String).trim().isEmpty))) {
         throw FormatException('Invalid day ${d.id}');
       }
+      if (d.event?.containsKey('mapUrl') ?? false) {
+        final value = d.event!['mapUrl'];
+        final uri = value is String ? Uri.tryParse(value) : null;
+        if (value is! String || !value.startsWith('https://') ||
+            RegExp(r'[\s\\]|%(?![\da-fA-F]{2})').hasMatch(value) ||
+            uri == null || !uri.hasAuthority || uri.host.isEmpty ||
+            uri.userInfo.isNotEmpty || (uri.hasPort && uri.port > 65535)) {
+          throw FormatException('Invalid map URL for ${d.id}');
+        }
+      }
     }
   }
   final List<AdventDay> days;

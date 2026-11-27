@@ -66,7 +66,7 @@ void main(){
         debugShowCheckedModeBanner:false,theme:ThemeData(fontFamily:'packages/advent_calendar/Roboto',colorSchemeSeed:const Color(0xff284936)),
         builder:(context,child)=>MediaQuery(data:MediaQueryData(size:Size(width,844),disableAnimations:true,textScaler:TextScaler.linear(scale)),child:child!),
         home:AdventCalendarScreen(content:content,time:time,progress:AdventProgress(calendar:content.calendar,time:time,repository:store),savedAdvice:store,
-          actions:NativeAdventActions(confirmCalendar:(_)async=>null,shareOrigin:()=>const Rect.fromLTWH(0,0,10,10)))))));
+          actions:NativeAdventActions(confirmCalendar:(_)async=>null,shareOrigin:()=>const Rect.fromLTWH(0,0,10,10),share:(_,__,___)async=>SystemActionResult.cancelled))))));
       await tester.pumpAndSettle();
       await tester.runAsync(()async{for(final asset in content.assets.values){await precacheImage(AssetImage(asset,package:'advent_calendar'),tester.element(find.byType(AdventCalendarScreen)));}});
       await tester.pumpAndSettle();
@@ -122,6 +122,42 @@ void main(){
       if(day==3){await tester.ensureVisible(find.byKey(const ValueKey('day-4')));await tester.tap(find.byKey(const ValueKey('day-4')));await tester.pumpAndSettle();expect(find.text('День какао'),findsNothing);expect(find.text('Сюрприз откроется 4 декабря'),findsOneWidget);}
       else{await show(4);await capture('surprise-revealed-sheet-390');await close();}
     }
+    // Final handoff polish: snapshots at all agreed widths, plus pressed-state
+    // pixel regression. A Share highlight must never paint outside its button.
+    Future<List<int>> pixels() async {
+      return (await tester.runAsync(() async {
+        final image=await tester.renderObject<RenderRepaintBoundary>(find.byKey(const ValueKey('capture'))).toImage(pixelRatio:1);
+        final bytes=await image.toByteData(format:ImageByteFormat.rawRgba);image.dispose();
+        return bytes!.buffer.asUint8List().toList();
+      }))!;
+    }
+    for(final width in [320.0,360.0,390.0,430.0]){
+      await mount(width,savedCount:0);await show(14);
+      await tester.ensureVisible(find.byKey(const ValueKey('event-map-link')));await capture('polish-map-14-${width.toInt()}');await close();
+      if(width==390){
+        for(final day in [17,18]){await show(day);await capture('polish-place-$day-390');await close();}
+      }
+      await show(3);
+      final button=find.byKey(const ValueKey('advice-share'));
+      await tester.ensureVisible(button);await capture('polish-share-rest-${width.toInt()}');
+      final bounds=tester.getRect(button).inflate(1),before=await pixels();
+      final touch=await tester.startGesture(tester.getCenter(button));await tester.pump(const Duration(milliseconds:150));
+      await capture('polish-share-pressed-${width.toInt()}');final pressed=await pixels();
+      var changed=0,outside=0;
+      for(var i=0;i<before.length;i+=4){
+        if(before[i]!=pressed[i]||before[i+1]!=pressed[i+1]||before[i+2]!=pressed[i+2]||before[i+3]!=pressed[i+3]){
+          changed++;final p=i~/4;
+          if(!bounds.contains(Offset((p%width.toInt()).toDouble(),(p~/width.toInt()).toDouble())))outside++;
+        }
+      }
+      expect(changed,greaterThan(0),reason:'pressed highlight visible at $width');
+      expect(outside,0,reason:'Share highlight stays inside its bounds at $width');
+      await touch.up();await tester.pumpAndSettle();await close();
+    }
+    await mount(390,date:DateTime.utc(2026,12,10,9),savedCount:0);
+    await tester.ensureVisible(find.byKey(const ValueKey('day-10')));await capture('polish-advice-10-star-390');
+    await show(10);await tester.ensureVisible(find.text('Сохранить совет'));await tester.tap(find.text('Сохранить совет'));await tester.pumpAndSettle();await close();
+    await capture('polish-advice-10-heart-390');
     await tester.pumpWidget(const SizedBox());
   },timeout:const Timeout(Duration(minutes:2)),skip:!const bool.fromEnvironment('ADVENT_VISUALS'));
 }

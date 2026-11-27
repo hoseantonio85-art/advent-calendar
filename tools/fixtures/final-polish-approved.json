@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-27",
+  "base": "3af07ac19ab52d8104bea8fe69b638a59291c2b7",
+  "places": [
+    {
+      "day": 14,
+      "before": "Атриум · праздничная зона",
+      "after": "Навка Арена · Москва, ул. Нижние Мнёвники, 10А"
+    },
+    {
+      "day": 17,
+      "before": "Конференц-пространство · зал 3",
+      "after": "БКЗ, корпус Г"
+    },
+    {
+      "day": 18,
+      "before": "У большой ёлки · главный холл",
+      "after": "Елка возле переговорной Б.39.04"
+    }
+  ],
+  "mapUrl": "https://yandex.com/maps/org/navka_arena/26422616706/",
+  "runtimeSha256": "397fbf9a90d2f69fe8d4bbe70de5b1d657991b768e087cef82615c6c77f8c5d0",
+  "webDataSha256": "310a083fc0fc32fe6196eeb92ffbad02e2e43ed715cd2b372be201781207ad1f",
+  "htmlShellSha256": "af63becdc1dc97c59a66439ae0373dc98de17569875df7206d2e8959c2d741fe"
+}
