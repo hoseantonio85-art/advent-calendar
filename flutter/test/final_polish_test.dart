@@ -150,7 +150,8 @@ void main() {
   testWidgets('14/17/18 places, external URL, unavailable/error and retry; old host actions stay compatible', (t) async {
     final original = UrlLauncherPlatform.instance, launcher = MapLauncher();
     UrlLauncherPlatform.instance = launcher; addTearDown(() => UrlLauncherPlatform.instance = original);
-    final semantics = t.ensureSemantics(); addTearDown(semantics.dispose);
+    final semantics = t.ensureSemantics();
+    try {
     await mount(t);
     for (final entry in {14:'Навка Арена · Москва, ул. Нижние Мнёвники, 10А',
       17:'БКЗ, корпус Г', 18:'Елка возле переговорной Б.39.04'}.entries) {
@@ -172,6 +173,7 @@ void main() {
     }
     expect(launcher.urls, [mapUrl, mapUrl, mapUrl]);
     expect(t.takeException(), isNull); await t.pumpWidget(const SizedBox());
+    } finally { semantics.dispose(); }
   });
 
   for (final width in [320.0, 360.0, 390.0, 430.0]) {
