@@ -3,14 +3,22 @@ const {ROOT,BLOCKS,marker,readContent,validateContent,projectFlutter,webData,ren
 const {cases}=require('./content-test-fixtures.cjs'),{exportCsv}=require('./export-content.cjs');
 const master=readContent(),html=fs.readFileSync(path.join(ROOT,'index.html'),'utf8').replace(/\r\n/g,'\n');
 const approved=require('./fixtures/calendar-2026-approved.json'),hash=s=>crypto.createHash('sha256').update(s).digest('hex');
+const polish=require('./fixtures/final-polish-approved.json');
 function shell(s){for(const name of Object.values(BLOCKS)){const a=s.indexOf(marker(name))+marker(name).length,b=s.indexOf(marker(name,true));s=s.slice(0,a)+'\n'+s.slice(b);}return s;}
 function parsed(s){return {events:JSON.parse(s.match(/ const events=(\{[\s\S]*?\n \});/)[1]),thoughts:JSON.parse(s.match(/ const thoughts=(\[[\s\S]*?\n \]);/)[1])};}
-test('approved campaign: 31/14/17, byte-identical runtime data, HTML shell and all art',()=>{
+test('approved campaign: only requested places/mapUrl/venue description changed; 31/14/17 and all art retained',()=>{
  assert.equal(master.days.length,approved.days);assert.equal(master.days.filter(d=>d.event).length,approved.events);
  assert.equal(master.days.filter(d=>!d.event).length,approved.advice);
- assert.equal(hash(JSON.stringify(projectFlutter(master),null,2)+'\n'),approved.runtimeSha256);
- assert.equal(hash(JSON.stringify(webData(master))),approved.webDataSha256);
- assert.equal(hash(shell(html)),approved.htmlShellSha256);
+ assert.equal(hash(JSON.stringify(projectFlutter(master),null,2)+'\n'),polish.runtimeSha256);
+ assert.equal(hash(JSON.stringify(webData(master))),polish.webDataSha256);
+ assert.equal(hash(shell(html)),polish.htmlShellSha256);
+ const previous=structuredClone(master);
+ for(const edit of polish.places){assert.equal(previous.days[edit.day-1].event.place,edit.after);previous.days[edit.day-1].event.place=edit.before;}
+ for(const edit of polish.descriptions){assert.equal(previous.days[edit.day-1].event.desc,edit.after);previous.days[edit.day-1].event.desc=edit.before;}
+ assert.equal(previous.days[13].event.mapUrl,polish.mapUrl);delete previous.days[13].event.mapUrl;
+ // Restore exactly the author's edits to prove all other copy/Bento is intact.
+ assert.equal(hash(JSON.stringify(projectFlutter(previous),null,2)+'\n'),approved.runtimeSha256);
+ assert.equal(hash(JSON.stringify(webData(previous))),approved.webDataSha256);
  for(const [key,digest] of Object.entries(approved.assets))assert.equal(hash(fs.readFileSync(path.join(ROOT,'flutter',master.assets[key]))),digest,key);
 });
 test('editing 19 December reaches both representations without changing the original',()=>{
@@ -18,7 +26,19 @@ test('editing 19 December reaches both representations without changing the orig
  assert.equal(web.events[19].title,'Проверка редактирования 19 декабря');
  assert.equal(runtime.days[18].title,web.events[19].title);assert.equal(runtime.days[18].event.desc,web.events[19].desc);
  assert.equal(runtime.days[18].event.startTime,null);assert.equal(runtime.days[18].event.place,'Система оценок');
- assert.equal(hash(JSON.stringify(projectFlutter(master),null,2)+'\n'),approved.runtimeSha256);
+ assert.equal(hash(JSON.stringify(projectFlutter(master),null,2)+'\n'),polish.runtimeSha256);
+});
+
+test('map URL is optional, validated and separate from place/locations in both projections and CSV',()=>{
+ const web=parsed(renderHtml(html,master)),runtime=projectFlutter(master).days[13];
+ assert.equal(web.events[14].mapUrl,polish.mapUrl);assert.equal(runtime.event.mapUrl,polish.mapUrl);
+ assert.deepEqual(runtime.event.locations,[polish.places[0].after]);
+ assert(!runtime.event.place.includes('https:'));assert(!runtime.event.locations.some(s=>s.includes('https:')));
+ assert.equal(projectFlutter(master).days[16].event.mapUrl,undefined);
+ assert(exportCsv(master).includes('"map_url"'));assert(exportCsv(master).includes('"'+polish.mapUrl+'"'));
+ for(const value of [null,42,'','javascript:alert(1)','http://example.com','https:example.com','https://','https://user:pass@example.com/','https://example.com/a b','https://example.com/\\bad','https://example.com/%zz','https://example.com:99999/']){
+  const bad=structuredClone(master);bad.days[13].event.mapUrl=value;assert.throws(()=>validateContent(bad),/mapUrl/,String(value));
+ }
 });
 test('event overlay and removal restore stable day/advice and its own art/theme/Bento',()=>{
  const c=cases(master),added=projectFlutter(c.added3),restored=projectFlutter(c.restored3),removed=projectFlutter(c.removed1);

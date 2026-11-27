@@ -1,4 +1,4 @@
-# Advent Calendar · передача Flutter-команде · 25 ноября 2026
+# Advent Calendar · передача Flutter-команде · актуализация 27 ноября 2026
 
 Готовый автономный feature-package. Команда «ВторогоКрыла» сама подключает,
 принимает и выпускает его в своём приложении. Исходники host поставщику не нужны
@@ -6,11 +6,15 @@
 
 ## 1. Что зафиксировать и получить
 
-**Ревизия кода/ресурсов: aa741a7fa98cfd097bc3ad9814b595f068837203**, main после
-PR #5/#6/#10; [CI #136](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45545383091)
-и [trusted publication](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45547533034)
-успешны. Package version **0.1.0**; demo APK **0.1.136.1/code13603** — другая
-система нумерации. Новый release tag для передачи не требуется.
+**Финальный code SHA: 1d711936b0716a77cf4963f20f59539301863a6c**, [PR #12](https://github.com/hoseantonio85-art/advent-calendar/pull/12),
+[CI #143](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866) успешен: analyze, функциональные/визуальные тесты, Android integration,
+release/audit/update. **PR ещё не слит; merge требует одобрения автора.**
+Предыдущая поставка main/CI #136 сохранена в летописи. Package version **0.1.0**;
+demo 0.1.143.1/code14303 — другая нумерация. Новый tag не создаётся.
+[Проверки, APK и ограничения](FINAL-POLISH-2026-11-27.md).
+Уточнение 14 декабря: в place/locations только адрес; **«Навка Арена»** выделена
+в описании. HTML/Flutter проверены на одну строку адреса при обычном масштабе на
+320/360/390/430 dp; при крупном тексте переносы сохраняются для доступности.
 
 В pubspec.yaml host:
 
@@ -21,12 +25,12 @@ dependencies:
   advent_calendar:
     git:
       url: https://github.com/hoseantonio85-art/advent-calendar.git
-      ref: aa741a7fa98cfd097bc3ad9814b595f068837203
+      ref: 1d711936b0716a77cf4963f20f59539301863a6c
       path: flutter
   timezone: ^0.10.1 # прямой import в bootstrap ниже
 ```
 
-Альтернатива: [полный ZIP того же SHA](https://github.com/hoseantonio85-art/advent-calendar/archive/aa741a7fa98cfd097bc3ad9814b595f068837203.zip),
+Альтернатива: [полный ZIP того же SHA](https://github.com/hoseantonio85-art/advent-calendar/archive/1d711936b0716a77cf4963f20f59539301863a6c.zip),
 распаковать целиком, подключить вложенный flutter/ как path dependency и передать
 **эту актуальную инструкцию вместе с архивом**. Архив содержит также master-source
 и генераторы; его старая документация относится к моменту code SHA. Проверены
@@ -37,7 +41,10 @@ dependencies:
 >=3.4 <4 без нижнего Flutter bound; проверенные locks требуют Dart >=3.13 /
 Flutter >=3.47. Нижняя декларация не обещает совместимость со старым SDK.
 Deps: timezone ^0.10.1, shared_preferences ^2.5.3, share_plus ^12.0.1,
-add_2_calendar ^3.0.1; в CI разрешены 0.10.1/2.5.6/12.0.2/3.1.1 соответственно.
+add_2_calendar ^3.0.1, url_launcher ^6.3.2; CI locks:
+0.10.1/2.5.6/12.0.2/3.1.1/6.3.2 соответственно. url_launcher Android backend
+6.3.35 требует Dart >=3.12 / Flutter >=3.44, ниже прежнего lock floor;
+добавление plugin не меняет обязательные параметры/интерфейсы host.
 Git SHA не закрепляет транзитивные версии host: его команда разрешает конфликты
 и фиксирует свой pubspec.lock. Demo Android: min24/compile36/target36; нативную
 конфигурацию и iOS требования plugins проверить в host, не копировать demo Gradle.
@@ -114,6 +121,14 @@ route; внутренними шторками владеет package. Assets/JS
   платформах ([share_plus](https://pub.dev/packages/share_plus/versions/12.0.2),
   [add_2_calendar](https://pub.dev/packages/add_2_calendar/versions/3.1.1)).
 
+Optional event.mapUrl открывается самим package через url_launcher с
+LaunchMode.externalApplication из прежнего блока «Место». Небольшой значок справа,
+адрес без URL. ОС выбирает Яндекс Карты или внешний браузер по своим handlers.
+Без mapUrl поведение прежнее. false/error дают существующий unavailable/error
+UI и повтор. Новых обязательных callbacks нет; host делает pub get/native rebuild
+и проверяет переход/возврат на физическом Android. canLaunchUrl/preflight нет;
+package не требует новых query/permissions для него. Не обещать наличие Яндекс Карт.
+
 Результаты completed/cancelled/unavailable; ошибка даёт retry в UI. completed
 календаря означает запуск редактора ОС, **не доказательство сохранения события**.
 Без savedAdvice/actions соответствующие возможности не включены полностью;
@@ -158,7 +173,8 @@ platform config, зависимостями/приёмкой/выпуском. �
   уникальный прогресс, saved add/remove/restore и однократное конфетти корректны.
 - Перезапуск, logout/relogin/смена аккаунта и обычное обновление **host APK** поверх
   предыдущего сохраняют данные; старые callback/шторки не показывают чужой аккаунт.
-- Реальные Share/cancel/error и Calendar confirmation/allDay/sourceTime/unavailable;
+- Реальный переход карты/браузер/возврат для 14 декабря и статичные места 17/18;
+  Share pressed/cancel/error и Calendar confirmation/allDay/sourceTime/unavailable;
   физические PROFILE/память/accessibility и целевые Android/iOS устройства приняты.
 
 До интеграции подтвердить: **SDK/платформы и native config; совместимые plugin/lock;

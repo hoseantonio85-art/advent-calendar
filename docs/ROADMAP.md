@@ -1,5 +1,29 @@
 # Дорожная карта · Advent Calendar
 
+## Финальный полировочный пакет · 27 ноября 2026
+
+Интеграция во «ВтороеКрыло» выполнена командой host и в целом принята автором.
+Точечно исправлены три места, добавлен optional event.mapUrl (master → HTML/JSON,
+проверка HTTPS, внешнее открытие из блока «Место»), один индикатор star/heart у
+совета, отклик открытия sheet и pressed-state Share. Обязательный host API и
+namespace данных не меняются; новая зависимость url_launcher ^6.3.2 требует
+обычного pub get/native rebuild у интеграторов.
+[Отчёт проверки/передачи](FINAL-POLISH-2026-11-27.md). Подписанная demo-публикация
+остаётся только из доверенного main после отдельного merge; секреты в PR не
+передаются. CI #142 полностью успешен (81 unit/widget, 29 visual, 42 snapshot,
+Android integration/release/audit/adb update); [code SHA CI #142 a4f9aa09a4359da777ba93b3551a22a138c471a3](https://github.com/hoseantonio85-art/advent-calendar/commit/a4f9aa09a4359da777ba93b3551a22a138c471a3)
+закреплён в handoff. [Тестовая APK ZIP](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835/artifacts/15187660383).
+PR #12 не слит; физический запуск карт и
+проверку обновления интеграционного приложения принимает команда «ВторогоКрыла».
+История предыдущих этапов ниже сохранена.
+
+Уточнение 14 декабря от 27 ноября: place — только адрес, название **«Навка Арена»**
+встроено в описание жирным. Map URL сохранён. Проверки стандартной одной строки
+добавлены в Flutter и HTML на четырёх ширинах. **CI #143 полностью успешен**:
+85 unit/widget, 29 visual, Android integration/release/audit/update.
+Актуальный package pin: **1d711936b0716a77cf4963f20f59539301863a6c**; [новая APK ZIP](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866/artifacts/15198203244).
+PR #12 не слит; постоянная подпись/main/Pages ожидают отдельного одобрения автора.
+
 ## Передача независимого package · 25 ноября 2026
 
 PR #5/#6/#10 слиты, main CI #136 и защищённая публикация 0.1.136.1 успешны.

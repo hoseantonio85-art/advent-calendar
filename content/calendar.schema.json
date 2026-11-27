@@ -60,6 +60,7 @@
         "time": {"$ref": "#/$defs/text", "description": "Original source label or HH:mm; never inferred."},
         "duration": {"type": ["integer", "null"], "minimum": 1},
         "place": {"$ref": "#/$defs/text"},
+        "mapUrl": {"type": "string", "format": "uri", "pattern": "^https://[^\\s\\\\]+$", "description": "Optional external map URL, no credentials. Kept separate from place/locations."},
         "desc": {"$ref": "#/$defs/text"},
         "cta": {"$ref": "#/$defs/text"},
         "cardLines": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}},

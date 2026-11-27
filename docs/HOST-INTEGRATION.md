@@ -1,6 +1,6 @@
 # Подключение Advent Calendar к «ВторомуКрылу»
 
-**Актуализировано 25 ноября 2026.** Передаётся готовый автономный package.
+**Актуализировано 27 ноября 2026.** Передаётся готовый автономный package.
 Исходники «ВторогоКрыла» поставщику не предоставляются и не требуются: команда
 host самостоятельно подключает и принимает модуль в своём приложении.
 Визуальная приёмка MVP подтверждена автором 24 ноября 2026; дизайн зафиксирован.
@@ -15,16 +15,17 @@ dependencies:
   advent_calendar:
     git:
       url: https://github.com/hoseantonio85-art/advent-calendar.git
-      ref: aa741a7fa98cfd097bc3ad9814b595f068837203
+      ref: 1d711936b0716a77cf4963f20f59539301863a6c
       path: flutter
   timezone: ^0.10.1 # прямая зависимость для bootstrap import ниже
 ```
 
-Это main sourceSha успешного [CI #136](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45545383091),
-включая Issue #7; package version в pubspec — **0.1.0**. Последующие auto-README/
-APK-метаданные не изменили flutter runtime. Release tag demo и его версия не
-заменяют package ref. Поставка: закреплённые исходники плюс актуальная handoff-
-инструкция. Если Git недоступен, [полный ZIP этого SHA](https://github.com/hoseantonio85-art/advent-calendar/archive/aa741a7fa98cfd097bc3ad9814b595f068837203.zip)
+Это финальный code SHA [PR #12](https://github.com/hoseantonio85-art/advent-calendar/pull/12),
+[CI #143](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/46000671866) полностью успешен. До merge требуется отдельное одобрение автора.
+Package version остаётся **0.1.0**; demo APK 0.1.143.1 имеет другую нумерацию
+и в PR подписана только CI debug-ключом. Постоянная demo-подпись доступна лишь
+доверенному main после разрешённого merge. Поставка: закреплённые исходники плюс актуальная handoff-
+инструкция. Если Git недоступен, [полный ZIP этого SHA](https://github.com/hoseantonio85-art/advent-calendar/archive/1d711936b0716a77cf4963f20f59539301863a6c.zip)
 содержит flutter/, master-source и tools; после распаковки можно использовать
 `path: ../vendor/advent-calendar/flutter` (путь выбрать по фактическому каталогу).
 Архивная документация соответствует моменту code SHA; передавайте вместе с ZIP
@@ -43,6 +44,7 @@ targetSdk36; это фактическая конфигурация demo, не �
 | shared_preferences | ^2.5.3 | 2.5.6 |
 | share_plus | ^12.0.1 | 12.0.2 |
 | add_2_calendar | ^3.0.1 | 3.1.1 |
+| url_launcher | ^6.3.2 | 6.3.2 |
 
 Host использует собственный pubspec.lock: Git SHA закрепляет код/контент package,
 но не подменяет разрешение транзитивных зависимостей host. Не копировать demo lock
@@ -142,6 +144,20 @@ final hostActions = NativeAdventActions(
 `hostConfirmCalendarExport(day)` возвращает `null` при отмене, `allDay` для даты без подтверждённого времени либо `sourceTime` **только** если source содержит startTime и положительную duration. Диалог должен показывать исходные дату/время/место и требовать подтверждение; callback-пример находится в example/lib/main.dart, сам пакет от demo не зависит. Время не угадывать. Для iPad shareAnchor задаётся из валидного RenderBox активного интерфейса.
 
 Можно полностью заменить `AdventSystemActions`. Результаты: completed/cancelled/unavailable; исключение платформы даёт существующее сообщение об ошибке и возможность повторить. Share cancellation поддерживается адаптером. **Add2Calendar сообщает запуск системного редактора, не подтверждение сохранения и не отмену внутри чужого приложения.** Поэтому completed здесь означает передачу запроса ОС; пакет не сообщает «событие сохранено». Достоверное отслеживание сохранения/отмены требует другого адаптера хоста, если это станет требованием. Web/desktop calendar возвращает unavailable. Нативные разрешения/intent handlers проверить в manifest реального хоста и на телефоне.
+
+### Внешние карты · 27 ноября
+
+Optional event.mapUrl — отдельная абсолютная HTTPS-ссылка. Package показывает
+в прежнем блоке «Место» небольшой внешний значок и вызывает url_launcher через
+LaunchMode.externalApplication. Яндекс Карты откроются при соответствующей
+ассоциации ОС, иначе внешний браузер; error/false обрабатываются с возможностью
+повтора. Обязательные AdventSystemActions/параметры экрана не расширялись:
+переход работает и с существующим host adapter. Без mapUrl блок не кликабелен.
+Адрес и locations не содержат URL; Share/Add to Calendar используют текст места.
+canLaunchUrl не вызывается; дополнительных query/permissions для preflight
+package не требует. Host подтверждает свои OS restrictions и физический переход
+с возвратом в календарь. Новый plugin требует pub get и native rebuild;
+[проверенные версии и границы SDK](FINAL-POLISH-2026-11-27.md).
 
 ## 6. Logout, смена аккаунта и отключение
 

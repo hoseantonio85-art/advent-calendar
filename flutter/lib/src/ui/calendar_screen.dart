@@ -5,6 +5,7 @@ import 'dart:math' as math;
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:url_launcher/url_launcher.dart';
 import '../content/content.dart';
 import '../domain/calendar.dart';
 import '../platform/host.dart';
@@ -117,19 +118,38 @@ class _CalendarState extends State<AdventCalendarScreen> with WidgetsBindingObse
     _noticeEntry?.remove(); _noticeEntry?.dispose(); _noticeEntry = null; _noticeMessage = null;
     _opening = true;
     try {
-      if (!await widget.progress.open(day.id) || !mounted) return;
-      final celebrate=day.revealOnDate?(await widget.progress.surprises?.claimSurprise(AdventProgress.campaignId,day.id)??false):false;
-      final opened = await widget.progress.read();
-      if (!mounted) return;
-      ++_viewRevision; // Invalidate older progress, but retain a valid saved-advice read.
-      setState(() => _creditedDays.value = opened);
+      // Start the route on this tap, without waiting for host storage latency.
+      // Persistence/claim errors stay visible and never fabricate progress.
+      final opening = _recordOpening(day);
       await showModalBottomSheet<void>(context: context, isScrollControlled: true,
         useSafeArea: true, enableDrag: true, sheetAnimationStyle: _calendarSheetMotion(context), showDragHandle: false, barrierColor:const Color(0xc202100c),shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(27))),backgroundColor: const Color(0xfffaf2e6),
         builder: (_) => _DaySheet(day: day, content: widget.content, time: widget.time,
-          actions: widget.actions, savedAdvice: widget.savedAdvice,celebrate:celebrate,onSaved:(){_refresh();}));
+          actions: widget.actions, savedAdvice: widget.savedAdvice,opening:opening,onSaved:(){_refresh();}));
     } catch (_) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Не удалось открыть день. Попробуйте ещё раз.')));
     } finally { _opening = false; }
+  }
+  Future<bool> _recordOpening(AdventDay day) async {
+    final progress = widget.progress;
+    ++_viewRevision; // Invalidate a snapshot begun before this write.
+    try {
+      if (!await progress.open(day.id)) return false;
+      final celebrate = day.revealOnDate
+          ? (await progress.surprises?.claimSurprise(AdventProgress.campaignId, day.id) ?? false)
+          : false;
+      // Writes may finish out of order after a quick close/reopen. The last
+      // completed write starts a fresh read containing every completed fact.
+      final revision = ++_viewRevision;
+      final opened = await progress.read();
+      if (mounted && revision == _viewRevision) {
+        setState(() => _creditedDays.value = opened);
+      }
+      return celebrate;
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось открыть день. Попробуйте ещё раз.')));
+      return false;
+    }
   }
   @override
   Widget build(BuildContext context) => _featureTheme(context,Scaffold(backgroundColor: _forest, body: SafeArea(
@@ -342,8 +362,11 @@ class _Tile extends StatelessWidget {
                     shadows:const [Shadow(color:Color(0x99250c0b),offset:Offset(0,1),blurRadius:10)]))))),
             ],
             Positioned.fill(child:IgnorePointer(child:AnimatedBuilder(animation:motion,builder:(_,__)=>CustomPaint(painter:_WinterPainter(day:n,phase:motion.value,today:today,snow:event==null,locked:locked,radius:radius))))),
-            if(event==null&&available&&saved)Positioned(right:11,top:today?35:10,child:const _SavedHeart()),
-            if(today)const Positioned(top:9,right:10,child:CustomPaint(size:Size.square(17),painter:_SparkPainter(_gold))),
+            if(event==null&&available)
+              Positioned(top:9,right:10,child:saved
+                ? const _SavedHeart(key:ValueKey('advice-saved-indicator'))
+                : const CustomPaint(key:ValueKey('advice-star-indicator'),size:Size.square(17),painter:_SparkPainter(_gold)))
+            else if(today)const Positioned(top:9,right:10,child:CustomPaint(size:Size.square(17),painter:_SparkPainter(_gold))),
           ])),
         )))));
   }
@@ -451,8 +474,8 @@ class _WinterPainter extends CustomPainter {
 }
 
 class _DaySheet extends StatefulWidget {
-  const _DaySheet({required this.day, required this.content, required this.time, this.actions, this.savedAdvice,this.celebrate=false,this.onSaved});
-  final bool celebrate;final VoidCallback? onSaved;
+  const _DaySheet({required this.day, required this.content, required this.time, required this.opening, this.actions, this.savedAdvice,this.onSaved});
+  final Future<bool> opening;final VoidCallback? onSaved;
   final AdventDay day; final AdventContent content; final CampaignTime time;
   final AdventSystemActions? actions; final SavedAdviceRepository? savedAdvice;
   @override
@@ -469,9 +492,19 @@ class _SheetChrome extends StatelessWidget {
 }
 
 class _SheetState extends State<_DaySheet> {
-  bool _saved=false,_busy=false,_loaded=false,_loadError=false;
+  bool _saved=false,_busy=false,_loaded=false,_loadError=false,_celebrate=false;
   @override
-  void initState(){super.initState();_load();}
+  void initState(){super.initState();_load();_completeOpening();}
+  Future<void> _completeOpening() async {
+    final celebrate = await widget.opening;
+    if (mounted && celebrate) setState(() => _celebrate = true);
+  }
+  Widget _place(Map<String,dynamic> event,double width) {
+    final url = event['mapUrl'] as String?;
+    return _detail(Icons.location_on_outlined,'Место',event['place'] as String,width,
+      onTap:url==null?null:()=>_action(()async => await launchUrl(Uri.parse(url),mode:LaunchMode.externalApplication)
+        ? SystemActionResult.completed : SystemActionResult.unavailable));
+  }
   Future<void> _load()async{
     try{final ids=await widget.savedAdvice?.readSaved(AdventProgress.campaignId);
       if(mounted)setState((){_saved=ids?.contains(widget.day.id)??false;_loaded=true;_loadError=false;});
@@ -502,18 +535,18 @@ class _SheetState extends State<_DaySheet> {
               const CustomPaint(painter:_CardTexturePainter(day:0,advice:false,sheet:true)),
               const DecoratedBox(decoration:BoxDecoration(gradient:RadialGradient(colors:[Color(0x40eac690),Colors.transparent],radius:.8))),
               Center(child:OverflowBox(maxWidth:188,maxHeight:188,child:_art(widget.content,day.art,size:188))),
-              if(widget.celebrate&&!MediaQuery.disableAnimationsOf(context))const Positioned.fill(child:_SurpriseConfetti()),
+              if(_celebrate&&!MediaQuery.disableAnimationsOf(context))const Positioned.fill(child:_SurpriseConfetti()),
             ]))),
             const SizedBox(height:17),
             if(MediaQuery.textScalerOf(context).scale(1)>1.4)...[
               _detail(Icons.calendar_today_outlined,'Дата','${day.date.day} декабря 2026',width,first:true),SizedBox(height:width<=360?7:9),
               _detail(Icons.schedule,'Время',event['time'] as String,width),SizedBox(height:width<=360?7:9),
-              _detail(Icons.location_on_outlined,'Место',event['place'] as String,width),
+              _place(event,width),
             ]else...[
             IntrinsicHeight(child:Row(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
               Expanded(child:_detail(Icons.calendar_today_outlined,'Дата','${day.date.day} декабря 2026',width,first:true)),
               SizedBox(width:width<=360?7:9),Expanded(child:_detail(Icons.schedule,'Время',event['time'] as String,width)),
-            ])),SizedBox(height:width<=360?7:9),_detail(Icons.location_on_outlined,'Место',event['place'] as String,width),
+            ])),SizedBox(height:width<=360?7:9),_place(event,width),
             ],
             const SizedBox(height:17),const Text('О СОБЫТИИ',style:TextStyle(color:Color(0xff789083),fontSize:10,height:1.1,fontWeight:FontWeight.w800,letterSpacing:1)),const SizedBox(height:9),
             _SourceText(event['desc'] as String),const SizedBox(height:19),const Divider(height:1,color:Color(0xffe1e3d8)),const SizedBox(height:16),
@@ -535,7 +568,8 @@ class _SheetState extends State<_DaySheet> {
               await widget.savedAdvice!.setSaved(AdventProgress.campaignId,day.id,!_saved);
               if(mounted)setState(()=>_saved=!_saved);widget.onSaved?.call();return SystemActionResult.completed;
             }),icon:Icon(!_loaded?Icons.hourglass_empty:_saved?Icons.favorite:Icons.favorite_border,size:14),label:Text(!_loaded?'Загрузка…':_saved?'Совет сохранён':'Сохранить совет')),
-            TextButton(style:TextButton.styleFrom(minimumSize:Size.zero,tapTargetSize:MaterialTapTargetSize.shrinkWrap,padding:const EdgeInsets.fromLTRB(12,15,12,4),foregroundColor:const Color(0xff486457),textStyle:const TextStyle(fontFamily:'packages/advent_calendar/Roboto',fontSize:12,height:1.2,fontWeight:FontWeight.w700)),
+            TextButton(key:const ValueKey('advice-share'),clipBehavior:Clip.antiAlias,
+              style:TextButton.styleFrom(minimumSize:const Size.fromHeight(48),padding:const EdgeInsets.symmetric(horizontal:12,vertical:15),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13)),foregroundColor:const Color(0xff486457),textStyle:const TextStyle(fontFamily:'packages/advent_calendar/Roboto',fontSize:12,height:1.2,fontWeight:FontWeight.w700)),
               onPressed:widget.actions==null||_busy?null:()=>_action(()=>widget.actions!.share(day)),child:const Text('Поделиться советом')),
           ],
           if(_loadError)TextButton(onPressed:_load,child:const Text('Повторить загрузку совета')),
@@ -577,11 +611,18 @@ String _dateCaption(AdventDay day){
 }
 final _primaryButtonStyle=FilledButton.styleFrom(backgroundColor:const Color(0xff183e30),foregroundColor:Colors.white,
   minimumSize:const Size.fromHeight(48),padding:const EdgeInsets.symmetric(horizontal:18,vertical:15),textStyle:const TextStyle(fontFamily: 'packages/advent_calendar/Roboto',fontSize:13,fontWeight:FontWeight.w700),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(13)));
-Widget _detail(IconData icon,String label,String value,double width,{bool first=false}){
+Widget _detail(IconData icon,String label,String value,double width,{bool first=false,VoidCallback? onTap}){
   final iconSize=width<=360?34.0:38.0,valueSize=width<=335&&first?10.0:width<=360?11.0:12.0;
-  return Container(padding:const EdgeInsets.all(8),decoration:BoxDecoration(color:const Color(0xffeff0e8),border:Border.all(color:const Color(0xffe4e7dc)),borderRadius:BorderRadius.circular(13)),
-    child:Row(children:[Container(width:iconSize,height:iconSize,decoration:BoxDecoration(gradient:const LinearGradient(colors:[Color(0xffdce8dd),Color(0xffe5ebdf)]),borderRadius:BorderRadius.circular(width<=360?10:11),border:Border.all(color:const Color(0xffd3ddd3))),child:Icon(icon,size:19,color:const Color(0xff557e65))),
-      const SizedBox(width:8),Expanded(child:Column(mainAxisAlignment:MainAxisAlignment.center,crossAxisAlignment:CrossAxisAlignment.start,children:[Text(label,style:const TextStyle(fontSize:10,fontWeight:FontWeight.w600,color:Color(0xff819285))),const SizedBox(height:3),Text(value,style:TextStyle(fontSize:valueSize,height:1.4,fontWeight:FontWeight.w700,color:const Color(0xff2d4536)))]))]));
+  final decoration=BoxDecoration(color:const Color(0xffeff0e8),border:Border.all(color:const Color(0xffe4e7dc)),borderRadius:BorderRadius.circular(13));
+  // Preserve Container's original 8 dp content inset + 1 dp border inset.
+  final child=Padding(padding:const EdgeInsets.all(9),child:Row(children:[Container(width:iconSize,height:iconSize,decoration:BoxDecoration(gradient:const LinearGradient(colors:[Color(0xffdce8dd),Color(0xffe5ebdf)]),borderRadius:BorderRadius.circular(width<=360?10:11),border:Border.all(color:const Color(0xffd3ddd3))),child:Icon(icon,size:19,color:const Color(0xff557e65))),
+      const SizedBox(width:8),Expanded(child:Column(mainAxisAlignment:MainAxisAlignment.center,crossAxisAlignment:CrossAxisAlignment.start,children:[Text(label,style:const TextStyle(fontSize:10,fontWeight:FontWeight.w600,color:Color(0xff819285))),const SizedBox(height:3),Text(value,style:TextStyle(fontSize:valueSize,height:1.4,fontWeight:FontWeight.w700,color:const Color(0xff2d4536)))])),
+      if(onTap!=null)const Padding(padding:EdgeInsets.only(left:8),child:Icon(Icons.open_in_new,size:14,color:Color(0xff557e65))),
+    ]));
+  if(onTap==null)return DecoratedBox(decoration:decoration,child:child);
+  return Semantics(key:const ValueKey('event-map-link'),link:true,hint:'Открыть место на карте',
+    child:Material(color:Colors.transparent,borderRadius:BorderRadius.circular(13),clipBehavior:Clip.antiAlias,
+      child:Ink(padding:EdgeInsets.zero,decoration:decoration,child:InkWell(onTap:onTap,child:child))));
 }
 
 
@@ -682,7 +723,7 @@ class _FooterStarPainter extends CustomPainter{
 }
 
 class _SavedHeart extends StatefulWidget {
-  const _SavedHeart();
+  const _SavedHeart({super.key});
   @override
   State<_SavedHeart> createState()=>_SavedHeartState();
 }

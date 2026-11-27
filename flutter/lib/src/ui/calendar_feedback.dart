@@ -3,7 +3,7 @@ part of 'calendar_screen.dart';
 AnimationStyle _calendarSheetMotion(BuildContext context) =>
     MediaQuery.disableAnimationsOf(context)
         ? AnimationStyle.noAnimation
-        : const AnimationStyle(duration: Duration(milliseconds: 420), reverseDuration: Duration(milliseconds: 300));
+        : const AnimationStyle(duration: Duration(milliseconds: 360), reverseDuration: Duration(milliseconds: 300));
 
 /// One notice, owned by the route. Repeated taps replace/reset it, never queue.
 class _ClosedDateNotice extends StatelessWidget {
