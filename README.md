@@ -26,6 +26,14 @@
 прогресс А, избранное, сюрпризы и схема demo-подписи сохранены.
 [Состав и проверки](docs/FINAL-POLISH-2026-11-27.md); физический переход в карты
 в интеграционном APK остаётся приёмкой команды host. PR автоматически не сливается.
+**CI #142 полностью успешен**: 81 unit/widget, 29 visual, Android integration,
+release ARM64/audit и adb install -r 14202 → 14203 с сохранением данных.
+[PR #12](https://github.com/hoseantonio85-art/advent-calendar/pull/12),
+[CI](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835), [тестовая APK (ZIP)](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835/artifacts/15187660383).
+Финальный code SHA для интеграторов: **a4f9aa09a4359da777ba93b3551a22a138c471a3**;
+[handoff](docs/INTEGRATION-HANDOFF.md) обновлён. APK PR имеет CI debug-подпись;
+обновление постоянной demo #137 требует отдельно одобренного merge и штатной
+защищённой main-публикации. Входная v9 и хвойный счётчик совпали с эталоном попиксельно.
 
 ## Передача Flutter-package команде «ВторогоКрыла» · 25 ноября 2026
 

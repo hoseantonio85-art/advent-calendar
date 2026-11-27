@@ -44,8 +44,37 @@ false и исключение обрабатываются существующ�
 Локально: генерация/--check, полная сверка master/HTML/Flutter/17 art, content
 tests и version/publication policy tests, parity прогресса и аудит tracked keys.
 Flutter analyze, unit/widget, snapshots/pressed pixel regression, browser map
-anchor, Android motion/release/audit/update запускаются штатным CI этого PR.
-Итоговые ссылки/результаты будут добавлены после завершения проверки.
+anchor, Android motion/release/audit/update выполнены штатным CI этого PR.
+**CI #142 завершён успешно**, [полный запуск](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835).
+Зафиксированный code SHA **a4f9aa09a4359da777ba93b3551a22a138c471a3**, package version 0.1.0.
+Документальный follow-up не меняет проверенные runtime/tests/assets/locks.
+
+- Package + demo: flutter analyze без замечаний. Unit/widget: **81 passed**, три
+  visual-only сценария пропущены в обычном запуске и включены следующим прогоном.
+- Visual-прогон: **29 passed**, 42 Flutter snapshot и 19 HTML reference.
+  Pressed pixel regression на четырёх ширинах: overlay видим, ни одного
+  изменённого пикселя за границей Share. Все 12 входных v9 и 8 countdown снимков
+  совпали пиксель в пиксель с прошлой принятой поставкой. Event-1/history/finale
+  также совпали. В surprise-sheet изменились только 59 пикселей звезды advice-3
+  на затемнённом календаре позади sheet, согласно новой логике индикатора.
+- Browser: адреса 14/17/18 и optional HTTPS anchor, generated variants, storage/
+  progress parity. [Снимки](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835/artifacts/15185414354),
+  [browser evidence](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835/artifacts/15185648770).
+- Android API35 integration: 360 ms, drag/Back/close/reduced motion, 24 stress
+  cycles, рестарт; [motion evidence](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835/artifacts/15186572474).
+  Debug/software-GPU timings — диагностика, не физический FPS/PROFILE benchmark.
+- Android release ARM64: **18 143 199 bytes**, debuggable=false, min24/target36,
+  applicationId com.example.advent_demo, versionName 0.1.142.1 / code14203.
+  В собранной APK runtime JSON побайтно совпал с generated source: все три адреса
+  и mapUrl на месте; integration_test plugin в release отсутствует.
+  [APK ZIP](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835/artifacts/15187660383), [APK audit](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835/artifacts/15186179690).
+  APK SHA256: 610d5e83b2c76d117d6c34f95869d9d7c563f5ef2d89550a76dffbcdf74dd2b7.
+- Реальный adb install -r на API28 x86_64 emulator: **14202 → 14203 PASS**,
+  UID прежний, raw opened/saved сохранились, видны 2 / 31 и сохранённый advice-3.
+  [Upgrade report/screenshots](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835/artifacts/15186354617).
+  Это две ordinary release APK из данного CI, не обновление постоянной demo #137.
+  Их общий тестовый сертификат:
+  cab9638b83f1989c54e1e25dd09c098b434965afbb919a6bf8151cb0bb1dc603.
 
 PR не получает постоянный ключ. Доверенный publisher на main не принимает эту
 ветку: тестовая APK из CI не равна постоянно подписанной demo 0.1.137.1.

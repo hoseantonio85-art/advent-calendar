@@ -12,8 +12,8 @@
 
 ## Подключение
 
-Проверенная ревизия кода/ресурсов из main:
-**aa741a7fa98cfd097bc3ad9814b595f068837203**, [CI #136](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45545383091).
+Финальная ревизия кода/ресурсов из PR #12 (27 ноября; merge требует одобрения):
+**a4f9aa09a4359da777ba93b3551a22a138c471a3**, [CI #142](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835).
 В pubspec.yaml host-приложения:
 
 ```yaml
@@ -21,7 +21,7 @@ dependencies:
   advent_calendar:
     git:
       url: https://github.com/hoseantonio85-art/advent-calendar.git
-      ref: aa741a7fa98cfd097bc3ad9814b595f068837203
+      ref: a4f9aa09a4359da777ba93b3551a22a138c471a3
       path: flutter
   timezone: ^0.10.1 # host bootstrap импортирует timezone/data/latest.dart
 ```
@@ -37,6 +37,12 @@ CI: Flutter **3.50.1 / Dart 3.14.0**, Java 17. Pubspec объявляет Dart >
 но проверенные lock-файлы требуют Dart >=3.13 / Flutter >=3.47; нижняя декларация
 не является обещанием совместимости со старым host. Его команда согласует SDK,
 plugin-версии/нативные настройки и фиксирует собственный pubspec.lock.
+
+27 ноября: три места исправлены в master/HTML/JSON; optional event.mapUrl
+открывается из блока «Место» стандартным OS handler. Новая dependency
+[url_launcher ^6.3.2](https://pub.dev/packages/url_launcher/versions/6.3.2)
+проверена в CI #142 на прежних SDK. Обязательный API прежний; host выполняет
+pub get/native rebuild со своим lock. [Итоговые проверки и APK](../docs/FINAL-POLISH-2026-11-27.md).
 
 ## Обязанности host и контент
 
@@ -54,6 +60,7 @@ Master — `../content/calendar_2026.json`, 31 дата и переменное 
 runtime asset `assets/advent/calendar_2026.json`; HTML/Node при работе package
 не исполняются. Новая редакция контента требует новой ревизии и сборки host APK.
 
-Demo APK **0.1.136.1**, её appId/ключ/versionCode — отдельная тестовая линия.
+Demo main **0.1.137.1** и PR APK **0.1.142.1** — отдельная тестовая линия
+с разными сертификатами; appId/ключ/versionCode принадлежат demo.
 В настоящий host они не переносятся; подпись и версии host принадлежат его команде.
 Обычная интеграция не копирует example/, demo Gradle или signing helpers.

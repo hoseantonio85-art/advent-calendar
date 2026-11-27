@@ -10,7 +10,10 @@ namespace данных не меняются; новая зависимость 
 обычного pub get/native rebuild у интеграторов.
 [Отчёт проверки/передачи](FINAL-POLISH-2026-11-27.md). Подписанная demo-публикация
 остаётся только из доверенного main после отдельного merge; секреты в PR не
-передаются. После CI зафиксировать code SHA в handoff; физический запуск карт и
+передаются. CI #142 полностью успешен (81 unit/widget, 29 visual, 42 snapshot,
+Android integration/release/audit/adb update); [итоговый code SHA a4f9aa09a4359da777ba93b3551a22a138c471a3](https://github.com/hoseantonio85-art/advent-calendar/commit/a4f9aa09a4359da777ba93b3551a22a138c471a3)
+закреплён в handoff. [Тестовая APK ZIP](https://github.com/hoseantonio85-art/advent-calendar/actions/runs/45973890835/artifacts/15187660383).
+PR #12 не слит; физический запуск карт и
 проверку обновления интеграционного приложения принимает команда «ВторогоКрыла».
 История предыдущих этапов ниже сохранена.
 
